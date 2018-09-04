@@ -28,11 +28,13 @@ module.exports = class RuleApplier {
 
   /**
    * @param config
+   * @param {IssueDataProvider} issueDataProvider
    * @param {GithubAPI} githubApiClient
    * @param {Logger} logger
    */
-  constructor (config, githubApiClient, logger) {
+  constructor (config, issueDataProvider, githubApiClient, logger) {
     this.config = config;
+    this.issueDataProvider = issueDataProvider;
     this.githubApiClient = githubApiClient;
     this.logger = logger;
   }
@@ -49,6 +51,10 @@ module.exports = class RuleApplier {
         this.applyRuleA1(context);
         break;
 
+      case Rule.B2:
+        this.applyRuleB2(context);
+        break;
+
       default:
         this.logger.error('Cannot apply ' + rule);
     }
@@ -61,7 +67,7 @@ module.exports = class RuleApplier {
    *
    * @private
    */
-  applyRuleA1 (context) {
+  async applyRuleA1 (context) {
     const todoColumnId = this.config.kanbanColumns.toDoColumnId;
     const issueId = context.payload.issue.id;
 
@@ -70,5 +76,17 @@ module.exports = class RuleApplier {
       content_id: issueId,
       content_type: 'Issue'
     });
+  }
+
+  /**
+   * @param {Context} context
+   */
+  async applyRuleB2 (context) {
+    const issueId = context.payload.issue.number;
+
+    const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
+    const relatedCard = await getRelatedCardPromise;
+
+    this.githubApiClient.projects.deleteProjectCard({card_id: relatedCard.id});
   }
 };

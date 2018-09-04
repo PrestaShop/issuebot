@@ -47,7 +47,7 @@ module.exports = app => {
 
     const issueDataProvider = new IssueDataProvider(config, context.github, context.log);
     const ruleComputer = new RuleComputer(config, issueDataProvider, context.log);
-    const ruleApplier = new RuleApplier(config, context.github, context.log);
+    const ruleApplier = new RuleApplier(config, issueDataProvider, context.github, context.log);
 
     let rulePromise = ruleComputer.findRule(context);
     let rule = await rulePromise;

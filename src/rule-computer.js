@@ -90,6 +90,18 @@ module.exports = class RuleComputer {
       }
     }
 
+    if (context.payload.action == 'demilestoned') {
+      this.logger.debug('Rule debug: demilestoned');
+      const issueId = context.payload.issue.number;
+
+      const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
+      const isIssueInKanban = await isIssueInKanbanPromise;
+
+      if (isIssueInKanban === true) {
+        return Rule.B2;
+      }
+    }
+
     return null;
   }
 };

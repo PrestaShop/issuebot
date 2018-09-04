@@ -40,6 +40,18 @@ module.exports = class IssueDataProvider {
    * @returns {Promise<boolean>}
    */
   async isIssueInTheKanban (issueId) {
+
+    let cardPromise = this.getRelatedCardInKanban(issueId);
+    let card = await cardPromise;
+
+    return (card !== null);
+  }
+
+  /**
+   * @param {int} issueId
+   * @returns {Promise<*>}
+   */
+  async getRelatedCardInKanban (issueId) {
     var cardsPromise = this.githubApiClient.projects.getProjectCards(
       {column_id: this.config.kanbanColumns.toDoColumnId}
     );
@@ -57,11 +69,11 @@ module.exports = class IssueDataProvider {
       var currentIssueId = this.parseCardUrlForId(cardUrl);
 
       if (issueId == currentIssueId) {
-        return true;
+        return currentCard;
       }
     }
 
-    return false;
+    return null;
   }
 
   /**

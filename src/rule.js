@@ -22,8 +22,28 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+
+/**
+ * These Rules describe how the automation of the PrestaShop Kanban project
+ * should behave
+ *
+ * @type {{A1: string, B2: string}}
+ */
 const Rules = {
-  A1: 'A1'
+  A1: 'A1',
+  /*
+   * Scenario: Auto-add an Issue to the kanban when setting the milestone
+   * GIVEN an Issue not in the kanban
+   * WHEN it is milestoned for the next patch or minor release
+   * THEN it is added to the kanban in "To Do" column
+   */
+  B2: 'B2',
+  /*
+   * Scenario: remove an Issue from the kanban when the milestone is unset
+   * GIVEN an Issue in the kanban
+   * WHEN its milestone is unset
+   * THEN remove the Issue from the kanban
+   */
 };
 
 module.exports = Rules;
