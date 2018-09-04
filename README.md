@@ -19,7 +19,9 @@ See Probot doc [for local development](https://probot.github.io/docs/development
 
 ## Test
 
-Incoming
+```
+npm run test
+```
 
 ## Deployment
 
@@ -41,3 +43,5 @@ ruleApplier.applyRule(rule, context);
 
 The idea behind is to define a set of Rules for PrestaShop
 project workflow and the bot applies them.
+
+Rules are described in `src/rule.js` file.

@@ -48,9 +48,7 @@ module.exports = class RuleComputer {
     switch (context.name) {
       case 'issues':
         this.logger.debug('Rule debug: is issue');
-        var promise = this.findIssueRule(context);
-
-        return promise;
+        return this.findIssueRule(context);
         break;
 
       case 'issue_comment':

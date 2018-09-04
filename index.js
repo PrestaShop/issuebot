@@ -40,8 +40,8 @@ module.exports = app => {
         toDoColumnId: 3311230,
       },
       milestones: {
-        next_patch_milestone: 'a',
-        next_minor_milestone: 'b',
+        next_patch_milestone: '1.7.4.3',
+        next_minor_milestone: '1.7.5.0',
       }
     };
 

@@ -52,21 +52,21 @@ module.exports = class IssueDataProvider {
    * @returns {Promise<*>}
    */
   async getRelatedCardInKanban (issueId) {
-    var cardsPromise = this.githubApiClient.projects.getProjectCards(
+    let cardsPromise = this.githubApiClient.projects.getProjectCards(
       {column_id: this.config.kanbanColumns.toDoColumnId}
     );
 
-    var allTodoCards = await cardsPromise;
+    let allTodoCards = await cardsPromise;
 
-    for (var index = 0; index < allTodoCards.data.length; index++) {
+    for (let index = 0; index < allTodoCards.data.length; index++) {
 
-      var currentCard = allTodoCards.data[index];
+      let currentCard = allTodoCards.data[index];
       if (currentCard.hasOwnProperty('content_url') == false) {
         continue;
       }
 
-      var cardUrl = currentCard.content_url;
-      var currentIssueId = this.parseCardUrlForId(cardUrl);
+      let cardUrl = currentCard.content_url;
+      let currentIssueId = this.parseCardUrlForId(cardUrl);
 
       if (issueId == currentIssueId) {
         return currentCard;
