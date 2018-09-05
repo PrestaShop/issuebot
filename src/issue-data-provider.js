@@ -64,14 +64,11 @@ module.exports = class IssueDataProvider {
     for (let index = 0; index < allCards.length; index++) {
 
       let currentCard = allCards[index];
-      if (currentCard.hasOwnProperty('content_url') == false) {
+      if (currentCard.hasOwnProperty('content_url') === false) {
         continue;
       }
 
-      let cardUrl = currentCard.content_url;
-      let currentIssueId = this.parseCardUrlForId(cardUrl);
-
-      if (issueId == currentIssueId) {
+      if (issueId === parseInt(this.parseCardUrlForId(currentCard.content_url))) {
         return currentCard;
       }
     }

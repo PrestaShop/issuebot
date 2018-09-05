@@ -49,7 +49,6 @@ module.exports = class RuleComputer {
       case 'issues':
         this.logger.debug('Rule debug: is issue');
         return this.findIssueRule(context);
-        break;
 
       case 'issue_comment':
         this.logger.debug('Rule debug: is issue comment');
@@ -71,14 +70,13 @@ module.exports = class RuleComputer {
    */
   async findIssueRule (context) {
 
-    if (context.payload.action == 'milestoned') {
+    if (context.payload.action === 'milestoned') {
       this.logger.debug('Rule debug: milestoned');
-
       const milestone = context.payload.issue.milestone.title;
 
-      if ((milestone == this.config.milestones.next_minor_milestone) || (milestone == this.config.milestones.next_patch_milestone)) {
+      if ((milestone === this.config.milestones.next_minor_milestone) ||
+        (milestone === this.config.milestones.next_patch_milestone)) {
         const issueId = context.payload.issue.number;
-
         const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
         const isIssueInKanban = await isIssueInKanbanPromise;
 
@@ -88,10 +86,9 @@ module.exports = class RuleComputer {
       }
     }
 
-    if (context.payload.action == 'demilestoned') {
+    if (context.payload.action === 'demilestoned') {
       this.logger.debug('Rule debug: demilestoned');
       const issueId = context.payload.issue.number;
-
       const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
       const isIssueInKanban = await isIssueInKanbanPromise;
 
@@ -103,19 +100,18 @@ module.exports = class RuleComputer {
     if (context.payload.action === 'labeled') {
       this.logger.debug('Rule debug: labeled');
       const issueId = context.payload.issue.number;
-
       const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
       const getCardInKanban = await getCardInKanbanPromise;
 
       if (getCardInKanban !== null) {
-        let cardColumnId = this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url);
+        let cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
 
-        if (this.config.kanbanColumns.toDoColumnId != cardColumnId) {
+        if (this.config.kanbanColumns.toDoColumnId !== cardColumnId) {
           return Rule.C1;
         }
       }
     }
 
-    return null;
+    return Promise.resolve(null);
   }
 };
