@@ -1,5 +1,8 @@
 const {Application} = require('probot');
 const myProbotApp = require('..');
+const TestUtils = require('./test-utils');
+
+let testUtils = new TestUtils();
 
 describe('PrestaShop Kanban automation app test: add issues to Kanban', () => {
   let app;
@@ -10,29 +13,8 @@ describe('PrestaShop Kanban automation app test: add issues to Kanban', () => {
   });
 
   test('scenario A1: success', async () => {
-    let webhookPayload = {
-      'action': 'milestoned',
-      'issue': {
-        'id': 12345,
-        'node_id': 'abcd',
-        'number': 2,
-        'title': 'Milestoned issue',
-        'milestone': {'title': '1.7.4.3'}
-      }
-    };
-
-    let githubApiClientMock = {
-      projects: {
-        getProjectCards: jest.fn().mockReturnValue(Promise.resolve({
-          data:
-            [
-              {content_url: 'https://github.com/matks/test-project-bot/issues/8', id: 'z'},
-              {content_url: 'https://github.com/matks/test-project-bot/issues/11', id: 'a'},
-            ],
-        })),
-        createProjectCard: jest.fn().mockReturnValue(Promise.resolve({}))
-      }
-    };
+    let webhookPayload = testUtils.getDefaultPayloadMock('milestoned', 2);
+    let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     app.auth = () => Promise.resolve(githubApiClientMock);
 
@@ -49,29 +31,17 @@ describe('PrestaShop Kanban automation app test: add issues to Kanban', () => {
   });
 
   test('scenario A1: issue already exists in kanban', async () => {
-    let webhookPayload = {
-      'action': 'milestoned',
-      'issue': {
-        'id': 12345,
-        'node_id': 'abcd',
-        'number': 2,
-        'title': 'Milestoned issue',
-        'milestone': {'title': '1.7.4.3'}
-      }
-    };
+    let webhookPayload = testUtils.getDefaultPayloadMock('milestoned', 2);
+    let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
-    let githubApiClientMock = {
-      projects: {
-        getProjectCards: jest.fn().mockReturnValue(Promise.resolve({
-          data:
-            [
-              {content_url: 'https://github.com/matks/test-project-bot/issues/2', id: 'z'},
-              {content_url: 'https://github.com/matks/test-project-bot/issues/11', id: 'a'},
-            ],
-        })),
-        createProjectCard: jest.fn().mockReturnValue(Promise.resolve({}))
-      }
-    };
+    // mock customization
+    githubApiClientMock.projects.getProjectCards = jest.fn().mockReturnValue(Promise.resolve({
+      data:
+        [
+          {content_url: 'https://github.com/prestashop/test-project-bot/issues/2', id: 'z'},
+          {content_url: 'https://github.com/prestashop/test-project-bot/issues/11', id: 'a'},
+        ],
+    }));
 
     app.auth = () => Promise.resolve(githubApiClientMock);
 
@@ -84,29 +54,11 @@ describe('PrestaShop Kanban automation app test: add issues to Kanban', () => {
   });
 
   test('scenario A1: bad milestone', async () => {
-    let webhookPayload = {
-      'action': 'milestoned',
-      'issue': {
-        'id': 12345,
-        'node_id': 'abcd',
-        'number': 2,
-        'title': 'Milestoned issue',
-        'milestone': {'title': 'a'}
-      }
-    };
+    let webhookPayload = testUtils.getDefaultPayloadMock('milestoned', 2);
+    let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
-    let githubApiClientMock = {
-      projects: {
-        getProjectCards: jest.fn().mockReturnValue(Promise.resolve({
-          data:
-            [
-              {content_url: 'https://github.com/matks/test-project-bot/issues/8', id: 'z'},
-              {content_url: 'https://github.com/matks/test-project-bot/issues/11', id: 'a'},
-            ],
-        })),
-        createProjectCard: jest.fn().mockReturnValue(Promise.resolve({}))
-      }
-    };
+    // mock customization
+    webhookPayload.issue.milestone = {'title': 'a'};
 
     app.auth = () => Promise.resolve(githubApiClientMock);
 

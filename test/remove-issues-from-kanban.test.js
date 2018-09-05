@@ -1,5 +1,8 @@
 const {Application} = require('probot');
 const myProbotApp = require('..');
+const TestUtils = require('./test-utils');
+
+let testUtils = new TestUtils();
 
 describe('PrestaShop Kanban automation app test: removes issues from Kanban', () => {
   let app;
@@ -7,33 +10,12 @@ describe('PrestaShop Kanban automation app test: removes issues from Kanban', ()
   beforeEach(() => {
     app = new Application();
     app.load(myProbotApp);
-
   });
 
   test('scenario B2: success', async () => {
-    let webhookPayload = {
-      'action': 'demilestoned',
-      'issue': {
-        'id': 12345,
-        'node_id': 'abcd',
-        'number': 11,
-        'title': 'Unmilestoned issue',
-        'milestone': null,
-      }
-    };
+    let webhookPayload = testUtils.getDefaultPayloadMock('demilestoned', 11);
+    let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
-    let githubApiClientMock = {
-      projects: {
-        getProjectCards: jest.fn().mockReturnValue(Promise.resolve({
-          data:
-            [
-              {content_url: 'https://github.com/matks/test-project-bot/issues/8', id: 'z'},
-              {content_url: 'https://github.com/matks/test-project-bot/issues/11', id: 'a'},
-            ],
-        })),
-        deleteProjectCard: jest.fn().mockReturnValue(Promise.resolve({}))
-      }
-    };
     app.auth = () => Promise.resolve(githubApiClientMock);
 
     await app.receive({
@@ -45,29 +27,9 @@ describe('PrestaShop Kanban automation app test: removes issues from Kanban', ()
   });
 
   test('scenario B2: issue is not in Kanban', async () => {
-    let webhookPayload = {
-      'action': 'demilestoned',
-      'issue': {
-        'id': 12345,
-        'node_id': 'abcd',
-        'number': 13,
-        'title': 'Unmilestoned issue',
-        'milestone': null,
-      }
-    };
+    let webhookPayload = testUtils.getDefaultPayloadMock('demilestoned', 13);
+    let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
-    let githubApiClientMock = {
-      projects: {
-        getProjectCards: jest.fn().mockReturnValue(Promise.resolve({
-          data:
-            [
-              {content_url: 'https://github.com/matks/test-project-bot/issues/8', id: 'z'},
-              {content_url: 'https://github.com/matks/test-project-bot/issues/11', id: 'a'},
-            ],
-        })),
-        deleteProjectCard: jest.fn().mockReturnValue(Promise.resolve({}))
-      }
-    };
     app.auth = () => Promise.resolve(githubApiClientMock);
 
     await app.receive({
