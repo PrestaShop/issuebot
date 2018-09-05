@@ -55,6 +55,10 @@ module.exports = class RuleApplier {
         this.applyRuleB2(context);
         break;
 
+      case Rule.C1:
+        this.applyRuleC1(context);
+        break;
+
       default:
         this.logger.error('Cannot apply ' + rule);
     }
@@ -88,5 +92,21 @@ module.exports = class RuleApplier {
     const relatedCard = await getRelatedCardPromise;
 
     this.githubApiClient.projects.deleteProjectCard({card_id: relatedCard.id});
+  }
+
+  /**
+   * @param {Context} context
+   */
+  async applyRuleC1 (context) {
+    const issueId = context.payload.issue.number;
+
+    const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
+    const relatedCard = await getRelatedCardPromise;
+
+    this.githubApiClient.projects.moveProjectCard({
+      card_id: relatedCard.id,
+      position: 'bottom',
+      column_id: this.config.kanbanColumns.toDoColumnId
+    })
   }
 };

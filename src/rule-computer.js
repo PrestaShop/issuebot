@@ -100,6 +100,22 @@ module.exports = class RuleComputer {
       }
     }
 
+    if (context.payload.action === 'labeled') {
+      this.logger.debug('Rule debug: labeled');
+      const issueId = context.payload.issue.number;
+
+      const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
+      const getCardInKanban = await getCardInKanbanPromise;
+
+      if (getCardInKanban !== null) {
+        let cardColumnId = this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url);
+
+        if (this.config.kanbanColumns.toDoColumnId != cardColumnId) {
+          return Rule.C1;
+        }
+      }
+    }
+
     return null;
   }
 };

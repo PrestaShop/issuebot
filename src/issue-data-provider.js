@@ -33,10 +33,14 @@ module.exports = class IssueDataProvider {
     this.config = config;
     this.githubApiClient = githubApiClient;
     this.logger = logger;
+
+    /* used to store all project cards once it has been downloaded */
+    this.allCardsCache = null;
   }
 
   /**
    * @param {int} issueId
+   *
    * @returns {Promise<boolean>}
    */
   async isIssueInTheKanban (issueId) {
@@ -49,18 +53,17 @@ module.exports = class IssueDataProvider {
 
   /**
    * @param {int} issueId
+   *
    * @returns {Promise<*>}
    */
   async getRelatedCardInKanban (issueId) {
-    let cardsPromise = this.githubApiClient.projects.getProjectCards(
-      {column_id: this.config.kanbanColumns.toDoColumnId}
-    );
 
-    let allTodoCards = await cardsPromise;
+    let allCardsPromise = this.getAllCardsInKanban();
+    let allCards = await allCardsPromise;
 
-    for (let index = 0; index < allTodoCards.data.length; index++) {
+    for (let index = 0; index < allCards.length; index++) {
 
-      let currentCard = allTodoCards.data[index];
+      let currentCard = allCards[index];
       if (currentCard.hasOwnProperty('content_url') == false) {
         continue;
       }
@@ -77,13 +80,54 @@ module.exports = class IssueDataProvider {
   }
 
   /**
+   * Fetch all Kanban columns to get all cards
+   *
+   * @todo: check whether it can be replaced by a "search card" however Github REST API v3
+   * provides search for commits, issues, repos ... but not cards
+   *
+   * @returns {Promise<T[]>}
+   */
+  async getAllCardsInKanban () {
+
+    if (this.allCardsCache !== null) {
+      return this.allCardsCache;
+    }
+
+    // @todo: what about column "up next" ?
+    let todoCardsPromise = this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns.toDoColumnId});
+    let inProgressCardsPromise = this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns.inProgressColumnId});
+    let toBeReviewedCardsPromise = this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns.toBeReviewedColumnId});
+    let toBeTestedCardsPromise = this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns.toBeTestedColumnId});
+    let toBeMergedCardsPromise = this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns.toBerMergedColumnId});
+    let doneCardsPromise = this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns.doneColumnId});
+
+    let allTodoCards = await todoCardsPromise;
+    let allInProgressCards = await inProgressCardsPromise;
+    let allToBeReviewedCards = await toBeReviewedCardsPromise;
+    let allToBeTestedCards = await toBeTestedCardsPromise;
+    let allToBeMergedCards = await toBeMergedCardsPromise;
+    let allDoneCards = await doneCardsPromise;
+
+    this.allCardsCache = Array.prototype.concat.apply([],
+      [
+        allTodoCards.data,
+        allInProgressCards.data,
+        allToBeReviewedCards.data,
+        allToBeTestedCards.data,
+        allToBeMergedCards.data,
+        allDoneCards.data
+      ]
+    );
+
+    return this.allCardsCache;
+  }
+
+  /**
    * Parse a github URL to extract Issue / Pull Request ID
    *
    * @param {string} url
    *
    * @returns {string}
-   *
-   * @private
    */
   parseCardUrlForId (url) {
     return url.substr(url.lastIndexOf('/') + 1);

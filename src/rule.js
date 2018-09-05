@@ -30,6 +30,7 @@
  * @type {{A1: string, B2: string}}
  */
 const Rules = {
+  /* Scenarios A: Add an Issue to the kanban */
   A1: 'A1',
   /*
    * Scenario: Auto-add an Issue to the kanban when setting the milestone
@@ -37,12 +38,23 @@ const Rules = {
    * WHEN it is milestoned for the next patch or minor release
    * THEN it is added to the kanban in "To Do" column
    */
+
+  /* Scenarios B: Remove Issue from the kanban */
   B2: 'B2',
   /*
    * Scenario: remove an Issue from the kanban when the milestone is unset
    * GIVEN an Issue in the kanban
    * WHEN its milestone is unset
    * THEN remove the Issue from the kanban
+   */
+
+  /* Scenarios C: Move issue in the kanban according to its status */
+  C1: 'C1'
+  /*
+   * Scenario: place an Issue in the "To do" column according to its label
+   * GIVEN an Issue in the kanban not in the "To do" column
+   * WHEN it is labeled "To Do"
+   * THEN it is placed in the "To do" column
    */
 };
 

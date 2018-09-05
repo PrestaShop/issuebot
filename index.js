@@ -38,6 +38,11 @@ module.exports = app => {
     const config = {
       kanbanColumns: {
         toDoColumnId: 3311230,
+        inProgressColumnId: 3311231,
+        toBeReviewedColumnId: 3311232,
+        toBeTestedColumnId: 3329346,
+        toBerMergedColumnId: 3329347,
+        doneColumnId: 3329348,
       },
       milestones: {
         next_patch_milestone: '1.7.4.3',
@@ -56,7 +61,7 @@ module.exports = app => {
       context.log.info('Received webhook matches rule ' + rule + ' requirements');
       ruleApplier.applyRule(rule, context);
     } else {
-      context.log.info('No rule applies to ' + context.name);
+      context.log.info('No rule applies to received webhook: ' + context.name);
     }
   });
 };
