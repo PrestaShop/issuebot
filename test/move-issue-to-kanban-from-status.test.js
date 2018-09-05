@@ -77,4 +77,60 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
 
     expect(githubApiClientMock.projects.moveProjectCard).not.toHaveBeenCalled();
   });
+
+  test('scenario C2: success', async () => {
+    let webhookPayload = testUtils.getDefaultPayloadMock('closed', 8);
+    let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
+
+    app.auth = () => Promise.resolve(githubApiClientMock);
+
+    await app.receive({
+      name: 'issues',
+      payload: webhookPayload
+    });
+
+    expect(githubApiClientMock.projects.moveProjectCard).toHaveBeenCalledWith({
+      card_id: 'z',
+      position: 'bottom',
+      column_id: 3329348
+    });
+  });
+
+  test('scenario C2: card already in done column', async () => {
+    let webhookPayload = testUtils.getDefaultPayloadMock('closed', 8);
+    let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
+
+    // mock customization
+    githubApiClientMock.projects.getProjectCards = jest.fn().mockReturnValue(Promise.resolve({
+      data:
+        [{
+          content_url: 'https://github.com/prestashop/test-project-bot/issues/8',
+          column_url: 'https://api.github.com/projects/columns/3329348',
+          id: 'aa'
+        }]
+    }));
+
+    app.auth = () => Promise.resolve(githubApiClientMock);
+
+    await app.receive({
+      name: 'issues',
+      payload: webhookPayload
+    });
+
+    expect(githubApiClientMock.projects.moveProjectCard).not.toHaveBeenCalled();
+  });
+
+  test('scenario C2: not the kanban', async () => {
+    let webhookPayload = testUtils.getDefaultPayloadMock('closed', 20);
+    let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
+
+    app.auth = () => Promise.resolve(githubApiClientMock);
+
+    await app.receive({
+      name: 'issues',
+      payload: webhookPayload
+    });
+
+    expect(githubApiClientMock.projects.moveProjectCard).not.toHaveBeenCalled();
+  });
 });

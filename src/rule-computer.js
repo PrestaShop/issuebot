@@ -114,6 +114,21 @@ module.exports = class RuleComputer {
       }
     }
 
+    if (context.payload.action === 'closed') {
+      this.logger.debug('Rule debug: closed');
+      const issueId = context.payload.issue.number;
+      const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
+      const getCardInKanban = await getCardInKanbanPromise;
+
+      if (getCardInKanban !== null) {
+        let cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
+
+        if (this.config.kanbanColumns.doneColumnId !== cardColumnId) {
+          return Rule.C2;
+        }
+      }
+    }
+
     return Promise.resolve(null);
   }
 

@@ -49,12 +49,19 @@ const Rules = {
    */
 
   /* Scenarios C: Move issue in the kanban according to its status */
-  C1: 'C1'
+  C1: 'C1',
   /*
    * Scenario: place an Issue in the "To do" column according to its label
    * GIVEN an Issue in the kanban not in the "To do" column
    * WHEN it is labeled "To Do"
    * THEN it is placed in the "To do" column
+   */
+  C2: 'C2'
+  /*
+   * Scenario: place an Issue in the "Done" column when it is closed
+   * GIVEN an Issue in the kanban not in the "Done" column
+   * WHEN it is closed
+   * THEN it is placed in the "Done" column
    */
 };
 

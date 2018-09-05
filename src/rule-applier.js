@@ -59,6 +59,10 @@ module.exports = class RuleApplier {
         this.applyRuleC1(context);
         break;
 
+      case Rule.C2:
+        this.applyRuleC2(context);
+        break;
+
       default:
         this.logger.error('Cannot apply ' + rule);
     }
@@ -107,6 +111,22 @@ module.exports = class RuleApplier {
       card_id: relatedCard.id,
       position: 'bottom',
       column_id: this.config.kanbanColumns.toDoColumnId
-    })
+    });
+  }
+
+  /**
+   * @param {Context} context
+   */
+  async applyRuleC2 (context) {
+    const issueId = context.payload.issue.number;
+
+    const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
+    const relatedCard = await getRelatedCardPromise;
+
+    this.githubApiClient.projects.moveProjectCard({
+      card_id: relatedCard.id,
+      position: 'bottom',
+      column_id: this.config.kanbanColumns.doneColumnId
+    });
   }
 };
