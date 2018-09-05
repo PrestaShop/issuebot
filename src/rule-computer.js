@@ -99,19 +99,49 @@ module.exports = class RuleComputer {
 
     if (context.payload.action === 'labeled') {
       this.logger.debug('Rule debug: labeled');
-      const issueId = context.payload.issue.number;
+      const issue = context.payload.issue;
+      const issueId = issue.number;
       const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
       const getCardInKanban = await getCardInKanbanPromise;
 
       if (getCardInKanban !== null) {
         let cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
 
-        if (this.config.kanbanColumns.toDoColumnId !== cardColumnId) {
+        // @todo: check this is indeed 'todo'
+        if (this.config.kanbanColumns.toDoColumnId !== cardColumnId && this.issueHasLabel(issue, 'todo')) {
           return Rule.C1;
         }
       }
     }
 
     return Promise.resolve(null);
+  }
+
+  /**
+   * @param issue
+   * @param {string} labelTitle
+   *
+   * @returns {boolean}
+   */
+  issueHasLabel (issue, labelTitle) {
+    if (issue.hasOwnProperty('labels') === false) {
+      return false;
+    }
+
+    const issueLabels = issue.labels;
+
+    for (let index = 0; index < issueLabels.length; index++) {
+
+      let currentLabel = issueLabels[index];
+      if (currentLabel.hasOwnProperty('name') === false) {
+        continue;
+      }
+
+      if (currentLabel.name === labelTitle) {
+        return true;
+      }
+    }
+
+    return false;
   }
 };

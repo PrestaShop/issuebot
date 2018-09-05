@@ -53,4 +53,28 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
 
     expect(githubApiClientMock.projects.moveProjectCard).not.toHaveBeenCalled();
   });
+
+  test('scenario C1: not the todo label', async () => {
+    let webhookPayload = testUtils.getDefaultPayloadMock('labeled', 8);
+    let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
+
+    // mock customization
+    webhookPayload.issue.labels = [{
+      'id': 789,
+      'node_id': 'abcd',
+      'url': 'https://github.com/prestashop/test-project-bot/labels/todo',
+      'name': 'xyz',
+      'color': 'eadd85',
+      'default': false
+    }];
+
+    app.auth = () => Promise.resolve(githubApiClientMock);
+
+    await app.receive({
+      name: 'issues',
+      payload: webhookPayload
+    });
+
+    expect(githubApiClientMock.projects.moveProjectCard).not.toHaveBeenCalled();
+  });
 });

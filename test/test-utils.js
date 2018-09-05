@@ -37,7 +37,16 @@ module.exports = class TestUtils {
         'node_id': 'abcd',
         'number': issueNumber,
         'title': 'An issue',
-        'milestone': {'title': '1.7.4.3'}
+        'milestone': {'title': '1.7.4.3'},
+        'labels': [
+          {
+            'id': 789,
+            'node_id': 'abcd',
+            'url': 'https://github.com/prestashop/test-project-bot/labels/todo',
+            'name': 'todo',
+            'color': 'eadd85',
+            'default': false
+          }]
       }
     };
   }
