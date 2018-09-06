@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Github App to automate PrestaShop project workflow",
   "author": "PrestaShop",
-  "license": "OSL-3.0",
+  "license": "MIT",
   "repository": "https://github.com/PrestaShop/issuebot.git",
   "homepage": "https://github.com/PrestaShop/issuebot",
   "bugs": "https://github.com/PrestaShop/issuebot",
