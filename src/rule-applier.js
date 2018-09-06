@@ -44,7 +44,7 @@ module.exports = class RuleApplier {
    * @param {Context} context
    */
   applyRule (rule, context) {
-    this.logger.debug('Applying rule ' + rule);
+    this.logger.debug('[Rule Applier] Applying rule ' + rule);
 
     switch (rule) {
       case Rule.A1:
@@ -64,7 +64,8 @@ module.exports = class RuleApplier {
         break;
 
       default:
-        this.logger.error('Cannot apply ' + rule);
+        this.logger.error('[Rule Applier] Cannot apply ' + rule);
+
     }
   }
 

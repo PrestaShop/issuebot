@@ -47,15 +47,15 @@ module.exports = class RuleComputer {
 
     switch (context.name) {
       case 'issues':
-        this.logger.debug('Rule debug: is issue');
+        this.logger.debug('[Rule Computer] Context type is issue');
         return this.findIssueRule(context);
 
       case 'issue_comment':
-        this.logger.debug('Rule debug: is issue comment');
+        this.logger.debug('[Rule Computer] Context type is issue comment');
         break;
 
       default:
-        this.logger.debug('No rule applies to ' + context.name);
+        this.logger.debug('[Rule Computer] No rule applies to ' + context.name);
     }
   }
 
@@ -70,8 +70,7 @@ module.exports = class RuleComputer {
    */
   async findIssueRule (context) {
 
-    if (context.payload.action === 'milestoned') {
-      this.logger.debug('Rule debug: milestoned');
+    if (this.contextHasAction(context, 'milestoned')) {
       const milestone = context.payload.issue.milestone.title;
 
       if ((milestone === this.config.milestones.next_minor_milestone) ||
@@ -86,8 +85,7 @@ module.exports = class RuleComputer {
       }
     }
 
-    if (context.payload.action === 'demilestoned') {
-      this.logger.debug('Rule debug: demilestoned');
+    if (this.contextHasAction(context, 'demilestoned')) {
       const issueId = context.payload.issue.number;
       const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
       const isIssueInKanban = await isIssueInKanbanPromise;
@@ -97,8 +95,7 @@ module.exports = class RuleComputer {
       }
     }
 
-    if (context.payload.action === 'labeled') {
-      this.logger.debug('Rule debug: labeled');
+    if (this.contextHasAction(context, 'labeled')) {
       const issue = context.payload.issue;
       const issueId = issue.number;
       const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
@@ -114,8 +111,7 @@ module.exports = class RuleComputer {
       }
     }
 
-    if (context.payload.action === 'closed') {
-      this.logger.debug('Rule debug: closed');
+    if (this.contextHasAction(context, 'closed')) {
       const issueId = context.payload.issue.number;
       const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
       const getCardInKanban = await getCardInKanbanPromise;
@@ -155,6 +151,21 @@ module.exports = class RuleComputer {
       if (currentLabel.name === labelTitle) {
         return true;
       }
+    }
+
+    return false;
+  }
+
+  /**
+   * @param {Context} context
+   * @param string actionName
+   *
+   * @returns {boolean}
+   */
+  contextHasAction (context, actionName) {
+    if (context.payload.action === actionName) {
+      this.logger.debug('[Rule Computer] Context action is ' + actionName);
+      return true;
     }
 
     return false;

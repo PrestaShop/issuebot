@@ -58,10 +58,10 @@ module.exports = app => {
     let rule = await rulePromise;
 
     if (rule != null) {
-      context.log.info('Received webhook matches rule ' + rule + ' requirements');
+      context.log.info('[Index] Received webhook matches rule ' + rule + ' requirements');
       ruleApplier.applyRule(rule, context);
     } else {
-      context.log.info('No rule applies to received webhook: ' + context.name);
+      context.log.info('[Index] No rule applies to received webhook: ' + context.name);
     }
   });
 };

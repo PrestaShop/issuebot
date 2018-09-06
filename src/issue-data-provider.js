@@ -45,8 +45,8 @@ module.exports = class IssueDataProvider {
    */
   async isIssueInTheKanban (issueId) {
 
-    let cardPromise = this.getRelatedCardInKanban(issueId);
-    let card = await cardPromise;
+    const cardPromise = this.getRelatedCardInKanban(issueId);
+    const card = await cardPromise;
 
     return (card !== null);
   }
@@ -58,12 +58,14 @@ module.exports = class IssueDataProvider {
    */
   async getRelatedCardInKanban (issueId) {
 
-    let allCardsPromise = this.getAllCardsInKanban();
-    let allCards = await allCardsPromise;
+    const allCardsPromise = this.getAllCardsInKanban();
+    const allCards = await allCardsPromise;
+
+    let currentCard;
 
     for (let index = 0; index < allCards.length; index++) {
 
-      let currentCard = allCards[index];
+      currentCard = allCards[index];
       if (currentCard.hasOwnProperty('content_url') === false) {
         continue;
       }
@@ -91,30 +93,23 @@ module.exports = class IssueDataProvider {
     }
 
     // @todo: what about column "up next" ?
-    let todoCardsPromise = this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns.toDoColumnId});
-    let inProgressCardsPromise = this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns.inProgressColumnId});
-    let toBeReviewedCardsPromise = this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns.toBeReviewedColumnId});
-    let toBeTestedCardsPromise = this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns.toBeTestedColumnId});
-    let toBeMergedCardsPromise = this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns.toBerMergedColumnId});
-    let doneCardsPromise = this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns.doneColumnId});
+    const vars = [
+      'toDoColumnId',
+      'inProgressColumnId',
+      'toBeReviewedColumnId',
+      'toBeTestedColumnId',
+      'toBerMergedColumnId',
+      'doneColumnId',
+    ];
 
-    let allTodoCards = await todoCardsPromise;
-    let allInProgressCards = await inProgressCardsPromise;
-    let allToBeReviewedCards = await toBeReviewedCardsPromise;
-    let allToBeTestedCards = await toBeTestedCardsPromise;
-    let allToBeMergedCards = await toBeMergedCardsPromise;
-    let allDoneCards = await doneCardsPromise;
+    const allCards = [];
+    await Promise.all(vars.map(async (value) => {
+      const cards = await this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns[value]});
+      allCards.push(cards.data);
 
-    this.allCardsCache = Array.prototype.concat.apply([],
-      [
-        allTodoCards.data,
-        allInProgressCards.data,
-        allToBeReviewedCards.data,
-        allToBeTestedCards.data,
-        allToBeMergedCards.data,
-        allDoneCards.data
-      ]
-    );
+    }));
+
+    this.allCardsCache = Array.prototype.concat.apply([], allCards);
 
     return this.allCardsCache;
   }
