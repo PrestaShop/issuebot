@@ -13,7 +13,7 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
   });
 
   test('scenario C1: success', async () => {
-    let webhookPayload = testUtils.getDefaultPayloadMock('labeled', 8);
+    let webhookPayload = testUtils.getDefaultIssuePayloadMock('labeled', 8);
     let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     app.auth = () => Promise.resolve(githubApiClientMock);
@@ -31,7 +31,7 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
   });
 
   test('scenario C1: card already in todo column', async () => {
-    let webhookPayload = testUtils.getDefaultPayloadMock('labeled', 8);
+    let webhookPayload = testUtils.getDefaultIssuePayloadMock('labeled', 8);
     let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     // mock customization
@@ -55,7 +55,7 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
   });
 
   test('scenario C1: not the todo label', async () => {
-    let webhookPayload = testUtils.getDefaultPayloadMock('labeled', 8);
+    let webhookPayload = testUtils.getDefaultIssuePayloadMock('labeled', 8);
     let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     // mock customization
@@ -79,7 +79,7 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
   });
 
   test('scenario C2: success', async () => {
-    let webhookPayload = testUtils.getDefaultPayloadMock('closed', 8);
+    let webhookPayload = testUtils.getDefaultIssuePayloadMock('closed', 8);
     let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     app.auth = () => Promise.resolve(githubApiClientMock);
@@ -97,7 +97,7 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
   });
 
   test('scenario C2: card already in done column', async () => {
-    let webhookPayload = testUtils.getDefaultPayloadMock('closed', 8);
+    let webhookPayload = testUtils.getDefaultIssuePayloadMock('closed', 8);
     let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     // mock customization
@@ -121,7 +121,7 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
   });
 
   test('scenario C2: not the kanban', async () => {
-    let webhookPayload = testUtils.getDefaultPayloadMock('closed', 20);
+    let webhookPayload = testUtils.getDefaultIssuePayloadMock('closed', 20);
     let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     app.auth = () => Promise.resolve(githubApiClientMock);

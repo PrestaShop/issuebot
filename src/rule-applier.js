@@ -32,10 +32,17 @@ module.exports = class RuleApplier {
    * @param {GithubAPI} githubApiClient
    * @param {Logger} logger
    */
-  constructor (config, issueDataProvider, githubApiClient, logger) {
+  constructor (
+    config,
+    issueDataProvider,
+    githubApiClient,
+    prestashopPullRequestParser,
+    logger
+  ) {
     this.config = config;
     this.issueDataProvider = issueDataProvider;
     this.githubApiClient = githubApiClient;
+    this.prestashopPullRequestParser = prestashopPullRequestParser;
     this.logger = logger;
   }
 
@@ -61,6 +68,10 @@ module.exports = class RuleApplier {
 
       case Rule.C2:
         this.applyRuleC2(context);
+        break;
+
+      case Rule.E1:
+        this.applyRuleE1(context);
         break;
 
       default:
@@ -130,4 +141,31 @@ module.exports = class RuleApplier {
       column_id: this.config.kanbanColumns.doneColumnId
     });
   }
+
+  /**
+   * @param {Context} context
+   */
+  async applyRuleE1 (context) {
+    const milestone = context.payload.issue.milestone.title;
+    const linkedIssueNumbers = this.getLinkedIssueNumbers(context.payload.issue);
+
+    linkedIssueNumbers.forEach((issueNumber) => {
+      this.githubApiClient.issues.edit({
+        owner: this.config.repository.owner,
+        repo: this.config.repository.name,
+        number: issueNumber,
+        milestone: milestone
+      });
+    });
+  }
+
+  /**
+   * @param issue
+   * @returns {null}|{array}
+   */
+  getLinkedIssueNumbers (issue) {
+    const ticketNumbers = this.prestashopPullRequestParser.parseBodyForIssuesNumbers(issue.body);
+
+    return ticketNumbers;
+  };
 };

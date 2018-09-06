@@ -13,7 +13,7 @@ describe('PrestaShop Kanban automation app test: add issues to Kanban', () => {
   });
 
   test('scenario A1: success', async () => {
-    let webhookPayload = testUtils.getDefaultPayloadMock('milestoned', 2);
+    let webhookPayload = testUtils.getDefaultIssuePayloadMock('milestoned', 2);
     let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     app.auth = () => Promise.resolve(githubApiClientMock);
@@ -31,7 +31,7 @@ describe('PrestaShop Kanban automation app test: add issues to Kanban', () => {
   });
 
   test('scenario A1: issue already exists in kanban', async () => {
-    let webhookPayload = testUtils.getDefaultPayloadMock('milestoned', 2);
+    let webhookPayload = testUtils.getDefaultIssuePayloadMock('milestoned', 2);
     let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     // mock customization
@@ -54,7 +54,7 @@ describe('PrestaShop Kanban automation app test: add issues to Kanban', () => {
   });
 
   test('scenario A1: bad milestone', async () => {
-    let webhookPayload = testUtils.getDefaultPayloadMock('milestoned', 2);
+    let webhookPayload = testUtils.getDefaultIssuePayloadMock('milestoned', 2);
     let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     // mock customization

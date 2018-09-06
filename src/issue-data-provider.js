@@ -36,6 +36,8 @@ module.exports = class IssueDataProvider {
 
     /* used to store all project cards once it has been downloaded */
     this.allCardsCache = null;
+    /* store downloaded issues data */
+    this.issuesCacheById = {};
   }
 
   /**
@@ -79,6 +81,29 @@ module.exports = class IssueDataProvider {
   }
 
   /**
+   *
+   * @param {int} issueNumber
+   * @returns {Promise<*>}
+   */
+  async getIssue (issueNumber) {
+
+    if (this.issuesCacheById.hasOwnProperty(issueNumber)) {
+      return this.issuesCacheById[issueNumber];
+    }
+
+    // @todo: check what happens if bad response
+    const issue = await this.githubApiClient.issues.get({
+      owner: this.config.repository.owner,
+      repo: this.config.repository.name,
+      number: issueNumber
+    });
+
+    this.issuesCacheById[issueNumber] = issue;
+
+    return this.issuesCacheById[issueNumber];
+  }
+
+  /**
    * Fetch all Kanban columns to get all cards
    *
    * @todo: check whether it can be replaced by a "search card" however Github REST API v3
@@ -103,6 +128,7 @@ module.exports = class IssueDataProvider {
     ];
 
     const allCards = [];
+    // @todo: handle bad responses
     await Promise.all(vars.map(async (value) => {
       const cards = await this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns[value]});
       allCards.push(cards.data);

@@ -56,12 +56,20 @@ const Rules = {
    * WHEN it is labeled "To Do"
    * THEN it is placed in the "To do" column
    */
-  C2: 'C2'
+  C2: 'C2',
   /*
    * Scenario: place an Issue in the "Done" column when it is closed
    * GIVEN an Issue in the kanban not in the "Done" column
    * WHEN it is closed
    * THEN it is placed in the "Done" column
+   */
+  E1: 'E1'
+  /*
+   * Scenario: reflect the Pull Request milestone in the linked Issue
+   * GIVEN an open Issue
+   * AND a Pull Request linked to it
+   * WHEN the PR is set to a milestone
+   * THEN apply that milestone to the Issue
    */
 };
 

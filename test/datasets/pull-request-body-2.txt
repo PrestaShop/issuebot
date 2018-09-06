@@ -1,0 +1,40 @@
+| Questions     | Answers
+| ------------- | -------------------------------------------------------
+| Branch?       | develop
+| Description?  | In BackOffice "Catalog" > "Products", currently admins can either "add" or "delete" a "specific price" on the "Edit a Product" page. This PR enables to edit a specific price.
+| Type?         | new feature
+| Category?     | BO
+| BC breaks?    | yes, see below
+| Deprecations? | no
+| Fixed ticket? | #160 and #6300
+| How to test?  | See below
+
+## Ticket scope
+
+This feature has 3 goals for the "edit a product" / "specific prices" panel:
+- move the "add a specific price" form above the specific prices list
+- move the javascript code which handles this form behavior into new-theme
+- enable a "edit a specific price" button which opens a form in a pop-in
+
+A 4th goal was added during the development as I found a bug on this form. I reported it in the forge (http://forge.prestashop.com/browse/BOOM-6300) and solved it in this PR.
+
+This PR replaces https://github.com/PrestaShop/PrestaShop/pull/9388 as the previous PR did not use a pop-in. The spec changed so I created a new PR. However I fixed the requested changes of the previous PR in this new PR.
+
+## How to test
+
+Go on a "Edit a product" page on the BackOffice for 1 product. Click on "add a specific price" to display a form which allows to create specific prices. Create 2 or 3 of them so that you have a listing of prices with multiple items in it.
+
+Now you can check that:
+- When you click on the "add a specific price" button a new form appears **above** the listing
+- When you click on the "edit" icon for 1 price, a pop-in appears with a form in it pre-filled with the settings of the selected price. You can modify the settings and click on "apply" to modify the price. Check the different buttons work correctly.
+
+**Be careful:** in multi-shop context another field appears in the form. Also products with combination have another form field that single-combination products do not display. So test with a product with combinations and with a product without.
+
+## Translations
+
+2 translations have been added following @LouiseBonnard directions
+
+<!-- Reviewable:start -->
+---
+This change is [<img src="https://reviewable.io/review_button.svg" height="34" align="absmiddle" alt="Reviewable"/>](https://reviewable.io/reviews/prestashop/prestashop/9465)
+<!-- Reviewable:end -->

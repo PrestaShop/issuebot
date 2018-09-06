@@ -1,0 +1,15 @@
+| Questions     | Answers
+| ------------- | -------------------------------------------------------
+| Branch?       | develop
+| Description?  | Can't change image when creating product.
+| Type?         | bug fix
+| Category?     | BO
+| BC breaks?    | no
+| Deprecations? | no
+| Fixed ticket? | Fixes #9556
+| How to test?  | Try to change combination image when creating a new product
+
+<!-- Reviewable:start -->
+---
+This change is [<img src="https://reviewable.io/review_button.svg" height="34" align="absmiddle" alt="Reviewable"/>](https://reviewable.io/reviews/prestashop/prestashop/10302)
+<!-- Reviewable:end -->

@@ -26,6 +26,7 @@
 const RuleComputer = require('./src/rule-computer.js');
 const IssueDataProvider = require('./src/issue-data-provider.js');
 const RuleApplier = require('./src/rule-applier');
+const PrestashopPullRequestParser = require('./src/prestashop-pull-request-parser');
 
 /**
  * Entry point for Probot App
@@ -36,6 +37,10 @@ module.exports = app => {
 
     // @todo: parse this config from a YAML file
     const config = {
+      repository: {
+        owner: 'matks',
+        name: 'test-project-bot'
+      },
       kanbanColumns: {
         toDoColumnId: 3311230,
         inProgressColumnId: 3311231,
@@ -51,8 +56,10 @@ module.exports = app => {
     };
 
     const issueDataProvider = new IssueDataProvider(config, context.github, context.log);
-    const ruleComputer = new RuleComputer(config, issueDataProvider, context.log);
-    const ruleApplier = new RuleApplier(config, issueDataProvider, context.github, context.log);
+    const prestashopPullRequestParser = new PrestashopPullRequestParser(context.log);
+
+    const ruleComputer = new RuleComputer(config, issueDataProvider, prestashopPullRequestParser, context.log);
+    const ruleApplier = new RuleApplier(config, issueDataProvider, context.github, prestashopPullRequestParser, context.log);
 
     let rulePromise = ruleComputer.findRule(context);
     let rule = await rulePromise;

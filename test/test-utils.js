@@ -29,7 +29,7 @@ module.exports = class TestUtils {
    * @param {string} action
    * @param {int} issueNumber
    */
-  getDefaultPayloadMock (action, issueNumber) {
+  getDefaultIssuePayloadMock (action, issueNumber) {
     return {
       'action': action,
       'issue': {
@@ -44,9 +44,37 @@ module.exports = class TestUtils {
             'node_id': 'abcd',
             'url': 'https://github.com/prestashop/test-project-bot/labels/todo',
             'name': 'todo',
-            'color': 'eadd85',
             'default': false
           }]
+      }
+    };
+  }
+
+  /**
+   * @param {string} action
+   * @param {int} pullRequestNumber
+   */
+  getDefaultPullRequestPayloadMock (action, pullRequestNumber) {
+    return {
+      'action': action,
+      'issue': {
+        'id': 12345,
+        'node_id': 'abcd',
+        'number': pullRequestNumber,
+        'title': 'A pull request',
+        'milestone': {'title': '1.7.4.3'},
+        'labels': [
+          {
+            'id': 789,
+            'node_id': 'abcd',
+            'url': 'https://github.com/prestashop/test-project-bot/labels/todo',
+            'name': 'todo',
+            'default': false
+          }],
+        'pull_request': {
+          'url': 'https://api.github.com/repos/prestashop/test-project-bot/pulls/' + pullRequestNumber,
+        },
+        'body': '\r\n| Questions     | Answers\r\n| ------------- | -------------------------------------------------------\r\n| Branch?       | develop\r\n| Description?  | aaa\r\n| Type?         | improvement\r\n| Category?     | BO\r\n| BC breaks?    | no\r\n| Deprecations? | no\r\n| Fixed ticket? | #12\r\n| How to test?  | \r\n'
       }
     };
   }
@@ -72,7 +100,23 @@ module.exports = class TestUtils {
         createProjectCard: jest.fn().mockReturnValue(Promise.resolve({})),
         deleteProjectCard: jest.fn().mockReturnValue(Promise.resolve({})),
         moveProjectCard: jest.fn().mockReturnValue(Promise.resolve({}))
+      },
+      issues: {
+        get: jest.fn().mockReturnValue(Promise.resolve({
+          data: {id: 'abcd', milestone: null}
+        })),
+        edit: jest.fn().mockReturnValue(Promise.resolve({}))
       }
     };
+  }
+
+  /**
+   * @param {array} expected
+   * @param {array} result
+   *
+   * @todo: replace jest by jasmine to avoir deep compare with toEqual()
+   */
+  expectArraysToBeEqual (result, expected) {
+    expect(JSON.stringify(result)).toEqual(JSON.stringify(expected));
   }
 };

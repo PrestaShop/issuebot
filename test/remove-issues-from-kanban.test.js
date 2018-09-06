@@ -13,7 +13,7 @@ describe('PrestaShop Kanban automation app test: removes issues from Kanban', ()
   });
 
   test('scenario B2: success', async () => {
-    let webhookPayload = testUtils.getDefaultPayloadMock('demilestoned', 11);
+    let webhookPayload = testUtils.getDefaultIssuePayloadMock('demilestoned', 11);
     let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     app.auth = () => Promise.resolve(githubApiClientMock);
@@ -27,7 +27,7 @@ describe('PrestaShop Kanban automation app test: removes issues from Kanban', ()
   });
 
   test('scenario B2: issue is not in Kanban', async () => {
-    let webhookPayload = testUtils.getDefaultPayloadMock('demilestoned', 13);
+    let webhookPayload = testUtils.getDefaultIssuePayloadMock('demilestoned', 13);
     let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     app.auth = () => Promise.resolve(githubApiClientMock);

@@ -28,12 +28,19 @@ module.exports = class RuleComputer {
   /**
    * @param config
    * @param {IssueDataProvider} issueDataProvider
+   * @param {PrestashopPullRequestParser} prestashopPullRequestParser
    * @param {Logger} logger
    */
-  constructor (config, issueDataProvider, logger) {
+  constructor (
+    config,
+    issueDataProvider,
+    prestashopPullRequestParser,
+    logger
+  ) {
     this.config = config;
-    this.logger = logger;
     this.issueDataProvider = issueDataProvider;
+    this.prestashopPullRequestParser = prestashopPullRequestParser;
+    this.logger = logger;
   }
 
   /**
@@ -47,12 +54,14 @@ module.exports = class RuleComputer {
 
     switch (context.name) {
       case 'issues':
-        this.logger.debug('[Rule Computer] Context type is issue');
+        // some webhooks for pull requests are labeled as 'issues' webhooks by github T_T
+        if (context.payload.issue.hasOwnProperty('pull_request')) {
+          return this.findPullRequestRule(context);
+        }
         return this.findIssueRule(context);
 
-      case 'issue_comment':
-        this.logger.debug('[Rule Computer] Context type is issue comment');
-        break;
+      case 'pull_request':
+        return this.findPullRequestRule(context);
 
       default:
         this.logger.debug('[Rule Computer] No rule applies to ' + context.name);
@@ -69,12 +78,12 @@ module.exports = class RuleComputer {
    * @private
    */
   async findIssueRule (context) {
+    this.logger.debug('[Rule Computer] Context type is issue');
 
     if (this.contextHasAction(context, 'milestoned')) {
       const milestone = context.payload.issue.milestone.title;
 
-      if ((milestone === this.config.milestones.next_minor_milestone) ||
-        (milestone === this.config.milestones.next_patch_milestone)) {
+      if (this.milestoneMatchesTheNextPatchOrMinorRelease(milestone)) {
         const issueId = context.payload.issue.number;
         const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
         const isIssueInKanban = await isIssueInKanbanPromise;
@@ -129,6 +138,45 @@ module.exports = class RuleComputer {
   }
 
   /**
+   * Try to find whether webhook context matches a Pull Request rule requirements.
+   *
+   * @param {Context} context
+   *
+   * @returns {Promise<*>}
+   *
+   * @private
+   */
+  async findPullRequestRule (context) {
+    this.logger.debug('[Rule Computer] Context type is pull request');
+
+    const linkedIssueNumbers = this.getLinkedIssueNumbers(context.payload.issue);
+
+    if (null === linkedIssueNumbers) {
+      return Promise.resolve(null);
+    }
+
+    if (this.contextHasAction(context, 'milestoned')) {
+      const milestone = context.payload.issue.milestone.title;
+
+      if (this.milestoneMatchesTheNextPatchOrMinorRelease(milestone)) {
+
+        for (let index = 0; index < linkedIssueNumbers.length; index++) {
+
+          let currentIssueNumber = linkedIssueNumbers[index];
+          let getIssueResponse = await this.issueDataProvider.getIssue(currentIssueNumber);
+          let getIssueResponseA = await this.issueDataProvider.getIssue(currentIssueNumber);
+
+          if (getIssueResponseA.data.milestone === null) {
+            return Rule.E1;
+          }
+        }
+      }
+    }
+
+    return Promise.resolve(null);
+  }
+
+  /**
    * @param issue
    * @param {string} labelTitle
    *
@@ -170,4 +218,19 @@ module.exports = class RuleComputer {
 
     return false;
   }
+
+  milestoneMatchesTheNextPatchOrMinorRelease (milestone) {
+    return ((milestone === this.config.milestones.next_minor_milestone) ||
+      (milestone === this.config.milestones.next_patch_milestone));
+  }
+
+  /**
+   * @param issue
+   * @returns {null}|{array}
+   */
+  getLinkedIssueNumbers (issue) {
+    const ticketNumbers = this.prestashopPullRequestParser.parseBodyForIssuesNumbers(issue.body);
+
+    return ticketNumbers;
+  };
 };
