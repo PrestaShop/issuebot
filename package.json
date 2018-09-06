@@ -1,0 +1,42 @@
+{
+  "name": "issuebot",
+  "version": "0.1.0",
+  "description": "Github App to automate PrestaShop project workflow",
+  "author": "PrestaShop",
+  "license": "MIT",
+  "repository": "https://github.com/PrestaShop/issuebot.git",
+  "homepage": "https://github.com/PrestaShop/issuebot",
+  "bugs": "https://github.com/PrestaShop/issuebot",
+  "keywords": [
+    "probot",
+    "github",
+    "probot-app",
+    "prestashop"
+  ],
+  "scripts": {
+    "dev": "nodemon",
+    "start": "probot run ./index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "probot": "^7.0.0"
+  },
+  "devDependencies": {
+    "jest": "^22.4.3",
+    "nodemon": "^1.17.2",
+    "smee-client": "^1.0.2"
+  },
+  "engines": {
+    "node": ">= 8.3.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "nodemonConfig": {
+    "exec": "npm start",
+    "watch": [
+      ".env",
+      "."
+    ]
+  }
+}
