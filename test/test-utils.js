@@ -51,10 +51,13 @@ module.exports = class TestUtils {
   }
 
   /**
+   * Fake pull request = webhook payload considered an "issue" payload
+   * by github but actually refers to a pull request
+   *
    * @param {string} action
    * @param {int} pullRequestNumber
    */
-  getDefaultPullRequestPayloadMock (action, pullRequestNumber) {
+  getDefaultFakePullRequestPayloadMock (action, pullRequestNumber) {
     return {
       'action': action,
       'issue': {
@@ -63,6 +66,7 @@ module.exports = class TestUtils {
         'number': pullRequestNumber,
         'title': 'A pull request',
         'milestone': {'title': '1.7.4.3'},
+        'body': this.getBodyWithLinksToIssue(12),
         'labels': [
           {
             'id': 789,
@@ -74,7 +78,40 @@ module.exports = class TestUtils {
         'pull_request': {
           'url': 'https://api.github.com/repos/prestashop/test-project-bot/pulls/' + pullRequestNumber,
         },
-        'body': '\r\n| Questions     | Answers\r\n| ------------- | -------------------------------------------------------\r\n| Branch?       | develop\r\n| Description?  | aaa\r\n| Type?         | improvement\r\n| Category?     | BO\r\n| BC breaks?    | no\r\n| Deprecations? | no\r\n| Fixed ticket? | #12\r\n| How to test?  | \r\n'
+      }
+    };
+  }
+
+  /**
+   * @param {string} action
+   * @param {int} pullRequestNumber
+   * @param {string} pullRequestState
+   * @param {string} labelName
+   * @param {int} linkedIssueNumber
+   */
+  getDefaultPullRequestPayloadMock (action, pullRequestNumber, pullRequestState, labelName, linkedIssueNumber) {
+    return {
+      'action': action,
+      'number': pullRequestNumber,
+      'pull_request': {
+        'url': 'https://api.github.com/repos/matks/test-project-bot/pulls/' + pullRequestNumber,
+        'id': 853,
+        'node_id': 'abcd',
+        'issue_url': 'https://api.github.com/repos/matks/test-project-bot/issues/' + pullRequestNumber,
+        'number': pullRequestNumber,
+        'state': pullRequestState,
+        'locked': false,
+        'title': 'A PR which is linked to a ticket',
+        'body': this.getBodyWithLinksToIssue(linkedIssueNumber),
+        'labels': [
+          {
+            'id': 626,
+            'node_id': 'thy',
+            'name': labelName,
+            'default': false
+          }
+        ],
+        'milestone': {'title': '1.7.4.3'}
       }
     };
   }
@@ -103,7 +140,7 @@ module.exports = class TestUtils {
       },
       issues: {
         get: jest.fn().mockReturnValue(Promise.resolve({
-          data: {id: 'abcd', milestone: null}
+          data: {id: 'abcd', milestone: null, labels: []}
         })),
         edit: jest.fn().mockReturnValue(Promise.resolve({}))
       }
@@ -118,5 +155,18 @@ module.exports = class TestUtils {
    */
   expectArraysToBeEqual (result, expected) {
     expect(JSON.stringify(result)).toEqual(JSON.stringify(expected));
+  }
+
+  /**
+   * @param {int} issueNumber
+   *
+   * @returns {string}
+   *
+   * @private
+   */
+  getBodyWithLinksToIssue (issueNumber) {
+    return '\r\n| Questions     | Answers\r\n| ------------- | -\r\n| Branch?       | develop\r\n| Description?  '
+      + '| aaa\r\n| Type?         | improvement\r\n| Category?     | BO\r\n| BC breaks?    | no\r\n| Deprecations?'
+      + '| no\r\n| Fixed ticket? | #' + issueNumber + '\r\n| How to test?  | \r\n';
   }
 };

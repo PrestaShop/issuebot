@@ -56,12 +56,12 @@ module.exports = class RuleComputer {
       case 'issues':
         // some webhooks for pull requests are labeled as 'issues' webhooks by github T_T
         if (context.payload.issue.hasOwnProperty('pull_request')) {
-          return this.findPullRequestRule(context);
+          return this.findPullRequestRule(context, false);
         }
         return this.findIssueRule(context);
 
       case 'pull_request':
-        return this.findPullRequestRule(context);
+        return this.findPullRequestRule(context, true);
 
       default:
         this.logger.debug('[Rule Computer] No rule applies to ' + context.name);
@@ -141,22 +141,31 @@ module.exports = class RuleComputer {
    * Try to find whether webhook context matches a Pull Request rule requirements.
    *
    * @param {Context} context
+   * @param {boolean} isARealPullRequest
    *
    * @returns {Promise<*>}
    *
    * @private
    */
-  async findPullRequestRule (context) {
+  async findPullRequestRule (context, isARealPullRequest) {
     this.logger.debug('[Rule Computer] Context type is pull request');
 
-    const linkedIssueNumbers = this.getLinkedIssueNumbers(context.payload.issue);
+    let webhookData;
+    if (isARealPullRequest === true) {
+      webhookData = context.payload.pull_request;
+    } else {
+      webhookData = context.payload.issue;
+    }
+
+    const linkedIssueNumbers = this.getLinkedIssueNumbers(webhookData);
 
     if (null === linkedIssueNumbers) {
+      this.logger.info('[Rule Computer] No issues linked to pull request ' + webhookData.number);
       return Promise.resolve(null);
     }
 
     if (this.contextHasAction(context, 'milestoned')) {
-      const milestone = context.payload.issue.milestone.title;
+      const milestone = webhookData.milestone.title;
 
       if (this.milestoneMatchesTheNextPatchOrMinorRelease(milestone)) {
 
@@ -164,10 +173,29 @@ module.exports = class RuleComputer {
 
           let currentIssueNumber = linkedIssueNumbers[index];
           let getIssueResponse = await this.issueDataProvider.getIssue(currentIssueNumber);
-          let getIssueResponseA = await this.issueDataProvider.getIssue(currentIssueNumber);
 
-          if (getIssueResponseA.data.milestone === null) {
+          if (getIssueResponse.data.milestone === null) {
             return Rule.E1;
+          }
+        }
+      }
+    }
+
+    if (this.contextHasAction(context, 'labeled')) {
+      for (let index = 0; index < linkedIssueNumbers.length; index++) {
+
+        let currentIssueNumber = linkedIssueNumbers[index];
+        let getIssueResponse = await this.issueDataProvider.getIssue(currentIssueNumber);
+
+        if (getIssueResponse.data.labels.length === 0) {
+          return Rule.E3;
+        }
+
+        for (let index = 0; index < getIssueResponse.data.labels.length; index++) {
+          let currentLabel = getIssueResponse.data.labels[index];
+
+          if (currentLabel.name !== 'waiting for QA') {
+            return Rule.E3;
           }
         }
       }
@@ -225,11 +253,11 @@ module.exports = class RuleComputer {
   }
 
   /**
-   * @param issue
+   * @param webhookData
    * @returns {null}|{array}
    */
-  getLinkedIssueNumbers (issue) {
-    const ticketNumbers = this.prestashopPullRequestParser.parseBodyForIssuesNumbers(issue.body);
+  getLinkedIssueNumbers (webhookData) {
+    const ticketNumbers = this.prestashopPullRequestParser.parseBodyForIssuesNumbers(webhookData.body);
 
     return ticketNumbers;
   };

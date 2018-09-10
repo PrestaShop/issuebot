@@ -74,6 +74,10 @@ module.exports = class RuleApplier {
         this.applyRuleE1(context);
         break;
 
+      case Rule.E3:
+        this.applyRuleE3(context);
+        break;
+
       default:
         this.logger.error('[Rule Applier] Cannot apply ' + rule);
 
@@ -160,11 +164,28 @@ module.exports = class RuleApplier {
   }
 
   /**
-   * @param issue
+   * @param {Context} context
+   */
+  async applyRuleE3 (context) {
+    // @todo: unify ways to access webhook data (issue or pull_request)
+    const issueNumber = context.payload.pull_request.number;
+
+    const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueNumber);
+    const relatedCard = await getRelatedCardPromise;
+
+    this.githubApiClient.projects.moveProjectCard({
+      card_id: relatedCard.id,
+      position: 'bottom',
+      column_id: this.config.kanbanColumns.toBeTestedColumnId
+    });
+  }
+
+  /**
+   * @param webhookData
    * @returns {null}|{array}
    */
-  getLinkedIssueNumbers (issue) {
-    const ticketNumbers = this.prestashopPullRequestParser.parseBodyForIssuesNumbers(issue.body);
+  getLinkedIssueNumbers (webhookData) {
+    const ticketNumbers = this.prestashopPullRequestParser.parseBodyForIssuesNumbers(webhookData.body);
 
     return ticketNumbers;
   };

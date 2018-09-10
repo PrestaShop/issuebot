@@ -63,13 +63,21 @@ const Rules = {
    * WHEN it is closed
    * THEN it is placed in the "Done" column
    */
-  E1: 'E1'
+  E1: 'E1',
   /*
    * Scenario: reflect the Pull Request milestone in the linked Issue
    * GIVEN an open Issue
    * AND a Pull Request linked to it
    * WHEN the PR is set to a milestone
    * THEN apply that milestone to the Issue
+   */
+  E3: 'E3',
+  /*
+   * Scenario: move Issue in kanban to the "To be tested" column when the linked PR is ready for test
+   * GIVEN an open Issue
+   * AND a Pull Request linked to it
+   * WHEN the PR is labeled "Waiting for QA"
+   * THEN move the linked issue to the "To be tested" column
    */
 };
 
