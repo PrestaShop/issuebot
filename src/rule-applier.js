@@ -83,7 +83,7 @@ module.exports = class RuleApplier {
   }
 
   /**
-   * Apply Rule A1
+   * Apply Rule A1: create card in todo kandan column.
    *
    * @param {Context} context
    *
@@ -101,6 +101,8 @@ module.exports = class RuleApplier {
   }
 
   /**
+   * Apply Rule B2: remove card from kanban.
+   *
    * @param {Context} context
    */
   async applyRuleB2 (context) {
@@ -111,6 +113,8 @@ module.exports = class RuleApplier {
   }
 
   /**
+   * Apply Rule C1: move card into todo column.
+   *
    * @param {Context} context
    */
   async applyRuleC1 (context) {
@@ -125,6 +129,8 @@ module.exports = class RuleApplier {
   }
 
   /**
+   * Apply Rule C2: move card into done column.
+   *
    * @param {Context} context
    */
   async applyRuleC2 (context) {
@@ -139,6 +145,8 @@ module.exports = class RuleApplier {
   }
 
   /**
+   * Apply Rule E1: apply milestone to linked issues.
+   *
    * @param {Context} context
    */
   async applyRuleE1 (context) {
@@ -156,6 +164,8 @@ module.exports = class RuleApplier {
   }
 
   /**
+   * Apply Rule E3: move card into to be tested column.
+   *
    * @param {Context} context
    */
   async applyRuleE3 (context) {
@@ -174,6 +184,7 @@ module.exports = class RuleApplier {
 
   /**
    * @param webhookData
+   *
    * @returns {null}|{array}
    */
   getLinkedIssueNumbers (webhookData) {

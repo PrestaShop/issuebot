@@ -23,6 +23,7 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 const Rule = require('./rule.js');
+const RuleComputerUtils = require('./rule-computer-utils.js');
 const Config = require('config');
 
 module.exports = class RuleComputer {
@@ -37,8 +38,8 @@ module.exports = class RuleComputer {
     logger
   ) {
     this.issueDataProvider = issueDataProvider;
-    this.prestashopPullRequestParser = prestashopPullRequestParser;
     this.logger = logger;
+    this.utils = new RuleComputerUtils(prestashopPullRequestParser, logger);
   }
 
   /**
@@ -77,54 +78,33 @@ module.exports = class RuleComputer {
    */
   async findIssueRule (context) {
     this.logger.debug('[Rule Computer] Context type is issue');
+    let rule;
 
-    if (this.contextHasAction(context, 'milestoned')) {
-      const milestone = context.payload.issue.milestone.title;
-
-      if (this.milestoneMatchesTheNextPatchOrMinorRelease(milestone)) {
-        const issueId = context.payload.issue.number;
-        const isIssueInKanban = await this.issueDataProvider.isIssueInTheKanban(issueId);
-
-        if (isIssueInKanban === false) {
-          return Rule.A1;
-        }
+    if (this.utils.contextHasAction(context, 'milestoned')) {
+      rule = await this.checkRuleA1(context);
+      if (rule !== false) {
+        return rule;
       }
     }
 
-    if (this.contextHasAction(context, 'demilestoned')) {
-      const issueId = context.payload.issue.number;
-      const isIssueInKanban = await this.issueDataProvider.isIssueInTheKanban(issueId);
-
-      if (isIssueInKanban === true) {
-        return Rule.B2;
+    if (this.utils.contextHasAction(context, 'demilestoned')) {
+      rule = await this.checkRuleB2(context);
+      if (rule !== false) {
+        return rule;
       }
     }
 
-    if (this.contextHasAction(context, 'labeled')) {
-      const issue = context.payload.issue;
-      const issueId = issue.number;
-      const getCardInKanban = await this.issueDataProvider.getRelatedCardInKanban(issueId);
-
-      if (getCardInKanban !== null) {
-        let cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
-
-        if (this.cardIsNotInColumn('todo', cardColumnId) && this.issueHasLabel(issue, 'todo')) {
-          return Rule.C1;
-        }
+    if (this.utils.contextHasAction(context, 'labeled')) {
+      rule = await this.checkRuleC1(context);
+      if (rule !== false) {
+        return rule;
       }
     }
 
-    if (this.contextHasAction(context, 'closed')) {
-      const issueId = context.payload.issue.number;
-      const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
-      const getCardInKanban = await getCardInKanbanPromise;
-
-      if (getCardInKanban !== null) {
-        let cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
-
-        if (Config.get('botConfig.kanbanColumns.done.id') !== cardColumnId) {
-          return Rule.C2;
-        }
+    if (this.utils.contextHasAction(context, 'closed')) {
+      rule = await this.checkRuleC2(context);
+      if (rule !== false) {
+        return rule;
       }
     }
 
@@ -143,6 +123,7 @@ module.exports = class RuleComputer {
    */
   async findPullRequestRule (context, isARealPullRequest) {
     this.logger.debug('[Rule Computer] Context type is pull request');
+    let rule;
 
     let webhookData;
     if (isARealPullRequest === true) {
@@ -151,47 +132,24 @@ module.exports = class RuleComputer {
       webhookData = context.payload.issue;
     }
 
-    const linkedIssueNumbers = this.getLinkedIssueNumbers(webhookData);
+    const linkedIssueNumbers = this.utils.getLinkedIssueNumbers(webhookData);
 
     if (null === linkedIssueNumbers) {
       this.logger.info('[Rule Computer] No issues linked to pull request ' + webhookData.number);
       return Promise.resolve(null);
     }
 
-    if (this.contextHasAction(context, 'milestoned')) {
-      const milestone = webhookData.milestone.title;
-
-      if (this.milestoneMatchesTheNextPatchOrMinorRelease(milestone)) {
-
-        for (let index = 0; index < linkedIssueNumbers.length; index++) {
-
-          let currentIssueNumber = linkedIssueNumbers[index];
-          let getIssueResponse = await this.issueDataProvider.getIssue(currentIssueNumber);
-
-          if (getIssueResponse.data.milestone === null) {
-            return Rule.E1;
-          }
-        }
+    if (this.utils.contextHasAction(context, 'milestoned')) {
+      rule = await this.checkRuleE1(webhookData, linkedIssueNumbers);
+      if (rule !== false) {
+        return rule;
       }
     }
 
-    if (this.contextHasAction(context, 'labeled')) {
-      for (let index = 0; index < linkedIssueNumbers.length; index++) {
-
-        let currentIssueNumber = linkedIssueNumbers[index];
-        let getIssueResponse = await this.issueDataProvider.getIssue(currentIssueNumber);
-
-        if (getIssueResponse.data.labels.length === 0) {
-          return Rule.E3;
-        }
-
-        for (let index = 0; index < getIssueResponse.data.labels.length; index++) {
-          let currentLabel = getIssueResponse.data.labels[index];
-
-          if (currentLabel.name !== 'waiting for QA') {
-            return Rule.E3;
-          }
-        }
+    if (this.utils.contextHasAction(context, 'labeled')) {
+      rule = await this.checkRuleE3(webhookData, linkedIssueNumbers);
+      if (rule !== false) {
+        return rule;
       }
     }
 
@@ -199,73 +157,147 @@ module.exports = class RuleComputer {
   }
 
   /**
-   * @param issue
-   * @param {string} labelTitle
+   * Check Rule A1: issue milestoned for next release and not in kanban yet.
    *
-   * @returns {boolean}
+   * @param context
+   *
+   * @returns false|{string}
    */
-  issueHasLabel (issue, labelTitle) {
-    if (issue.hasOwnProperty('labels') === false) {
+  async checkRuleA1 (context) {
+    const milestone = context.payload.issue.milestone.title;
+
+    if (false === this.utils.milestoneMatchesTheNextPatchOrMinorRelease(milestone)) {
       return false;
     }
 
-    const issueLabels = issue.labels;
+    const issueId = context.payload.issue.number;
+    const isIssueInKanban = await this.issueDataProvider.isIssueInTheKanban(issueId);
 
-    for (let index = 0; index < issueLabels.length; index++) {
-
-      let currentLabel = issueLabels[index];
-      if (currentLabel.hasOwnProperty('name') === false) {
-        continue;
-      }
-
-      if (currentLabel.name === labelTitle) {
-        return true;
-      }
+    if (true === isIssueInKanban) {
+      return false;
     }
 
-    return false;
+    return Rule.A1;
   }
 
   /**
-   * @param {Context} context
-   * @param {string} actionName
+   * Check Rule B2: issue in kanban demilestoned.
    *
-   * @returns {boolean}
+   * @param context
+   *
+   * @returns false|{string}
    */
-  contextHasAction (context, actionName) {
-    if (context.payload.action === actionName) {
-      this.logger.debug('[Rule Computer] Context action is ' + actionName);
-      return true;
+  async checkRuleB2 (context) {
+    const issueId = context.payload.issue.number;
+    const isIssueInKanban = await this.issueDataProvider.isIssueInTheKanban(issueId);
+
+    if (false === isIssueInKanban) {
+      return false;
+    }
+
+    return Rule.B2;
+  }
+
+  /**
+   * Check Rule C1: issue labeled 'todo' not yet in todo column
+   *
+   * @param context
+   *
+   * @returns false|{string}
+   */
+  async checkRuleC1 (context) {
+    const issue = context.payload.issue;
+    const issueId = issue.number;
+    const getCardInKanban = await this.issueDataProvider.getRelatedCardInKanban(issueId);
+
+    if (getCardInKanban !== null) {
+      let cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
+
+      if (this.utils.cardIsNotInColumn('todo', cardColumnId) && this.utils.issueHasLabel(issue, 'todo')) {
+        return Rule.C1;
+      }
     }
 
     return false;
   }
 
-  milestoneMatchesTheNextPatchOrMinorRelease (milestone) {
-    return ((milestone === Config.get('botConfig.milestones.next_minor_milestone')) ||
-      (milestone === Config.get('botConfig.milestones.next_patch_milestone')));
+  /**
+   * Check Rule C2: issue closed not yet in done column
+   *
+   * @param context
+   *
+   * @returns false|{string}
+   */
+  async checkRuleC2 (context) {
+    const issueId = context.payload.issue.number;
+    const getCardInKanban = await this.issueDataProvider.getRelatedCardInKanban(issueId);
+
+    if (getCardInKanban !== null) {
+      let cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
+
+      if (Config.get('botConfig.kanbanColumns.done.id') !== cardColumnId) {
+        return Rule.C2;
+      }
+    }
+
+    return false;
   }
 
   /**
+   * Check Rule E1: milestoned PR linked to issues not milestoned yet.
+   *
    * @param webhookData
+   * @param linkedIssueNumbers
    *
-   * @returns {null}|{array}
+   * @returns false|{string}
    */
-  getLinkedIssueNumbers (webhookData) {
-    const ticketNumbers = this.prestashopPullRequestParser.parseBodyForIssuesNumbers(webhookData.body);
+  async checkRuleE1 (webhookData, linkedIssueNumbers) {
+    const milestone = webhookData.milestone.title;
 
-    return ticketNumbers;
-  };
+    if (this.utils.milestoneMatchesTheNextPatchOrMinorRelease(milestone)) {
+
+      for (let index = 0; index < linkedIssueNumbers.length; index++) {
+
+        let currentIssueNumber = linkedIssueNumbers[index];
+        let getIssueResponse = await this.issueDataProvider.getIssue(currentIssueNumber);
+
+        if (getIssueResponse.data.milestone === null) {
+          return Rule.E1;
+        }
+      }
+    }
+
+    return false;
+  }
 
   /**
-   * @param {string} columnName
-   * @param {int} cardColumnId
+   * Check Rule E3: PR labeled 'waiting for QA' linked to isses without the label.
    *
-   * @returns {boolean}
+   * @param webhookData
+   * @param linkedIssueNumbers
+   *
+   * @returns false|{string}
    */
-  cardIsNotInColumn (columnName, cardColumnId) {
-    const columnId = parseInt(Config.get('botConfig.kanbanColumns.' + columnName + '.id'));
+  async checkRuleE3 (webhookData, linkedIssueNumbers) {
 
-    return (columnId !== cardColumnId);
+    for (let index = 0; index < linkedIssueNumbers.length; index++) {
+
+      let currentIssueNumber = linkedIssueNumbers[index];
+      let getIssueResponse = await this.issueDataProvider.getIssue(currentIssueNumber);
+
+      if (getIssueResponse.data.labels.length === 0) {
+        return Rule.E3;
+      }
+
+      for (let index = 0; index < getIssueResponse.data.labels.length; index++) {
+        let currentLabel = getIssueResponse.data.labels[index];
+
+        if (currentLabel.name !== 'waiting for QA') {
+          return Rule.E3;
+        }
+      }
+    }
+
+    return false;
   }
 };
