@@ -1,0 +1,32 @@
+{
+  "botConfig": {
+    "repository": {
+      "owner": "matks",
+      "name": "test-project-bot"
+    },
+    "kanbanColumns": {
+      "todo": {
+        "id": 3311230
+      },
+      "in_progress": {
+        "id": 3311231
+      },
+      "to_be_reviewed": {
+        "id": 3311232
+      },
+      "to_be_tested": {
+        "id": 3329346
+      },
+      "to_be_merged": {
+        "id": 3329347
+      },
+      "done": {
+        "id": 3329348
+      }
+    },
+    "milestones": {
+      "next_patch_milestone": "1.7.4.3",
+      "next_minor_milestone": "1.7.5.0"
+    }
+  }
+}

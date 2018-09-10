@@ -22,22 +22,20 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-var Rule = require('./rule.js');
+const Rule = require('./rule.js');
+const Config = require('config');
 
 module.exports = class RuleComputer {
   /**
-   * @param config
    * @param {IssueDataProvider} issueDataProvider
    * @param {PrestashopPullRequestParser} prestashopPullRequestParser
    * @param {Logger} logger
    */
   constructor (
-    config,
     issueDataProvider,
     prestashopPullRequestParser,
     logger
   ) {
-    this.config = config;
     this.issueDataProvider = issueDataProvider;
     this.prestashopPullRequestParser = prestashopPullRequestParser;
     this.logger = logger;
@@ -85,8 +83,7 @@ module.exports = class RuleComputer {
 
       if (this.milestoneMatchesTheNextPatchOrMinorRelease(milestone)) {
         const issueId = context.payload.issue.number;
-        const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
-        const isIssueInKanban = await isIssueInKanbanPromise;
+        const isIssueInKanban = await this.issueDataProvider.isIssueInTheKanban(issueId);
 
         if (isIssueInKanban === false) {
           return Rule.A1;
@@ -96,8 +93,7 @@ module.exports = class RuleComputer {
 
     if (this.contextHasAction(context, 'demilestoned')) {
       const issueId = context.payload.issue.number;
-      const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
-      const isIssueInKanban = await isIssueInKanbanPromise;
+      const isIssueInKanban = await this.issueDataProvider.isIssueInTheKanban(issueId);
 
       if (isIssueInKanban === true) {
         return Rule.B2;
@@ -107,14 +103,12 @@ module.exports = class RuleComputer {
     if (this.contextHasAction(context, 'labeled')) {
       const issue = context.payload.issue;
       const issueId = issue.number;
-      const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
-      const getCardInKanban = await getCardInKanbanPromise;
+      const getCardInKanban = await this.issueDataProvider.getRelatedCardInKanban(issueId);
 
       if (getCardInKanban !== null) {
         let cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
 
-        // @todo: check this is indeed 'todo'
-        if (this.config.kanbanColumns.toDoColumnId !== cardColumnId && this.issueHasLabel(issue, 'todo')) {
+        if (this.cardIsNotInColumn('todo', cardColumnId) && this.issueHasLabel(issue, 'todo')) {
           return Rule.C1;
         }
       }
@@ -128,7 +122,7 @@ module.exports = class RuleComputer {
       if (getCardInKanban !== null) {
         let cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
 
-        if (this.config.kanbanColumns.doneColumnId !== cardColumnId) {
+        if (Config.get('botConfig.kanbanColumns.done.id') !== cardColumnId) {
           return Rule.C2;
         }
       }
@@ -234,7 +228,7 @@ module.exports = class RuleComputer {
 
   /**
    * @param {Context} context
-   * @param string actionName
+   * @param {string} actionName
    *
    * @returns {boolean}
    */
@@ -248,12 +242,13 @@ module.exports = class RuleComputer {
   }
 
   milestoneMatchesTheNextPatchOrMinorRelease (milestone) {
-    return ((milestone === this.config.milestones.next_minor_milestone) ||
-      (milestone === this.config.milestones.next_patch_milestone));
+    return ((milestone === Config.get('botConfig.milestones.next_minor_milestone')) ||
+      (milestone === Config.get('botConfig.milestones.next_patch_milestone')));
   }
 
   /**
    * @param webhookData
+   *
    * @returns {null}|{array}
    */
   getLinkedIssueNumbers (webhookData) {
@@ -261,4 +256,16 @@ module.exports = class RuleComputer {
 
     return ticketNumbers;
   };
+
+  /**
+   * @param {string} columnName
+   * @param {int} cardColumnId
+   *
+   * @returns {boolean}
+   */
+  cardIsNotInColumn (columnName, cardColumnId) {
+    const columnId = parseInt(Config.get('botConfig.kanbanColumns.' + columnName + '.id'));
+
+    return (columnId !== cardColumnId);
+  }
 };

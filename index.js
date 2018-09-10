@@ -35,35 +35,17 @@ const PrestashopPullRequestParser = require('./src/prestashop-pull-request-parse
 module.exports = app => {
   app.on('*', async context => {
 
-    // @todo: parse this config from a YAML file
-    const config = {
-      repository: {
-        owner: 'matks',
-        name: 'test-project-bot'
-      },
-      kanbanColumns: {
-        toDoColumnId: 3311230,
-        inProgressColumnId: 3311231,
-        toBeReviewedColumnId: 3311232,
-        toBeTestedColumnId: 3329346,
-        toBerMergedColumnId: 3329347,
-        doneColumnId: 3329348,
-      },
-      milestones: {
-        next_patch_milestone: '1.7.4.3',
-        next_minor_milestone: '1.7.5.0',
-      }
-    };
-
-    const issueDataProvider = new IssueDataProvider(config, context.github, context.log);
+    /* Services initialization */
+    const issueDataProvider = new IssueDataProvider(context.github, context.log);
     const prestashopPullRequestParser = new PrestashopPullRequestParser(context.log);
+    const ruleComputer = new RuleComputer(issueDataProvider, prestashopPullRequestParser, context.log);
+    const ruleApplier = new RuleApplier(issueDataProvider, context.github, prestashopPullRequestParser, context.log);
 
-    const ruleComputer = new RuleComputer(config, issueDataProvider, prestashopPullRequestParser, context.log);
-    const ruleApplier = new RuleApplier(config, issueDataProvider, context.github, prestashopPullRequestParser, context.log);
-
+    /* Attempts to match webhook data with a Rule */
     let rulePromise = ruleComputer.findRule(context);
     let rule = await rulePromise;
 
+    /* If Rule found, apply it */
     if (rule != null) {
       context.log.info('[Index] Received webhook matches rule ' + rule + ' requirements');
       ruleApplier.applyRule(rule, context);

@@ -22,15 +22,15 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+const Config = require('config');
+
 module.exports = class IssueDataProvider {
 
   /**
-   * @param config
    * @param {GithubAPI} githubApiClient
    * @param {Logger} logger
    */
-  constructor (config, githubApiClient, logger) {
-    this.config = config;
+  constructor (githubApiClient, logger) {
     this.githubApiClient = githubApiClient;
     this.logger = logger;
 
@@ -93,8 +93,8 @@ module.exports = class IssueDataProvider {
 
     // @todo: check what happens if bad response
     const issue = await this.githubApiClient.issues.get({
-      owner: this.config.repository.owner,
-      repo: this.config.repository.name,
+      owner: Config.get('botConfig.repository.owner'),
+      repo: Config.get('botConfig.repository.name'),
       number: issueNumber
     });
 
@@ -117,20 +117,12 @@ module.exports = class IssueDataProvider {
       return this.allCardsCache;
     }
 
-    // @todo: what about column "up next" ?
-    const vars = [
-      'toDoColumnId',
-      'inProgressColumnId',
-      'toBeReviewedColumnId',
-      'toBeTestedColumnId',
-      'toBerMergedColumnId',
-      'doneColumnId',
-    ];
+    const allColumnNames = Object.keys(Config.get('botConfig.kanbanColumns'));
 
     const allCards = [];
     // @todo: handle bad responses
-    await Promise.all(vars.map(async (value) => {
-      const cards = await this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns[value]});
+    await Promise.all(allColumnNames.map(async (value) => {
+      const cards = await this.githubApiClient.projects.getProjectCards({column_id: Config.get('botConfig.kanbanColumns.' + value + '.id')});
       allCards.push(cards.data);
 
     }));

@@ -19,6 +19,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "config": "^2.0.1",
     "probot": "^7.0.0"
   },
   "devDependencies": {
