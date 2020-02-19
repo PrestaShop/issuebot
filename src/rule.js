@@ -56,12 +56,41 @@ const Rules = {
    * WHEN it is labeled "To Do"
    * THEN it is placed in the "To do" column
    */
-  C2: 'C2'
+  C2: 'C2',
   /*
    * Scenario: place an Issue in the "Done" column when it is closed
    * GIVEN an Issue in the kanban not in the "Done" column
    * WHEN it is closed
    * THEN it is placed in the "Done" column
+   */
+  D1: 'D1',
+  /*
+   * Scenario: make automatic status labels mutually exclusive
+   * GIVEN an Issue
+   * WHEN it is labeled using one of the automatic status labels
+   * THEN any other automatic status label is removed
+   */
+  D2: 'D2',
+  /*
+   * Scenario: label an Issue when it is reopened
+   * GIVEN a closed Issue
+   * WHEN it is reopened
+   * AND there is no other automatic label
+   * THEN labeled it “To Do”
+   */
+  D3: 'D3',
+  /*
+   * Scenario: remove status label when closing an Issue
+   * GIVEN an open Issue
+   * WHEN it is closed
+   * THEN any automatic status label is removed
+   */
+  D4: 'D4'
+  /*
+   * Scenario: reopen an Issue when its status label is changed
+   * GIVEN a closed Issue
+   * WHEN it is labeled using one of the automatic status labels
+   * THEN it is reopened
    */
 };
 

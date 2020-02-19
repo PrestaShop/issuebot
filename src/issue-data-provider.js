@@ -26,7 +26,7 @@ module.exports = class IssueDataProvider {
 
   /**
    * @param config
-   * @param {GithubAPI} githubApiClient
+   * @param {import('probot').GitHubApi} githubApiClient
    * @param {Logger} logger
    */
   constructor (config, githubApiClient, logger) {
@@ -94,6 +94,8 @@ module.exports = class IssueDataProvider {
 
     // @todo: what about column "up next" ?
     const vars = [
+      'notReadyColumnId',
+      'backlogColumnId',
       'toDoColumnId',
       'inProgressColumnId',
       'toBeReviewedColumnId',
@@ -104,7 +106,7 @@ module.exports = class IssueDataProvider {
 
     const allCards = [];
     await Promise.all(vars.map(async (value) => {
-      const cards = await this.githubApiClient.projects.getProjectCards({column_id: this.config.kanbanColumns[value]});
+      const cards = await this.githubApiClient.projects.listCards({column_id: this.config.kanbanColumns[value]});
       allCards.push(cards.data);
 
     }));

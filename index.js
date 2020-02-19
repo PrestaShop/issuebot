@@ -28,25 +28,41 @@ const IssueDataProvider = require('./src/issue-data-provider.js');
 const RuleApplier = require('./src/rule-applier');
 
 /**
- * Entry point for Probot App
- * @param {import('probot').Application} app - Probot's Application class.
+ * This is the main entrypoint to your Probot app
+ * @param {import('probot').Application} app
  */
 module.exports = app => {
-  app.on('*', async context => {
+  // Your code here
+  app.log('IssueBot app loaded!')
 
+  app.on('issues.opened', async context => {
+    const issueComment = context.issue({ body: 'Thanks for opening this issue!' })
+    return context.github.issues.createComment(issueComment)
+  })
+
+  app.on('*', async context => {
     // @todo: parse this config from a YAML file
     const config = {
       kanbanColumns: {
-        toDoColumnId: 3311230,
-        inProgressColumnId: 3311231,
-        toBeReviewedColumnId: 3311232,
-        toBeTestedColumnId: 3329346,
-        toBerMergedColumnId: 3329347,
-        doneColumnId: 3329348,
+        notReadyColumnId: 8032025,
+        backlogColumnId: 8032027,
+        toDoColumnId: 8032010,
+        inProgressColumnId: 8032011,
+        toBeReviewedColumnId: 8032031,
+        toBeTestedColumnId: 8032032,
+        toBerMergedColumnId: 8032037,
+        doneColumnId: 8032012
+      },
+      labels: {
+        todo: { name: 'To Do', automatic: true },
+        toBeReproduced: { name: 'TBR', automatic: true },
+        toBeSpecified: { name: 'TBS', automatic: true },
+        needsMoreInfo: { name: 'NMI', automatic: true },
+        fixed: { name: 'Fixed', automatic: true }
       },
       milestones: {
         next_patch_milestone: '1.7.4.3',
-        next_minor_milestone: '1.7.5.0',
+        next_minor_milestone: '1.7.5.0'
       }
     };
 
@@ -54,14 +70,16 @@ module.exports = app => {
     const ruleComputer = new RuleComputer(config, issueDataProvider, context.log);
     const ruleApplier = new RuleApplier(config, issueDataProvider, context.github, context.log);
 
-    let rulePromise = ruleComputer.findRule(context);
-    let rule = await rulePromise;
+    const rulePromise = ruleComputer.findRules(context);
+    const rules = await rulePromise;
 
-    if (rule != null) {
-      context.log.info('[Index] Received webhook matches rule ' + rule + ' requirements');
-      ruleApplier.applyRule(rule, context);
+    if (rules != null) {
+      for (const rule of rules) {
+        context.log.info('[Index] Received webhook matches rule ' + rule + ' requirements');
+      }
+      ruleApplier.applyRules(rules, context);
     } else {
       context.log.info('[Index] No rule applies to received webhook: ' + context.name);
     }
-  });
-};
+  })
+}

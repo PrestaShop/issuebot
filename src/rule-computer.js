@@ -43,12 +43,12 @@ module.exports = class RuleComputer {
    *
    * @returns {Promise<*>}
    */
-  async findRule (context) {
+  async findRules (context) {
 
     switch (context.name) {
       case 'issues':
         this.logger.debug('[Rule Computer] Context type is issue');
-        return this.findIssueRule(context);
+        return this.findIssueRules(context);
 
       case 'issue_comment':
         this.logger.debug('[Rule Computer] Context type is issue comment');
@@ -68,8 +68,9 @@ module.exports = class RuleComputer {
    *
    * @private
    */
-  async findIssueRule (context) {
+  async findIssueRules (context) {
 
+    const rules = [];
     if (this.contextHasAction(context, 'milestoned')) {
       const milestone = context.payload.issue.milestone.title;
 
@@ -80,7 +81,7 @@ module.exports = class RuleComputer {
         const isIssueInKanban = await isIssueInKanbanPromise;
 
         if (isIssueInKanban === false) {
-          return Rule.A1;
+          rules.push(Rule.A1);
         }
       }
     }
@@ -91,41 +92,58 @@ module.exports = class RuleComputer {
       const isIssueInKanban = await isIssueInKanbanPromise;
 
       if (isIssueInKanban === true) {
-        return Rule.B2;
+        rules.push(Rule.B2);
       }
     }
 
     if (this.contextHasAction(context, 'labeled')) {
       const issue = context.payload.issue;
       const issueId = issue.number;
+      if (issue.state === 'closed' && this.isAutomaticLabel(context.payload.label)) {
+        rules.push(Rule.D4);
+      }
+      if (this.issueHasAutomaticLabel(issue)) {
+        rules.push(Rule.D1);
+      }
       const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
       const getCardInKanban = await getCardInKanbanPromise;
 
       if (getCardInKanban !== null) {
-        let cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
+        const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
 
-        // @todo: check this is indeed 'todo'
-        if (this.config.kanbanColumns.toDoColumnId !== cardColumnId && this.issueHasLabel(issue, 'todo')) {
-          return Rule.C1;
+        if (this.config.kanbanColumns.toDoColumnId !== cardColumnId && this.issueHasLabel(issue, this.config.labels.todo)) {
+          rules.push(Rule.C1);
         }
       }
     }
 
     if (this.contextHasAction(context, 'closed')) {
+      rules.push(Rule.D3);
+
       const issueId = context.payload.issue.number;
       const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
       const getCardInKanban = await getCardInKanbanPromise;
 
       if (getCardInKanban !== null) {
-        let cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
+        const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
 
         if (this.config.kanbanColumns.doneColumnId !== cardColumnId) {
-          return Rule.C2;
+          rules.push(Rule.C2);
         }
       }
     }
 
-    return Promise.resolve(null);
+    if (this.contextHasAction(context, 'reopened')) {
+      const issue = context.payload.issue;
+
+      if (!this.issueHasAutomaticLabel(issue)) {
+        rules.push(Rule.D2);
+      }
+    }
+
+    this.logger.info('Rules are : ' + rules.join(', '))
+
+    return rules;
   }
 
   /**
@@ -143,11 +161,10 @@ module.exports = class RuleComputer {
 
     for (let index = 0; index < issueLabels.length; index++) {
 
-      let currentLabel = issueLabels[index];
+      const currentLabel = issueLabels[index];
       if (currentLabel.hasOwnProperty('name') === false) {
         continue;
       }
-
       if (currentLabel.name === labelTitle) {
         return true;
       }
@@ -156,9 +173,40 @@ module.exports = class RuleComputer {
     return false;
   }
 
+  issueHasAutomaticLabel (issue) {
+    if (issue.hasOwnProperty('labels') === false) {
+      return false;
+    }
+
+    const issueLabels = issue.labels;
+
+    for (let index = 0; index < issueLabels.length; index++) {
+
+      const currentLabel = issueLabels[index];
+      if (currentLabel.hasOwnProperty('name') === false) {
+        continue;
+      }
+      if (this.isAutomaticLabel(currentLabel)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  isAutomaticLabel (label) {
+    const automaticLabels = Object.values(this.config.labels).filter(function (el) { return el.automatic === true; });
+    for (let i = 0; i < automaticLabels.length; i++) {
+      if (automaticLabels[i].name === label.name) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * @param {Context} context
-   * @param string actionName
+   * @param {string} actionName
    *
    * @returns {boolean}
    */
