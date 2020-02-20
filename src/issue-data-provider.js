@@ -117,6 +117,22 @@ module.exports = class IssueDataProvider {
   }
 
   /**
+   * @param {int} issueId
+   * @param {string} owner
+   * @param {string} repo
+   *
+   * @returns {Promise<*>}
+   */
+  async getData (issueId, owner, repo) {
+
+    return await this.githubApiClient.issues.get({
+      issue_number: issueId,
+      owner: owner,
+      repo: repo,
+    });
+  }
+
+  /**
    * Parse a github URL to extract Issue / Pull Request ID
    *
    * @param {string} url

@@ -85,12 +85,70 @@ const Rules = {
    * WHEN it is closed
    * THEN any automatic status label is removed
    */
-  D4: 'D4'
+  D4: 'D4',
   /*
    * Scenario: reopen an Issue when its status label is changed
    * GIVEN a closed Issue
    * WHEN it is labeled using one of the automatic status labels
    * THEN it is reopened
+   */
+  E1: 'E1',
+  /*
+   * Scenario: reflect the Pull Request milestone in the linked Issue
+   * GIVEN an open Issue
+   * AND a Pull Request linked to it
+   * WHEN the PR is set to a milestone
+   * THEN apply that milestone to the Issue
+   */
+  E3: 'E3',
+  /*
+   * Scenario: move Issue in kanban to the “To be tested” column when the linked PR is ready for test
+   * GIVEN an open Issue
+   * AND a Pull Request linked to it
+   * WHEN the PR is labeled “Waiting for QA”
+   * THEN move the linked issue to the “To be tested” column
+   */
+  E4: 'E4',
+  /*
+   * Scenario: move Issue in kanban to the “To be merged” column when the linked PR is ready for merge
+   * GIVEN an open Issue
+   * AND a Pull Request linked to it
+   * WHEN the PR is labeled “QA ✅”
+   * IF the PR is approved
+   * THEN move the linked issue to the “To be merged” column
+   */
+  E5: 'E5',
+  /*
+   * Scenario: close the Issue in kanban when the linked PR is merged
+   * GIVEN an open Issue
+   * AND a Pull Request linked to it
+   * WHEN the PR is merged
+   * THEN close the Issue
+   * AND label the issue “Fixed”
+   */
+  E6: 'E6',
+  /*
+   * Scenario: linking a PR to a closed issue re-opens it
+   * GIVEN a closed Issue
+   * WHEN a Pull Request is linked to it via “Fixes #123”
+   * THEN re-open the Issue
+   * AND apply the PR automation rules to update it
+   */
+  F1: 'F1',
+  /*
+   * Scenario: requesting changes in a PR moves the linked issue to the “In progress” column
+   * GIVEN an open Issue
+   * AND a Pull Request linked to it
+   * WHEN changes are requested in the PR
+   * THEN move the linked Issue to the “In progress” column
+   */
+  F2: 'F2'
+  /*
+   * Scenario: requesting changes in a PR moves the linked issue to the “In progress” column
+   * GIVEN an open Issue
+   * AND a Pull Request linked to it
+   * WHEN changes are requested in the PR
+   * THEN move the linked Issue to the “In progress” column
    */
 };
 
