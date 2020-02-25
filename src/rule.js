@@ -116,6 +116,7 @@ const Rules = {
    * WHEN the PR is labeled “QA ✅”
    * IF the PR is approved
    * THEN move the linked issue to the “To be merged” column
+   * AND remove assignee if there is one
    */
   E5: 'E5',
   /*
@@ -125,6 +126,7 @@ const Rules = {
    * WHEN the PR is merged
    * THEN close the Issue
    * AND label the issue “Fixed”
+   * AND remove assignee if there is one
    */
   E6: 'E6',
   /*
@@ -142,13 +144,89 @@ const Rules = {
    * WHEN changes are requested in the PR
    * THEN move the linked Issue to the “In progress” column
    */
-  F2: 'F2'
+  G2: 'G2',
   /*
-   * Scenario: requesting changes in a PR moves the linked issue to the “In progress” column
-   * GIVEN an open Issue
-   * AND a Pull Request linked to it
-   * WHEN changes are requested in the PR
-   * THEN move the linked Issue to the “In progress” column
+   * Scenario: label new Issue created in “To Do” column
+   * GIVEN an Issue in any state
+   * WHEN it is created into the column “To Do”
+   * IF the Issue has not the label “To Do”
+   * THEN add the label “To Do” to the Issue
+   * AND remove all other status labels
+   * AND IF the Issue is closed
+   * THEN re-open it
+   */
+  H1: 'H1',
+  /*
+   * Scenario: label Issue as in progress when moved to “In progress” column
+   * GIVEN an Issue in any state
+   * WHEN it is moved into the column “In progress”
+   * THEN add the label “WIP” to the Issue
+   * AND remove all other status labels
+   * AND IF the Issue is closed
+   * THEN re-open it
+   */
+  H2: 'H2',
+  /*
+   * Scenario: mark Issue as in-progress if WIP PR is linked
+   * WHEN a PR is linked to an Issue
+   * IF the Issue is in the column “To Do” in the Kanban
+   * AND IF the PR has the label “WIP”
+   * THEN move the Issue into “In progress” column
+   * AND remove “To Do” label if it exists
+   */
+  I1: 'I1',
+  /*
+   * Scenario: mark Issue as TBR if PR is linked
+   * WHEN a PR is linked to an Issue
+   * IF the PR does not have the label “WIP” OR the PR is not in draft
+   * AND IF the Issue is in the column “To Do” or “In progress” in the Kanban
+   * THEN move the Issue into “To be reviewed” column
+   * AND remove “To Do” label if it exists
+   */
+  J1: 'J1',
+  /*
+   * Scenario: mark Issue as TBT if PR is approved
+   * WHEN a PR is approved
+   * IF the linked Issue is in “In To be reviewed” column
+   * THEN move the Issue into “To be tested” column
+   * AND add the label TBT
+   * AND remove assignee if there is one
+   */
+  J3: 'J3',
+  /*
+   * Scenario: label Issue when moved to “To be tested” column
+   * WHEN an Issue is moved into the column “To be tested”
+   * IF the Issue has not the label “waiting for QA”
+   * THEN add the label “waiting for QA” to the Issue
+   */
+  J4: 'J4',
+  /*
+   * Scenario: mark Issue as in-progress if QA disapproves
+   * WHEN a PR is labeled “waiting for author”
+   * IF the linked Issue is in “In To be tested” column
+   * THEN move the Issue into “In progress” column
+   */
+  K1: 'K1',
+  /*
+   * Scenario: label/update Issue moved in “Done” column
+   * WHEN an Issue is moved into the column “Done”
+   * AND add the label “Fixed” to the Issue
+   * AND close the Issue if it is open
+   * AND remove assignee if there is one
+   */
+  L1: 'L1',
+  /*
+   * Scenario: label/update Issue moved in “TBS” column
+   * WHEN an Issue is moved into the column “TBS”
+   * AND add the label “TBS” to the Issue
+   * AND remove assignee if there is one
+   */
+  L2: 'L2'
+  /*
+   * Scenario: label/update Issue moved in “TBS” column
+   * WHEN an Issue is moved into the column “TBS”
+   * AND add the label “TBS” to the Issue
+   * AND remove assignee if there is one
    */
 };
 

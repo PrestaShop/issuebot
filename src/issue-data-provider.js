@@ -125,11 +125,13 @@ module.exports = class IssueDataProvider {
    */
   async getData (issueId, owner, repo) {
 
-    return await this.githubApiClient.issues.get({
+    const {data} = await this.githubApiClient.issues.get({
       issue_number: issueId,
       owner: owner,
       repo: repo,
     });
+
+    return data;
   }
 
   /**

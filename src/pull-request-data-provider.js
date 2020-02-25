@@ -57,7 +57,7 @@ module.exports = class PullRequestDataProvider {
       owner: owner,
       repo: repo,
     });
-    const refIssues = this.getReferencedIssues(pullRequestId, owner, repo);
+
     return data;
   }
 

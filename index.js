@@ -23,9 +23,10 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 
-const RuleComputer = require('./src/rule-computer.js');
-const IssueDataProvider = require('./src/issue-data-provider.js');
-const PullRequestDataProvider = require('./src/pull-request-data-provider.js');
+const RuleComputer = require('./src/rule-computer');
+const IssueDataProvider = require('./src/issue-data-provider');
+const PullRequestDataProvider = require('./src/pull-request-data-provider');
+const ProjectCardDataProvider = require('./src/project-card-data-provider');
 const RuleApplier = require('./src/rule-applier');
 
 /**
@@ -47,6 +48,7 @@ module.exports = app => {
       kanbanColumns: {
         notReadyColumnId: 8032025,
         backlogColumnId: 8032027,
+        toBeSpecifiedColumnId: 8032029,
         toDoColumnId: 8032010,
         inProgressColumnId: 8032011,
         toBeReviewedColumnId: 8032031,
@@ -56,23 +58,26 @@ module.exports = app => {
       },
       labels: {
         todo: { name: 'To Do', automatic: true },
+        inProgress: { name: 'WIP', automatic: false },
         toBeReproduced: { name: 'TBR', automatic: true },
         toBeSpecified: { name: 'TBS', automatic: true },
         needsMoreInfo: { name: 'NMI', automatic: true },
         toBeTested: { name: 'waiting for QA', automatic: false },
         toBeMerged: { name: 'QA ✔️', automatic: false },
+        waitingAuthor: { name: 'waiting for author️', automatic: false },
         fixed: { name: 'Fixed', automatic: true }
       },
       milestones: {
-        next_patch_milestone: '1.7.4.3',
-        next_minor_milestone: '1.7.5.0'
+        next_patch_milestone: '1.7.7.1',
+        next_minor_milestone: '1.7.8'
       }
     };
 
     const issueDataProvider = new IssueDataProvider(config, context.github, context.log);
     const pullRequestDataProvider = new PullRequestDataProvider(config, context.github, context.log);
-    const ruleComputer = new RuleComputer(config, issueDataProvider, pullRequestDataProvider, context.log);
-    const ruleApplier = new RuleApplier(config, issueDataProvider, pullRequestDataProvider, context.github, context.log);
+    const projectCardDataProvider = new ProjectCardDataProvider(config, context.github, context.log);
+    const ruleComputer = new RuleComputer(config, issueDataProvider, pullRequestDataProvider, projectCardDataProvider, context.log);
+    const ruleApplier = new RuleApplier(config, issueDataProvider, pullRequestDataProvider, projectCardDataProvider, context.github, context.log);
 
     const rulePromise = ruleComputer.findRules(context);
     const rules = await rulePromise;
