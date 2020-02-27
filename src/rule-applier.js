@@ -22,30 +22,32 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-const A1 = require('./rules/A1.js'); // eslint-disable-line no-unused-vars
-const B2 = require('./rules/B2.js'); // eslint-disable-line no-unused-vars
-const C1 = require('./rules/C1.js'); // eslint-disable-line no-unused-vars
-const C2 = require('./rules/C2.js'); // eslint-disable-line no-unused-vars
-const D1 = require('./rules/D1.js'); // eslint-disable-line no-unused-vars
-const D2 = require('./rules/D2.js'); // eslint-disable-line no-unused-vars
-const D3 = require('./rules/D3.js'); // eslint-disable-line no-unused-vars
-const D4 = require('./rules/D4.js'); // eslint-disable-line no-unused-vars
-const E1 = require('./rules/E1.js'); // eslint-disable-line no-unused-vars
-const E3 = require('./rules/E3.js'); // eslint-disable-line no-unused-vars
-const E4 = require('./rules/E4.js'); // eslint-disable-line no-unused-vars
-const E5 = require('./rules/E5.js'); // eslint-disable-line no-unused-vars
-const E6 = require('./rules/E6.js'); // eslint-disable-line no-unused-vars
-const F1 = require('./rules/F1.js'); // eslint-disable-line no-unused-vars
-const G2 = require('./rules/G2.js'); // eslint-disable-line no-unused-vars
-const H1 = require('./rules/H1.js'); // eslint-disable-line no-unused-vars
-const H2 = require('./rules/H2.js'); // eslint-disable-line no-unused-vars
-const I1 = require('./rules/I1.js'); // eslint-disable-line no-unused-vars
-const J1 = require('./rules/J1.js'); // eslint-disable-line no-unused-vars
-const J3 = require('./rules/J3.js'); // eslint-disable-line no-unused-vars
-const J4 = require('./rules/J4.js'); // eslint-disable-line no-unused-vars
-const K1 = require('./rules/K1.js'); // eslint-disable-line no-unused-vars
-const L1 = require('./rules/L1.js'); // eslint-disable-line no-unused-vars
-const L2 = require('./rules/L2.js'); // eslint-disable-line no-unused-vars
+/* eslint-disable no-unused-vars */
+const A1 = require('./rules/A1.js'); 
+const B2 = require('./rules/B2.js');
+const C1 = require('./rules/C1.js'); 
+const C2 = require('./rules/C2.js');
+const D1 = require('./rules/D1.js');
+const D2 = require('./rules/D2.js');
+const D3 = require('./rules/D3.js');
+const D4 = require('./rules/D4.js');
+const E1 = require('./rules/E1.js');
+const E3 = require('./rules/E3.js');
+const E4 = require('./rules/E4.js');
+const E5 = require('./rules/E5.js');
+const E6 = require('./rules/E6.js');
+const F1 = require('./rules/F1.js');
+const G2 = require('./rules/G2.js');
+const H1 = require('./rules/H1.js');
+const H2 = require('./rules/H2.js');
+const I1 = require('./rules/I1.js');
+const J1 = require('./rules/J1.js');
+const J3 = require('./rules/J3.js');
+const J4 = require('./rules/J4.js');
+const K1 = require('./rules/K1.js');
+const L1 = require('./rules/L1.js');
+const L2 = require('./rules/L2.js'); 
+/* eslint-enable */
 
 module.exports = class RuleApplier {
   /**
