@@ -26,46 +26,44 @@ const Rule = require('./Rule.js');
 const Utils = require('../ruleFinder/Utils');
 
 module.exports = class J3 extends Rule {
-
-    /**
+  /**
      * @param {Context} context
      *
      * @public
      */
-    async apply(context) {
+  async apply(context) {
+    const referencedIssueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card);
 
-        const referencedIssueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card);
+    const referencedIssue = await this.issueDataProvider.getData(
+      referencedIssueId,
+      context.payload.repository.owner.login,
+      context.payload.repository.name,
+    );
 
-        const referencedIssue = await this.issueDataProvider.getData(
-            referencedIssueId,
-            context.payload.repository.owner.login,
-            context.payload.repository.name
-        );
+    // Remove automatic labels
+    this.removeIssueAutomaticLabels(
+      referencedIssue,
+      context.payload.repository.owner.login,
+      context.payload.repository.name,
+      this.config.labels.todo,
+    );
 
-        // Remove automatic labels
-        this.removeIssueAutomaticLabels(
-            referencedIssue,
-            context.payload.repository.owner.login,
-            context.payload.repository.name,
-            this.config.labels.todo
-        );
-
-        // Add TBT label
-        if (!Utils.issueHasLabel(referencedIssue, this.config.labels.toBeTested.name)) {
-            await this.githubApiClient.issues.addLabels({
-                issue_number: referencedIssueId,
-                owner: context.payload.repository.owner.login,
-                repo: context.payload.repository.name,
-                labels: { labels: [this.config.labels.toBeTested.name] }
-            })
-        }
-
-        // Remove the issue assignee
-        await this.githubApiClient.issues.removeAssignees({
-            issue_number: referencedIssueId,
-            owner: context.payload.repository.owner.login,
-            repo: context.payload.repository.name,
-            assignees: referencedIssue.user.login
-        })
+    // Add TBT label
+    if (!Utils.issueHasLabel(referencedIssue, this.config.labels.toBeTested.name)) {
+      await this.githubApiClient.issues.addLabels({
+        issue_number: referencedIssueId,
+        owner: context.payload.repository.owner.login,
+        repo: context.payload.repository.name,
+        labels: {labels: [this.config.labels.toBeTested.name]},
+      });
     }
+
+    // Remove the issue assignee
+    await this.githubApiClient.issues.removeAssignees({
+      issue_number: referencedIssueId,
+      owner: context.payload.repository.owner.login,
+      repo: context.payload.repository.name,
+      assignees: referencedIssue.user.login,
+    });
+  }
 };

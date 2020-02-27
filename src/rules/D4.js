@@ -25,28 +25,29 @@
 const Rule = require('./Rule.js');
 
 module.exports = class D4 extends Rule {
-
-    /**
+  /**
      * @param {Context} context
      *
      * @public
      */
-    async apply(context) {
-        if (this.isAutomaticLabel(context.payload.label)) {
-            const issueId = context.payload.issue.number;
+  async apply(context) {
+    if (this.isAutomaticLabel(context.payload.label)) {
+      const issueId = context.payload.issue.number;
 
-            for (const label of context.payload.issue.labels) {
-                if (this.isAutomaticLabel(label)) {
-                    this.logger.info(`[Rule Applier] D4 - Remove label ${label.name}`);
+      for (let index = 0; index < context.payload.issue.labels.length; index += 1) {
+        const label = context.payload.issue.labels[index];
 
-                    await this.githubApiClient.issues.update({
-                        issue_number: issueId,
-                        owner: context.payload.repository.owner.login,
-                        repo: context.payload.repository.name,
-                        state: 'open'
-                    })
-                }
-            }
+        if (this.isAutomaticLabel(label)) {
+          this.logger.info(`[Rule Applier] D4 - Remove label ${label.name}`);
+
+          await this.githubApiClient.issues.update({
+            issue_number: issueId,
+            owner: context.payload.repository.owner.login,
+            repo: context.payload.repository.name,
+            state: 'open',
+          });
         }
+      }
     }
+  }
 };

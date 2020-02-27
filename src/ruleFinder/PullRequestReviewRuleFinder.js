@@ -26,18 +26,16 @@ const Rule = require('../rule');
 const Utils = require('./Utils');
 
 module.exports = class PullRequestReviewRuleFinder {
-
-
-    /**
+  /**
      * @param config
      * @param {Logger} logger
      */
-    constructor(config, logger) {
-        this.config = config;
-        this.logger = logger;
-    }
+  constructor(config, logger) {
+    this.config = config;
+    this.logger = logger;
+  }
 
-    /**
+  /**
      * Try to find whether webhook context matches an PR reviews rule requirements.
      *
      * @param {Context} context
@@ -46,22 +44,20 @@ module.exports = class PullRequestReviewRuleFinder {
      *
      * @public
      */
-    async findRules (context) {
-
-        const rules = [];
-        if (Utils.contextHasAction(context, 'submitted')) {
-            this.logger.info(context.payload.review)
-            if (context.payload.review.state === 'changes_requested') {
-                rules.push(Rule.F1);
-            }
-            if (context.payload.review.state === 'approved') {
-                rules.push(Rule.J1);
-            }
-        }
-
-        this.logger.info('Rules are : ' + rules.join(', '))
-
-        return rules;
+  async findRules(context) {
+    const rules = [];
+    if (Utils.contextHasAction(context, 'submitted')) {
+      this.logger.info(context.payload.review);
+      if (context.payload.review.state === 'changes_requested') {
+        rules.push(Rule.F1);
+      }
+      if (context.payload.review.state === 'approved') {
+        rules.push(Rule.J1);
+      }
     }
 
-}
+    this.logger.info(`Rules are : ${rules.join(', ')}`);
+
+    return rules;
+  }
+};

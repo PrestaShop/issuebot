@@ -24,34 +24,33 @@
  */
 
 module.exports = class TestUtils {
-
   /**
    * @param {string} action
    * @param {int} issueNumber
    */
-  getDefaultPayloadMock (action, issueNumber) {
+  getDefaultPayloadMock(action, issueNumber) {
     return {
-      'action': action,
-      'issue': {
-        'id': 12345,
-        'node_id': 'abcd',
-        'number': issueNumber,
-        'title': 'An issue',
-        'milestone': {'title': '1.7.4.3'},
-        'labels': [
+      action,
+      issue: {
+        id: 12345,
+        node_id: 'abcd',
+        number: issueNumber,
+        title: 'An issue',
+        milestone: {title: '1.7.4.3'},
+        labels: [
           {
-            'id': 789,
-            'node_id': 'abcd',
-            'url': 'https://github.com/prestashop/test-project-bot/labels/todo',
-            'name': 'todo',
-            'color': 'eadd85',
-            'default': false
-          }]
-      }
+            id: 789,
+            node_id: 'abcd',
+            url: 'https://github.com/prestashop/test-project-bot/labels/todo',
+            name: 'todo',
+            color: 'eadd85',
+            default: false,
+          }],
+      },
     };
   }
 
-  getDefaultGithubAPIClientMock () {
+  getDefaultGithubAPIClientMock() {
     return {
       projects: {
         getProjectCards: jest.fn().mockReturnValue(Promise.resolve({
@@ -60,19 +59,19 @@ module.exports = class TestUtils {
               {
                 content_url: 'https://github.com/prestashop/test-project-bot/issues/8',
                 column_url: 'https://api.github.com/projects/columns/3311239',
-                id: 'z'
+                id: 'z',
               },
               {
                 content_url: 'https://github.com/prestashop/test-project-bot/issues/11',
                 column_url: 'https://api.github.com/projects/columns/3311239',
-                id: 'a'
+                id: 'a',
               },
             ],
         })),
         createProjectCard: jest.fn().mockReturnValue(Promise.resolve({})),
         deleteProjectCard: jest.fn().mockReturnValue(Promise.resolve({})),
-        moveProjectCard: jest.fn().mockReturnValue(Promise.resolve({}))
-      }
+        moveProjectCard: jest.fn().mockReturnValue(Promise.resolve({})),
+      },
     };
   }
 };

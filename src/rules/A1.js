@@ -25,22 +25,21 @@
 const Rule = require('./Rule.js');
 
 module.exports = class A1 extends Rule {
-
-    /**
+  /**
      * Apply Rule A1
      *
      * @param {Context} context
      *
      * @public
      */
-    async apply(context) {
-        const todoColumnId = this.config.kanbanColumns.toDoColumnId;
-        const issueId = context.payload.issue.id;
+  async apply(context) {
+    const todoColumnId = this.config.kanbanColumns.toDoColumnId;
+    const issueId = context.payload.issue.id;
 
-        this.githubApiClient.projects.createCard({
-            column_id: todoColumnId,
-            content_id: issueId,
-            content_type: 'Issue'
-        });
-    }
-}
+    this.githubApiClient.projects.createCard({
+      column_id: todoColumnId,
+      content_id: issueId,
+      content_type: 'Issue',
+    });
+  }
+};

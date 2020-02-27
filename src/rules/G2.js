@@ -26,48 +26,46 @@ const Rule = require('./Rule.js');
 const Utils = require('../ruleFinder/Utils');
 
 module.exports = class G2 extends Rule {
-
-    /**
+  /**
      * @param {Context} context
      *
      * @public
      */
-    async apply(context) {
+  async apply(context) {
+    const referencedIssueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card);
 
-        const referencedIssueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card);
+    const referencedIssue = await this.issueDataProvider.getData(
+      referencedIssueId,
+      context.payload.repository.owner.login,
+      context.payload.repository.name,
+    );
 
-        const referencedIssue = await this.issueDataProvider.getData(
-            referencedIssueId,
-            context.payload.repository.owner.login,
-            context.payload.repository.name
-        );
-
-        // Re-open the issue if closed
-        if (referencedIssue.state === 'closed') {
-            await this.githubApiClient.issues.update({
-                issue_number: referencedIssueId,
-                owner: context.payload.repository.owner.login,
-                repo: context.payload.repository.name,
-                state: 'open'
-            })
-        }
-
-        // Remove automatic labels
-        this.removeIssueAutomaticLabels(
-            referencedIssue,
-            context.payload.repository.owner.login,
-            context.payload.repository.name,
-            this.config.labels.todo
-        );
-
-        // Add To-Do label
-        if (!Utils.issueHasLabel(referencedIssue, this.config.labels.todo.name)) {
-            await this.githubApiClient.issues.addLabels({
-                issue_number: referencedIssueId,
-                owner: context.payload.repository.owner.login,
-                repo: context.payload.repository.name,
-                labels: { labels: [this.config.labels.todo.name] }
-            })
-        }
+    // Re-open the issue if closed
+    if (referencedIssue.state === 'closed') {
+      await this.githubApiClient.issues.update({
+        issue_number: referencedIssueId,
+        owner: context.payload.repository.owner.login,
+        repo: context.payload.repository.name,
+        state: 'open',
+      });
     }
+
+    // Remove automatic labels
+    this.removeIssueAutomaticLabels(
+      referencedIssue,
+      context.payload.repository.owner.login,
+      context.payload.repository.name,
+      this.config.labels.todo,
+    );
+
+    // Add To-Do label
+    if (!Utils.issueHasLabel(referencedIssue, this.config.labels.todo.name)) {
+      await this.githubApiClient.issues.addLabels({
+        issue_number: referencedIssueId,
+        owner: context.payload.repository.owner.login,
+        repo: context.payload.repository.name,
+        labels: {labels: [this.config.labels.todo.name]},
+      });
+    }
+  }
 };

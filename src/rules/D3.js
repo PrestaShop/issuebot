@@ -25,18 +25,24 @@
 const Rule = require('./Rule.js');
 
 module.exports = class D3 extends Rule {
-
-    /**
+  /**
      * @param {Context} context
      *
      * @public
      */
-    async apply(context) {
-        this.removeIssueAutomaticLabels(
-            context.payload.issue,
-            context.payload.repository.owner.login,
-            context.payload.repository.name,
-            this.config.labels.fixed
-        );
-    }
+  async apply(context) {
+    await this.githubApiClient.issues.addLabels({
+      issue_number: context.payload.issue.number,
+      owner: context.payload.repository.owner.login,
+      repo: context.payload.repository.name,
+      labels: {labels: [this.config.labels.fixed.name]},
+    });
+
+    this.removeIssueAutomaticLabels(
+      context.payload.issue,
+      context.payload.repository.owner.login,
+      context.payload.repository.name,
+      this.config.labels.fixed,
+    );
+  }
 };

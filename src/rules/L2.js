@@ -23,33 +23,37 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 const Rule = require('./Rule.js');
-const Utils = require('../ruleFinder/Utils');
 
 module.exports = class L2 extends Rule {
-
-    /**
+  /**
      * @param {Context} context
      *
      * @public
      */
-    async apply(context) {
-        const issueId = context.payload.issue.number;
+  async apply(context) {
+    const issueId = context.payload.issue.number;
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.repository.name;
 
-        // Remove automatic labels
-        this.removeIssueAutomaticLabels(
-            issueId,
-            context.payload.repository.owner.login,
-            context.payload.repository.name,
-            this.config.labels.toBeMerged
-        );
+    // Remove automatic labels
+    this.removeIssueAutomaticLabels(issueId, owner, repo, this.config.labels.toBeMerged);
 
-        const card = await this.issueDataProvider.getRelatedCardInKanban(issueId);
-        if (card) {
-            const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(card.column_url));
+    const referencedIssue = await this.issueDataProvider.getData(issueId, owner, repo);
+    // Remove the issue assignee
+    await this.githubApiClient.issues.removeAssignees({
+      issue_number: issueId,
+      owner,
+      repo,
+      assignees: referencedIssue.user.login,
+    });
 
-            if (this.config.kanbanColumns.toBeTestedColumnId === cardColumnId) {
-                await this.moveCardTo(issueId, this.config.kanbanColumns.toBerMergedColumnId);
-            }
-        }
+    const card = await this.issueDataProvider.getRelatedCardInKanban(issueId);
+    if (card) {
+      const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(card.column_url), 10);
+
+      if (this.config.kanbanColumns.toBeTestedColumnId === cardColumnId) {
+        await this.moveCardTo(issueId, this.config.kanbanColumns.toBerMergedColumnId);
+      }
     }
+  }
 };

@@ -33,18 +33,19 @@ const RuleApplier = require('./src/rule-applier');
  * This is the main entrypoint to your Probot app
  * @param {import('probot').Application} app
  */
-module.exports = app => {
+module.exports = (app) => {
   // Your code here
-  app.log('IssueBot app loaded!')
+  app.log('IssueBot app loaded!');
 
-  app.on('issues.opened', async context => {
-    const issueComment = context.issue({ body: 'Thanks for opening this issue!' })
-    return context.github.issues.createComment(issueComment)
-  })
+  app.on('issues.opened', async (context) => {
+    const issueComment = context.issue({body: 'Thanks for opening this issue!'});
+    return context.github.issues.createComment(issueComment);
+  });
 
-  app.on('*', async context => {
+  app.on('*', async (context) => {
     // @todo: parse this config from a YAML file
     const config = {
+      nbRequiredApprovals: 2,
       kanbanColumns: {
         notReadyColumnId: 8032025,
         backlogColumnId: 8032027,
@@ -54,41 +55,54 @@ module.exports = app => {
         toBeReviewedColumnId: 8032031,
         toBeTestedColumnId: 8032032,
         toBerMergedColumnId: 8032037,
-        doneColumnId: 8032012
+        doneColumnId: 8032012,
       },
       labels: {
-        todo: { name: 'To Do', automatic: true },
-        inProgress: { name: 'WIP', automatic: false },
-        toBeReproduced: { name: 'TBR', automatic: true },
-        toBeSpecified: { name: 'TBS', automatic: true },
-        needsMoreInfo: { name: 'NMI', automatic: true },
-        toBeTested: { name: 'waiting for QA', automatic: false },
-        toBeMerged: { name: 'QA ✔️', automatic: false },
-        waitingAuthor: { name: 'waiting for author️', automatic: false },
-        fixed: { name: 'Fixed', automatic: true }
+        todo: {name: 'To Do', automatic: true},
+        inProgress: {name: 'WIP', automatic: false},
+        toBeReproduced: {name: 'TBR', automatic: true},
+        toBeSpecified: {name: 'TBS', automatic: true},
+        needsMoreInfo: {name: 'NMI', automatic: true},
+        toBeTested: {name: 'waiting for QA', automatic: false},
+        toBeMerged: {name: 'QA ✔️', automatic: false},
+        waitingAuthor: {name: 'waiting for author️', automatic: false},
+        fixed: {name: 'Fixed', automatic: true},
       },
       milestones: {
         next_patch_milestone: '1.7.7.1',
-        next_minor_milestone: '1.7.8'
-      }
+        next_minor_milestone: '1.7.8',
+      },
     };
 
     const issueDataProvider = new IssueDataProvider(config, context.github, context.log);
     const pullRequestDataProvider = new PullRequestDataProvider(config, context.github, context.log);
     const projectCardDataProvider = new ProjectCardDataProvider(config, context.github, context.log);
-    const ruleComputer = new RuleComputer(config, issueDataProvider, pullRequestDataProvider, projectCardDataProvider, context.log);
-    const ruleApplier = new RuleApplier(config, issueDataProvider, pullRequestDataProvider, projectCardDataProvider, context.github, context.log);
+    const ruleComputer = new RuleComputer(
+      config,
+      issueDataProvider,
+      pullRequestDataProvider,
+      projectCardDataProvider,
+      context.log,
+    );
+    const ruleApplier = new RuleApplier(
+      config,
+      issueDataProvider,
+      pullRequestDataProvider,
+      projectCardDataProvider,
+      context.github,
+      context.log,
+    );
 
     const rulePromise = ruleComputer.findRules(context);
     const rules = await rulePromise;
 
     if (rules != null) {
-      for (const rule of rules) {
-        context.log.info('[Index] Received webhook matches rule ' + rule + ' requirements');
-      }
+      rules.forEach((rule) => {
+        context.log.info(`[Index] Received webhook matches rule ${rule} requirements`);
+      });
       ruleApplier.applyRules(rules, context);
     } else {
-      context.log.info('[Index] No rule applies to received webhook: ' + context.name);
+      context.log.info(`[Index] No rule applies to received webhook: ${context.name}`);
     }
-  })
-}
+  });
+};

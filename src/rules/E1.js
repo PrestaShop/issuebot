@@ -25,30 +25,32 @@
 const Rule = require('./Rule.js');
 
 module.exports = class E1 extends Rule {
+  /**
+   * @param {Context} context
+   *
+   * @public
+   */
+  async apply(context) {
+    const pullRequestId = context.payload.issue.number;
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.repository.name;
 
-    /**
-     * @param {Context} context
-     *
-     * @public
-     */
-    async apply(context) {
-        const pullRequestId = context.payload.issue.number;
+    const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(
+      pullRequestId,
+      owner,
+      repo,
+    );
 
-        const referencedIssues = await this.pullRequestDataProvider.getReferencedIssues(
-            pullRequestId,
-            context.payload.repository.owner.login,
-            context.payload.repository.name
-        );
-
-        if (referencedIssues.length > 0) {
-            for (const referencedIssue of referencedIssues) {
-                await this.githubApiClient.issues.update({
-                    issue_number: referencedIssue,
-                    owner: context.payload.repository.owner.login,
-                    repo: context.payload.repository.name,
-                    milestone: context.payload.issue.milestone.number
-                })
-            }
-        }
+    if (referencedIssuesIds.length > 0) {
+      for (let index = 0; index < referencedIssuesIds.length; index += 1) {
+        const referencedIssueId = referencedIssuesIds[index];
+        await this.githubApiClient.issues.update({
+          issue_number: referencedIssueId,
+          owner,
+          repo,
+          milestone: context.payload.issue.milestone.number,
+        });
+      }
     }
+  }
 };

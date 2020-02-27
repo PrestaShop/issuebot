@@ -29,24 +29,20 @@
  * @returns {boolean}
  */
 module.exports.issueHasLabel = (issue, labelTitle) => {
-    if (issue.hasOwnProperty('labels') === false) {
-        return false;
-    }
-
-    const issueLabels = issue.labels;
-
-    for (let index = 0; index < issueLabels.length; index++) {
-
-        const currentLabel = issueLabels[index];
-        if (currentLabel.hasOwnProperty('name') === false) {
-            continue;
-        }
-        if (currentLabel.name === labelTitle) {
-            return true;
-        }
-    }
-
+  if (Object.prototype.hasOwnProperty.call(issue, 'labels') === false) {
     return false;
+  }
+
+  const issueLabels = issue.labels;
+
+  for (let index = 0; index < issueLabels.length; index += 1) {
+    const currentLabel = issueLabels[index];
+    if (Object.prototype.hasOwnProperty.call(currentLabel, 'name') && currentLabel.name === labelTitle) {
+      return true;
+    }
+  }
+
+  return false;
 };
 
 /**
@@ -55,10 +51,4 @@ module.exports.issueHasLabel = (issue, labelTitle) => {
  *
  * @returns {boolean}
  */
-module.exports.contextHasAction = (context, actionName) => {
-    if (context.payload.action === actionName) {
-        return true;
-    }
-
-    return false;
-};
+module.exports.contextHasAction = (context, actionName) => (context.payload.action === actionName);

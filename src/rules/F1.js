@@ -23,35 +23,46 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 const Rule = require('./Rule.js');
+const Utils = require('../ruleFinder/Utils');
 
 module.exports = class F1 extends Rule {
-
-    /**
+  /**
      * @param {Context} context
      *
      * @public
      */
-    async apply(context) {
-        const pullRequestId = context.payload.pull_request.number;
+  async apply(context) {
+    const pullRequestId = context.payload.pull_request.number;
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.repository.name;
 
-        const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(
-            pullRequestId,
-            context.payload.repository.owner.login,
-            context.payload.repository.name
-        );
+    const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(pullRequestId, owner, repo);
 
-        if (referencedIssuesIds.length > 0) {
-            for (const referencedIssueId of referencedIssuesIds) {
-                await this.moveCardTo(referencedIssueId, this.config.kanbanColumns.inProgressColumnId);
+    if (referencedIssuesIds.length > 0) {
+      for (let index = 0; index < referencedIssuesIds.length; index += 1) {
+        const referencedIssueId = referencedIssuesIds[index];
 
-                await this.githubApiClient.issues.addAssignees({
-                    issue_number: referencedIssueId,
-                    owner: context.payload.repository.owner.login,
-                    repo: context.payload.repository.name,
-                    assignees: context.payload.pull_request.user.login
-                })
+        await this.moveCardTo(referencedIssueId, this.config.kanbanColumns.inProgressColumnId);
 
-            }
+        const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+
+        if (Utils.issueHasLabel(referencedIssue, this.config.labels.todo.name)) {
+          // Remove label To-do
+          await this.githubApiClient.issues.removeLabel({
+            issue_number: referencedIssueId,
+            owner,
+            repo,
+            name: this.config.labels.todo.name,
+          });
         }
+
+        await this.githubApiClient.issues.addAssignees({
+          issue_number: referencedIssueId,
+          owner,
+          repo,
+          assignees: context.payload.pull_request.user.login,
+        });
+      }
     }
+  }
 };

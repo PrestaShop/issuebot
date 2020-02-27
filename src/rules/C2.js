@@ -25,13 +25,12 @@
 const Rule = require('./Rule.js');
 
 module.exports = class C2 extends Rule {
-
-    /**
+  /**
      * @param {Context} context
      *
      * @public
      */
-    async apply(context) {
-        await this.moveCardTo(context.payload.issue.number, this.config.kanbanColumns.doneColumnId);
-    }
+  async apply(context) {
+    await this.moveCardTo(context.payload.issue.number, this.config.kanbanColumns.doneColumnId);
+  }
 };

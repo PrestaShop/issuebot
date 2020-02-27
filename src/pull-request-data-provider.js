@@ -22,19 +22,18 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-const { graphql } = require("@octokit/graphql");
-const { createAppAuth } = require("@octokit/auth-app");
+const {graphql} = require('@octokit/graphql');
+const {createAppAuth} = require('@octokit/auth-app');
 const DomParser = require('dom-parser');
 
 
 module.exports = class PullRequestDataProvider {
-
   /**
    * @param config
    * @param {import('probot').GitHubApi} githubApiClient
    * @param {Logger} logger
    */
-  constructor (config, githubApiClient, logger) {
+  constructor(config, githubApiClient, logger) {
     this.config = config;
     this.githubApiClient = githubApiClient;
     this.logger = logger;
@@ -50,29 +49,27 @@ module.exports = class PullRequestDataProvider {
    *
    * @returns {Promise<boolean>}
    */
-  async getData (pullRequestId, owner, repo) {
-
+  async getData(pullRequestId, owner, repo) {
     const data = await this.githubApiClient.pulls.get({
       pull_number: pullRequestId,
-      owner: owner,
-      repo: repo,
+      owner,
+      repo,
     });
 
     return data;
   }
 
   async getReferencedIssues(pullRequestId, owner, repo) {
-
     const issues = [];
     const auth = createAppAuth({
       id: process.env.APP_ID,
       privateKey: process.env.PRIVATE_KEY,
-      installationId: 6855379
+      installationId: 6855379,
     });
     const graphqlWithAuth = graphql.defaults({
       request: {
-        hook: auth.hook
-      }
+        hook: auth.hook,
+      },
     });
 
     /**
@@ -134,15 +131,15 @@ module.exports = class PullRequestDataProvider {
      */
 
     try {
-      const { repository } = await graphqlWithAuth(
-          `{
+      const {repository} = await graphqlWithAuth(
+        `{
             repository(owner: "${owner}", name: "${repo}") {
               pullRequest(number: ${pullRequestId}) {
                 bodyHTML
               }
             }
           }
-        `
+        `,
       );
 
       const bodyHtml = repository.pullRequest.bodyHTML;
@@ -150,13 +147,13 @@ module.exports = class PullRequestDataProvider {
       const element = (new DomParser()).parseFromString(bodyHtml, 'text/html');
       const issueLinks = element.getElementsByClassName('issue-link');
 
-      for (const issueLink of issueLinks) {
+      issueLinks.forEach((issueLink) => {
         const issueUrl = issueLink.getAttribute('data-url');
 
         if (issueUrl) {
           issues.push(this.parseUrlForId(issueUrl));
         }
-      }
+      });
     } catch (error) {
       this.logger.error(`[Pull Request data Provider] Error when getting list issues : ${error.message}`);
     }
@@ -164,19 +161,19 @@ module.exports = class PullRequestDataProvider {
     return issues;
   }
 
-  async getNumberOfApprovals (pullRequestId, owner, repo) {
+  async getNumberOfApprovals(pullRequestId, owner, repo) {
     const reviews = await this.githubApiClient.pulls.listReviews({
       pull_number: pullRequestId,
-      owner: owner,
-      repo: repo
+      owner,
+      repo,
     });
 
     let nbApprovals = 0;
-    for (const review of reviews.data) {
+    reviews.data.forEach((review) => {
       if (review.state === 'APPROVED') {
-        ++nbApprovals;
+        nbApprovals += 1;
       }
-    }
+    });
 
     return nbApprovals;
   }
@@ -188,7 +185,7 @@ module.exports = class PullRequestDataProvider {
    *
    * @returns {int}
    */
-  parseUrlForId (url) {
-    return parseInt(url.substr(url.lastIndexOf('/') + 1));
+  parseUrlForId(url) {
+    return parseInt(url.substr(url.lastIndexOf('/') + 1), 10);
   }
 };

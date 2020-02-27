@@ -35,17 +35,33 @@ module.exports = class RuleComputer {
    * @param {ProjectCardDataProvider} projectCardDataProvider
    * @param {Logger} logger
    */
-  constructor (config, issueDataProvider, pullRequestDataProvider, projectCardDataProvider, logger) {
+  constructor(config, issueDataProvider, pullRequestDataProvider, projectCardDataProvider, logger) {
     this.config = config;
     this.logger = logger;
     this.issueDataProvider = issueDataProvider;
     this.pullRequestDataProvider = pullRequestDataProvider;
     this.projectCardDataProvider = projectCardDataProvider;
 
-    this.issueRuleFinder = new IssueRuleFinder(this.config, this.issueDataProvider, this.logger);
-    this.pullRequestRuleFinder = new PullRequestRuleFinder(this.config, this.issueDataProvider, this.pullRequestDataProvider, this.logger);
-    this.pullRequestReviewRuleFinder = new PullRequestReviewRuleFinder(this.config, this.logger);
-    this.projectCardRuleFinder = new ProjectCardRuleFinder(this.config, this.projectCardDataProvider, this.logger);
+    this.issueRuleFinder = new IssueRuleFinder(
+      this.config,
+      this.issueDataProvider,
+      this.logger,
+    );
+    this.pullRequestRuleFinder = new PullRequestRuleFinder(
+      this.config,
+      this.issueDataProvider,
+      this.pullRequestDataProvider,
+      this.logger,
+    );
+    this.pullRequestReviewRuleFinder = new PullRequestReviewRuleFinder(
+      this.config,
+      this.logger,
+    );
+    this.projectCardRuleFinder = new ProjectCardRuleFinder(
+      this.config,
+      this.projectCardDataProvider,
+      this.logger,
+    );
   }
 
   /**
@@ -55,10 +71,9 @@ module.exports = class RuleComputer {
    *
    * @returns {Promise<*>}
    */
-  async findRules (context) {
-
+  async findRules(context) {
     if (context.payload.action) {
-      this.logger.debug('[Rule Computer] Context action is ' + context.payload.action);
+      this.logger.debug(`[Rule Computer] Context action is ${context.payload.action}`);
     }
 
     switch (context.name) {
@@ -95,7 +110,9 @@ module.exports = class RuleComputer {
         break;
 
       default:
-        this.logger.debug('[Rule Computer] No rule applies to ' + context.name);
+        this.logger.debug(`[Rule Computer] No rule applies to ${context.name}`);
     }
+
+    return [];
   }
 };

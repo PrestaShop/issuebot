@@ -26,53 +26,45 @@ const Rule = require('./Rule.js');
 const Utils = require('../ruleFinder/Utils');
 
 module.exports = class K1 extends Rule {
-
-    /**
+  /**
      * @param {Context} context
      *
      * @public
      */
-    async apply(context) {
+  async apply(context) {
+    const referencedIssueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card);
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.repository.name;
 
-        const referencedIssueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card);
+    const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
 
-        const referencedIssue = await this.issueDataProvider.getData(
-            referencedIssueId,
-            context.payload.repository.owner.login,
-            context.payload.repository.name
-        );
+    // Remove automatic labels except FIXED
+    this.removeIssueAutomaticLabels(referencedIssue, owner, repo, this.config.labels.fixed);
 
-        // Remove automatic labels
-        this.removeIssueAutomaticLabels(
-            referencedIssue,
-            context.payload.repository.owner.login,
-            context.payload.repository.name,
-            this.config.labels.todo
-        );
-
-        // Add Fixed label
-        if (!Utils.issueHasLabel(referencedIssue, this.config.labels.fixed.name)) {
-            await this.githubApiClient.issues.addLabels({
-                issue_number: referencedIssueId,
-                owner: context.payload.repository.owner.login,
-                repo: context.payload.repository.name,
-                labels: { labels: [this.config.labels.fixed.name] }
-            })
-        }
-
-        // Remove the issue assignee
-        await this.githubApiClient.issues.removeAssignees({
-            issue_number: referencedIssueId,
-            owner: context.payload.repository.owner.login,
-            repo: context.payload.repository.name,
-            assignees: referencedIssue.user.login
-        })
-
-        await this.githubApiClient.issues.update({
-            issue_number: referencedIssueId,
-            owner: context.payload.repository.owner.login,
-            repo: context.payload.repository.name,
-            state: 'closed'
-        })
+    // Add Fixed label if it does not exist
+    if (!Utils.issueHasLabel(referencedIssue, this.config.labels.fixed.name)) {
+      await this.githubApiClient.issues.addLabels({
+        issue_number: referencedIssueId,
+        owner,
+        repo,
+        labels: {labels: [this.config.labels.fixed.name]},
+      });
     }
+
+    // Remove the issue assignee
+    await this.githubApiClient.issues.removeAssignees({
+      issue_number: referencedIssueId,
+      owner,
+      repo,
+      assignees: referencedIssue.user.login,
+    });
+
+    // Close the issue
+    await this.githubApiClient.issues.update({
+      issue_number: referencedIssueId,
+      owner,
+      repo,
+      state: 'closed',
+    });
+  }
 };

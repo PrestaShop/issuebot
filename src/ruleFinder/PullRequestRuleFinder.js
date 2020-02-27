@@ -26,21 +26,20 @@ const Rule = require('../rule');
 const Utils = require('./Utils');
 
 module.exports = class PullRequestRuleFinder {
-
-    /**
+  /**
      * @param config
      * @param {IssueDataProvider} issueDataProvider
      * @param {PullRequestDataProvider} pullRequestDataProvider
      * @param {Logger} logger
      */
-    constructor(config, issueDataProvider, pullRequestDataProvider, logger) {
-        this.config = config;
-        this.logger = logger;
-        this.issueDataProvider = issueDataProvider;
-        this.pullRequestDataProvider = pullRequestDataProvider;
-    }
+  constructor(config, issueDataProvider, pullRequestDataProvider, logger) {
+    this.config = config;
+    this.logger = logger;
+    this.issueDataProvider = issueDataProvider;
+    this.pullRequestDataProvider = pullRequestDataProvider;
+  }
 
-    /**
+  /**
      * Try to find whether webhook context matches an PR rule requirements.
      *
      * @param {Context} context
@@ -49,121 +48,126 @@ module.exports = class PullRequestRuleFinder {
      *
      * @public
      */
-    async findRules (context) {
+  async findRules(context) {
+    const rules = [];
+    if (Utils.contextHasAction(context, 'opened')) {
+      const pullRequest = context.payload.pull_request;
 
-        const rules = [];
-        if (Utils.contextHasAction(context, 'opened')) {
-            const pullRequest = context.payload.pull_request;
+      const issueIds = await this.pullRequestDataProvider.getReferencedIssues(
+        pullRequest.number,
+        context.payload.repository.owner.login,
+        context.payload.repository.name,
+      );
+      if (
+        issueIds.length > 0
+                && !(Utils.issueHasLabel(pullRequest, this.config.labels.inProgress.name) || pullRequest.draft === true)
+      ) {
+        rules.push(Rule.I1);
 
-            const issueIds = await this.pullRequestDataProvider.getReferencedIssues(
-                pullRequest.number,
-                context.payload.repository.owner.login,
-                context.payload.repository.name
-            );
-            if (
-                issueIds.length > 0 &&
-                !(Utils.issueHasLabel(pullRequest, this.config.labels.inProgress.name) || true === pullRequest.draft)
-            ) {
-                rules.push(Rule.I1);
+        for (let index = 0; index < issueIds.length; index += 1) {
+          const issueId = issueIds[index];
 
-                for (const issueId of issueIds) {
-                    const issue = await this.issueDataProvider.getData(
-                        issueId,
-                        context.payload.repository.owner.login,
-                        context.payload.repository.name
-                    );
+          const issue = await this.issueDataProvider.getData(
+            issueId,
+            context.payload.repository.owner.login,
+            context.payload.repository.name,
+          );
 
-                    if (issue.state === 'closed') {
-                        rules.push(Rule.E6);
-                        break;
-                    }
-                }
-            }
+          if (issue.state === 'closed') {
+            rules.push(Rule.E6);
+          }
         }
-        if (Utils.contextHasAction(context, 'ready_for_review')) {
-            const pullRequest = context.payload.pull_request;
+      }
+    }
+    if (Utils.contextHasAction(context, 'ready_for_review')) {
+      const pullRequest = context.payload.pull_request;
 
-            if (!(Utils.issueHasLabel(pullRequest, this.config.labels.inProgress.name) || true === pullRequest.draft)) {
-                const issueIds = await this.pullRequestDataProvider.getReferencedIssues(
-                    pullRequest.number,
-                    context.payload.repository.owner.login,
-                    context.payload.repository.name
-                );
+      if (!(Utils.issueHasLabel(pullRequest, this.config.labels.inProgress.name) || pullRequest.draft === true)) {
+        const issueIds = await this.pullRequestDataProvider.getReferencedIssues(
+          pullRequest.number,
+          context.payload.repository.owner.login,
+          context.payload.repository.name,
+        );
 
-                if (issueIds.length > 0) {
-                    rules.push(Rule.I1);
-                }
-            }
+        if (issueIds.length > 0) {
+          rules.push(Rule.I1);
         }
-        if (Utils.contextHasAction(context, 'milestoned')) {
-            rules.push(Rule.E1);
-        }
-
-        if (Utils.contextHasAction(context, 'labeled')) {
-            const pullRequest = context.payload.pull_request;
-
-            if (Utils.issueHasLabel(pullRequest, this.config.labels.toBeTested.name)) {
-                rules.push(Rule.E3);
-            }
-            if (Utils.issueHasLabel(pullRequest, this.config.labels.toBeMerged.name)) {
-                const nbApprovals = await this.pullRequestDataProvider.getNumberOfApprovals(
-                    pullRequest.number,
-                    context.payload.repository.owner.login,
-                    context.payload.repository.name
-                );
-                if (nbApprovals >= 2) {
-                    rules.push(Rule.E4);
-                }
-            }
-            if (Utils.issueHasLabel(pullRequest, this.config.labels.inProgress.name) || true === pullRequest.draft) {
-                const issueIds = await this.pullRequestDataProvider.getReferencedIssues(
-                    pullRequest.number,
-                    context.payload.repository.owner.login,
-                    context.payload.repository.name
-                );
-                if (issueIds.length > 0) {
-                    rules.push(Rule.H2);
-                }
-            }
-            if (Utils.issueHasLabel(pullRequest, this.config.labels.waitingAuthor.name)) {
-                rules.push(Rule.J4);
-            }
-        }
-
-        if (Utils.contextHasAction(context, 'closed')) {
-            rules.push(Rule.E5);
-        }
-
-        if (Utils.contextHasAction(context, 'edited')) {
-            const pullRequest = context.payload.pull_request;
-
-            if (context.payload.changes.body) {
-                const issueIds = await this.pullRequestDataProvider.getReferencedIssues(
-                    pullRequest.number,
-                    context.payload.repository.owner.login,
-                    context.payload.repository.name
-                );
-                if (issueIds.length > 0 && (Utils.issueHasLabel(pullRequest, this.config.labels.inProgress.name) || true === pullRequest.draft)) {
-                    rules.push(Rule.H2);
-                }
-                for (const issueId of issueIds) {
-                    const issue = await this.issueDataProvider.getData(
-                        issueId,
-                        context.payload.repository.owner.login,
-                        context.payload.repository.name
-                    );
-
-                    if (issue.state === 'closed') {
-                        rules.push(Rule.E6);
-                        break;
-                    }
-                }
-            }
-        }
-
-        this.logger.info('Rules are : ' + rules.join(', '))
-
-        return rules;
+      }
+    }
+    if (Utils.contextHasAction(context, 'milestoned')) {
+      rules.push(Rule.E1);
     }
 
+    if (Utils.contextHasAction(context, 'labeled')) {
+      const pullRequest = context.payload.pull_request;
+
+      if (Utils.issueHasLabel(pullRequest, this.config.labels.toBeTested.name)) {
+        rules.push(Rule.E3);
+      }
+      if (Utils.issueHasLabel(pullRequest, this.config.labels.toBeMerged.name)) {
+        const nbApprovals = await this.pullRequestDataProvider.getNumberOfApprovals(
+          pullRequest.number,
+          context.payload.repository.owner.login,
+          context.payload.repository.name,
+        );
+        if (nbApprovals >= this.config.nbRequiredApprovals) {
+          rules.push(Rule.E4);
+        }
+      }
+      if (Utils.issueHasLabel(pullRequest, this.config.labels.inProgress.name) || pullRequest.draft === true) {
+        const issueIds = await this.pullRequestDataProvider.getReferencedIssues(
+          pullRequest.number,
+          context.payload.repository.owner.login,
+          context.payload.repository.name,
+        );
+        if (issueIds.length > 0) {
+          rules.push(Rule.H2);
+        }
+      }
+      if (Utils.issueHasLabel(pullRequest, this.config.labels.waitingAuthor.name)) {
+        rules.push(Rule.J4);
+      }
+    }
+
+    if (Utils.contextHasAction(context, 'closed')) {
+      rules.push(Rule.E5);
+    }
+
+    if (Utils.contextHasAction(context, 'edited')) {
+      const pullRequest = context.payload.pull_request;
+
+      if (context.payload.changes.body) {
+        const issueIds = await this.pullRequestDataProvider.getReferencedIssues(
+          pullRequest.number,
+          context.payload.repository.owner.login,
+          context.payload.repository.name,
+        );
+        if (
+          issueIds.length > 0
+        ) {
+          if ((Utils.issueHasLabel(pullRequest, this.config.labels.inProgress.name) || pullRequest.draft === true)) {
+            rules.push(Rule.H2);
+          } else {
+            rules.push(Rule.I1);
+          }
+        }
+        for (let index = 0; index < issueIds.length; index += 1) {
+          const issueId = issueIds[index];
+          const issue = await this.issueDataProvider.getData(
+            issueId,
+            context.payload.repository.owner.login,
+            context.payload.repository.name,
+          );
+
+          if (issue.state === 'closed') {
+            rules.push(Rule.E6);
+          }
+        }
+      }
+    }
+
+    this.logger.info(`Rules are : ${rules.join(', ')}`);
+
+    return rules;
+  }
 };

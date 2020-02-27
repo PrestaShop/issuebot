@@ -23,13 +23,12 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 module.exports = class IssueDataProvider {
-
   /**
    * @param config
    * @param {import('probot').GitHubApi} githubApiClient
    * @param {Logger} logger
    */
-  constructor (config, githubApiClient, logger) {
+  constructor(config, githubApiClient, logger) {
     this.config = config;
     this.githubApiClient = githubApiClient;
     this.logger = logger;
@@ -43,8 +42,7 @@ module.exports = class IssueDataProvider {
    *
    * @returns {Promise<boolean>}
    */
-  async isIssueInTheKanban (issueId) {
-
+  async isIssueInTheKanban(issueId) {
     const cardPromise = this.getRelatedCardInKanban(issueId);
     const card = await cardPromise;
 
@@ -56,21 +54,18 @@ module.exports = class IssueDataProvider {
    *
    * @returns {Promise<*>}
    */
-  async getRelatedCardInKanban (issueId) {
-
+  async getRelatedCardInKanban(issueId) {
     const allCardsPromise = this.getAllCardsInKanban();
     const allCards = await allCardsPromise;
 
     let currentCard;
 
-    for (let index = 0; index < allCards.length; index++) {
-
+    for (let index = 0; index < allCards.length; index += 1) {
       currentCard = allCards[index];
-      if (currentCard.hasOwnProperty('content_url') === false) {
-        continue;
-      }
-
-      if (issueId === parseInt(this.parseCardUrlForId(currentCard.content_url))) {
+      if (
+        Object.prototype.hasOwnProperty.call(currentCard, 'content_url')
+          && issueId === parseInt(this.parseCardUrlForId(currentCard.content_url), 10)
+      ) {
         return currentCard;
       }
     }
@@ -86,8 +81,7 @@ module.exports = class IssueDataProvider {
    *
    * @returns {Promise<T[]>}
    */
-  async getAllCardsInKanban () {
-
+  async getAllCardsInKanban() {
     if (this.allCardsCache !== null) {
       return this.allCardsCache;
     }
@@ -97,6 +91,7 @@ module.exports = class IssueDataProvider {
       'notReadyColumnId',
       'backlogColumnId',
       'toDoColumnId',
+      'toBeSpecifiedColumnId',
       'inProgressColumnId',
       'toBeReviewedColumnId',
       'toBeTestedColumnId',
@@ -108,7 +103,6 @@ module.exports = class IssueDataProvider {
     await Promise.all(vars.map(async (value) => {
       const cards = await this.githubApiClient.projects.listCards({column_id: this.config.kanbanColumns[value]});
       allCards.push(cards.data);
-
     }));
 
     this.allCardsCache = Array.prototype.concat.apply([], allCards);
@@ -123,12 +117,11 @@ module.exports = class IssueDataProvider {
    *
    * @returns {Promise<*>}
    */
-  async getData (issueId, owner, repo) {
-
+  async getData(issueId, owner, repo) {
     const {data} = await this.githubApiClient.issues.get({
       issue_number: issueId,
-      owner: owner,
-      repo: repo,
+      owner,
+      repo,
     });
 
     return data;
@@ -141,7 +134,7 @@ module.exports = class IssueDataProvider {
    *
    * @returns {string}
    */
-  parseCardUrlForId (url) {
+  parseCardUrlForId(url) {
     return url.substr(url.lastIndexOf('/') + 1);
   }
 };

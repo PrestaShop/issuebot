@@ -26,18 +26,18 @@ const Rule = require('../rule');
 const Utils = require('./Utils');
 
 module.exports = class IssueRuleFinder {
-
-    /**
+  /**
      * @param config
      * @param {IssueDataProvider} issueDataProvider
      * @param {Logger} logger
      */
-    constructor(config, issueDataProvider, logger) {
-        this.config = config;
-        this.logger = logger;
-        this.issueDataProvider = issueDataProvider;
-    }
-    /**
+  constructor(config, issueDataProvider, logger) {
+    this.config = config;
+    this.logger = logger;
+    this.issueDataProvider = issueDataProvider;
+  }
+
+  /**
      * Try to find whether webhook context matches an Issue rule requirements.
      *
      * @param {Context} context
@@ -46,83 +46,84 @@ module.exports = class IssueRuleFinder {
      *
      * @public
      */
-    async findRules (context) {
+  async findRules(context) {
+    const rules = [];
+    if (Utils.contextHasAction(context, 'milestoned')) {
+      const milestone = context.payload.issue.milestone.title;
 
-        const rules = [];
-        if (Utils.contextHasAction(context, 'milestoned')) {
-            const milestone = context.payload.issue.milestone.title;
+      if ((milestone === this.config.milestones.next_minor_milestone)
+                || (milestone === this.config.milestones.next_patch_milestone)) {
+        const issueId = context.payload.issue.number;
+        const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
+        const isIssueInKanban = await isIssueInKanbanPromise;
 
-            if ((milestone === this.config.milestones.next_minor_milestone) ||
-                (milestone === this.config.milestones.next_patch_milestone)) {
-                const issueId = context.payload.issue.number;
-                const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
-                const isIssueInKanban = await isIssueInKanbanPromise;
-
-                if (isIssueInKanban === false) {
-                    rules.push(Rule.A1);
-                }
-            }
+        if (isIssueInKanban === false) {
+          rules.push(Rule.A1);
         }
-
-        if (Utils.contextHasAction(context, 'demilestoned')) {
-            const issueId = context.payload.issue.number;
-            const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
-            const isIssueInKanban = await isIssueInKanbanPromise;
-
-            if (isIssueInKanban === true) {
-                rules.push(Rule.B2);
-            }
-        }
-
-        if (Utils.contextHasAction(context, 'labeled')) {
-            const issue = context.payload.issue;
-            const issueId = issue.number;
-
-            rules.push(Rule.D1);
-
-            if (issue.state === 'closed' && context.payload.label.name !== this.config.labels.fixed.name) {
-                rules.push(Rule.D4);
-            }
-
-            if (context.payload.label.name === this.config.labels.toBeMerged.name) {
-                rules.push(Rule.L2);
-            }
-
-            const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
-            const getCardInKanban = await getCardInKanbanPromise;
-
-            if (getCardInKanban !== null) {
-                const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
-
-                if (this.config.kanbanColumns.toDoColumnId !== cardColumnId && Utils.issueHasLabel(issue, this.config.labels.todo.name)) {
-                    rules.push(Rule.C1);
-                }
-            }
-        }
-
-        if (Utils.contextHasAction(context, 'closed')) {
-            rules.push(Rule.D3);
-
-            const issueId = context.payload.issue.number;
-            const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
-            const getCardInKanban = await getCardInKanbanPromise;
-
-            if (getCardInKanban !== null) {
-                const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
-
-                if (this.config.kanbanColumns.doneColumnId !== cardColumnId) {
-                    rules.push(Rule.C2);
-                }
-            }
-        }
-
-        if (Utils.contextHasAction(context, 'reopened')) {
-            rules.push(Rule.D2);
-        }
-
-        this.logger.info('Rules are : ' + rules.join(', '))
-
-        return rules;
+      }
     }
 
-}
+    if (Utils.contextHasAction(context, 'demilestoned')) {
+      const issueId = context.payload.issue.number;
+      const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
+      const isIssueInKanban = await isIssueInKanbanPromise;
+
+      if (isIssueInKanban === true) {
+        rules.push(Rule.B2);
+      }
+    }
+
+    if (Utils.contextHasAction(context, 'labeled')) {
+      const {issue} = context.payload;
+      const issueId = issue.number;
+
+      rules.push(Rule.D1);
+
+      if (issue.state === 'closed' && context.payload.label.name !== this.config.labels.fixed.name) {
+        rules.push(Rule.D4);
+      }
+
+      if (context.payload.label.name === this.config.labels.toBeMerged.name) {
+        rules.push(Rule.L2);
+      }
+
+      const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
+      const getCardInKanban = await getCardInKanbanPromise;
+
+      if (getCardInKanban !== null) {
+        const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url), 10);
+
+        if (
+          this.config.kanbanColumns.toDoColumnId !== cardColumnId
+            && Utils.issueHasLabel(issue, this.config.labels.todo.name)
+        ) {
+          rules.push(Rule.C1);
+        }
+      }
+    }
+
+    if (Utils.contextHasAction(context, 'closed')) {
+      rules.push(Rule.D3);
+
+      const issueId = context.payload.issue.number;
+      const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
+      const getCardInKanban = await getCardInKanbanPromise;
+
+      if (getCardInKanban !== null) {
+        const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url), 10);
+
+        if (this.config.kanbanColumns.doneColumnId !== cardColumnId) {
+          rules.push(Rule.C2);
+        }
+      }
+    }
+
+    if (Utils.contextHasAction(context, 'reopened')) {
+      rules.push(Rule.D2);
+    }
+
+    this.logger.info(`Rules are : ${rules.join(', ')}`);
+
+    return rules;
+  }
+};

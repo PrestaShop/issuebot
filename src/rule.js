@@ -210,7 +210,7 @@ const Rules = {
   /*
    * Scenario: label/update Issue moved in “Done” column
    * WHEN an Issue is moved into the column “Done”
-   * AND add the label “Fixed” to the Issue
+   * THEN add the label “Fixed” to the Issue
    * AND close the Issue if it is open
    * AND remove assignee if there is one
    */
@@ -221,7 +221,7 @@ const Rules = {
    * AND add the label “TBS” to the Issue
    * AND remove assignee if there is one
    */
-  L2: 'L2'
+  L2: 'L2',
   /*
    * Scenario: label/update Issue moved in “TBS” column
    * WHEN an Issue is moved into the column “TBS”

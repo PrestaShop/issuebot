@@ -23,13 +23,12 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 module.exports = class ProjectCardDataProvider {
-
   /**
    * @param config
    * @param {import('probot').GitHubApi} githubApiClient
    * @param {Logger} logger
    */
-  constructor (config, githubApiClient, logger) {
+  constructor(config, githubApiClient, logger) {
     this.config = config;
     this.githubApiClient = githubApiClient;
     this.logger = logger;
@@ -40,13 +39,12 @@ module.exports = class ProjectCardDataProvider {
    *
    * @returns {int|null}
    */
-  async getRelatedIssueId (projectCard) {
-
-    if (projectCard.hasOwnProperty('content_url') === false) {
-      return null;
+  async getRelatedIssueId(projectCard) {
+    if (Object.prototype.hasOwnProperty.call(projectCard, 'content_url')) {
+      return parseInt(this.parseIssueUrlForId(projectCard.content_url), 10);
     }
 
-    return parseInt(this.parseIssueUrlForId(projectCard.content_url));
+    return null;
   }
 
   /**
@@ -56,7 +54,7 @@ module.exports = class ProjectCardDataProvider {
    *
    * @returns {string}
    */
-  parseIssueUrlForId (url) {
+  parseIssueUrlForId(url) {
     return url.substr(url.lastIndexOf('/') + 1);
   }
 };

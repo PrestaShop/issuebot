@@ -2,7 +2,7 @@ const {Application} = require('probot');
 const myProbotApp = require('..');
 const TestUtils = require('./test-utils');
 
-let testUtils = new TestUtils();
+const testUtils = new TestUtils();
 
 describe('PrestaShop Kanban automation app test: add issues to Kanban', () => {
   let app;
@@ -13,26 +13,26 @@ describe('PrestaShop Kanban automation app test: add issues to Kanban', () => {
   });
 
   test('scenario A1: success', async () => {
-    let webhookPayload = testUtils.getDefaultPayloadMock('milestoned', 2);
-    let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
+    const webhookPayload = testUtils.getDefaultPayloadMock('milestoned', 2);
+    const githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     app.auth = () => Promise.resolve(githubApiClientMock);
 
     await app.receive({
       name: 'issues',
-      payload: webhookPayload
+      payload: webhookPayload,
     });
 
     expect(githubApiClientMock.projects.createProjectCard).toHaveBeenCalledWith({
       column_id: 3311230,
       content_id: 12345,
-      content_type: 'Issue'
+      content_type: 'Issue',
     });
   });
 
   test('scenario A1: issue already exists in kanban', async () => {
-    let webhookPayload = testUtils.getDefaultPayloadMock('milestoned', 2);
-    let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
+    const webhookPayload = testUtils.getDefaultPayloadMock('milestoned', 2);
+    const githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     // mock customization
     githubApiClientMock.projects.getProjectCards = jest.fn().mockReturnValue(Promise.resolve({
@@ -47,24 +47,24 @@ describe('PrestaShop Kanban automation app test: add issues to Kanban', () => {
 
     await app.receive({
       name: 'issues',
-      payload: webhookPayload
+      payload: webhookPayload,
     });
 
     expect(githubApiClientMock.projects.createProjectCard).not.toHaveBeenCalled();
   });
 
   test('scenario A1: bad milestone', async () => {
-    let webhookPayload = testUtils.getDefaultPayloadMock('milestoned', 2);
-    let githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
+    const webhookPayload = testUtils.getDefaultPayloadMock('milestoned', 2);
+    const githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     // mock customization
-    webhookPayload.issue.milestone = {'title': 'a'};
+    webhookPayload.issue.milestone = {title: 'a'};
 
     app.auth = () => Promise.resolve(githubApiClientMock);
 
     await app.receive({
       name: 'issues',
-      payload: webhookPayload
+      payload: webhookPayload,
     });
 
     expect(githubApiClientMock.projects.createProjectCard).not.toHaveBeenCalled();

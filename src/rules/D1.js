@@ -25,21 +25,20 @@
 const Rule = require('./Rule.js');
 
 module.exports = class D1 extends Rule {
-
-    /**
+  /**
      * @param {Context} context
      *
      * @public
      */
-    async apply(context) {
-        if (this.isAutomaticLabel(context.payload.label)) {
-            // Remove all other automatic labels except the one added
-            this.removeIssueAutomaticLabels(
-                context.payload.issue,
-                context.payload.repository.owner.login,
-                context.payload.repository.name,
-                context.payload.label
-            );
-        }
+  async apply(context) {
+    if (this.isAutomaticLabel(context.payload.label)) {
+      // Remove all other automatic labels except the one added
+      this.removeIssueAutomaticLabels(
+        context.payload.issue,
+        context.payload.repository.owner.login,
+        context.payload.repository.name,
+        context.payload.label,
+      );
     }
+  }
 };

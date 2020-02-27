@@ -23,25 +23,40 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 const Rule = require('./Rule.js');
+const Utils = require('../ruleFinder/Utils');
 
 module.exports = class D2 extends Rule {
-
-    /**
+  /**
      * @param {Context} context
      *
      * @public
      */
-    async apply(context) {
-        if (!this.issueHasAutomaticLabel(context.payload.issue)) {
-            const issueId = context.payload.issue.number;
-            this.logger.info(`[Rule Applier] D2 - Add label ${this.config.labels.todo.name}`);
+  async apply(context) {
+    const issueId = context.payload.issue.number;
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.repository.name;
 
-            await this.githubApiClient.issues.addLabels({
-                issue_number: issueId,
-                owner: context.payload.repository.owner.login,
-                repo: context.payload.repository.name,
-                labels: {labels: [this.config.labels.todo.name]}
-            })
-        }
+    if (Utils.issueHasLabel(context.payload.issue, this.config.labels.fixed.name)) {
+      this.logger.info(`[Rule Applier] D2 - Remove label ${this.config.labels.fixed.name}`);
+      await this.githubApiClient.issues.removeLabel({
+        issue_number: issueId,
+        owner,
+        repo,
+        name: this.config.labels.fixed.name,
+      });
     }
+
+    const issue = await this.issueDataProvider.getData(issueId, owner, repo);
+
+    if (!this.issueHasAutomaticLabel(issue)) {
+      this.logger.info(`[Rule Applier] D2 - Add label ${this.config.labels.todo.name}`);
+
+      await this.githubApiClient.issues.addLabels({
+        issue_number: issueId,
+        owner,
+        repo,
+        labels: {labels: [this.config.labels.todo.name]},
+      });
+    }
+  }
 };

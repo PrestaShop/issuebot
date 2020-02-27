@@ -26,46 +26,45 @@ const Rule = require('./Rule.js');
 const Utils = require('../ruleFinder/Utils');
 
 module.exports = class H1 extends Rule {
-
-    /**
+  /**
      * @param {Context} context
      *
      * @public
      */
-    async apply(context) {
-        const referencedIssueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card);
+  async apply(context) {
+    const referencedIssueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card);
 
-        const referencedIssue = await this.issueDataProvider.getData(
-            referencedIssueId,
-            context.payload.repository.owner.login,
-            context.payload.repository.name
-        );
+    const referencedIssue = await this.issueDataProvider.getData(
+      referencedIssueId,
+      context.payload.repository.owner.login,
+      context.payload.repository.name,
+    );
 
-        // Re-open the issue if closed
-        if (referencedIssue.state === 'closed') {
-            await this.githubApiClient.issues.update({
-                issue_number: referencedIssueId,
-                owner: context.payload.repository.owner.login,
-                repo: context.payload.repository.name,
-                state: 'open'
-            })
-        }
-
-        // Remove automatic labels
-        this.removeIssueAutomaticLabels(
-            referencedIssue,
-            context.payload.repository.owner.login,
-            context.payload.repository.name
-        );
-
-        // Add In-Progress label
-        if (!Utils.issueHasLabel(referencedIssue, this.config.labels.inProgress.name)) {
-            await this.githubApiClient.issues.addLabels({
-                issue_number: referencedIssueId,
-                owner: context.payload.repository.owner.login,
-                repo: context.payload.repository.name,
-                labels: { labels: [this.config.labels.inProgress.name] }
-            })
-        }
+    // Re-open the issue if closed
+    if (referencedIssue.state === 'closed') {
+      await this.githubApiClient.issues.update({
+        issue_number: referencedIssueId,
+        owner: context.payload.repository.owner.login,
+        repo: context.payload.repository.name,
+        state: 'open',
+      });
     }
+
+    // Remove automatic labels
+    this.removeIssueAutomaticLabels(
+      referencedIssue,
+      context.payload.repository.owner.login,
+      context.payload.repository.name,
+    );
+
+    // Add In-Progress label
+    if (!Utils.issueHasLabel(referencedIssue, this.config.labels.inProgress.name)) {
+      await this.githubApiClient.issues.addLabels({
+        issue_number: referencedIssueId,
+        owner: context.payload.repository.owner.login,
+        repo: context.payload.repository.name,
+        labels: {labels: [this.config.labels.inProgress.name]},
+      });
+    }
+  }
 };

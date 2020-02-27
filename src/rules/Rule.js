@@ -24,8 +24,7 @@
  */
 
 module.exports = class Rule {
-
-    /**
+  /**
      * @param config
      * @param {IssueDataProvider} issueDataProvider
      * @param {PullRequestDataProvider} pullRequestDataProvider
@@ -33,78 +32,74 @@ module.exports = class Rule {
      * @param {import('probot').GitHubApi} githubApiClient
      * @param {Logger} logger
      */
-    constructor(config, issueDataProvider, pullRequestDataProvider, projectCardDataProvider, githubApiClient, logger) {
-        this.config = config;
-        this.issueDataProvider = issueDataProvider;
-        this.pullRequestDataProvider = pullRequestDataProvider;
-        this.projectCardDataProvider = projectCardDataProvider;
-        this.githubApiClient = githubApiClient;
-        this.logger = logger;
+  constructor(config, issueDataProvider, pullRequestDataProvider, projectCardDataProvider, githubApiClient, logger) {
+    this.config = config;
+    this.issueDataProvider = issueDataProvider;
+    this.pullRequestDataProvider = pullRequestDataProvider;
+    this.projectCardDataProvider = projectCardDataProvider;
+    this.githubApiClient = githubApiClient;
+    this.logger = logger;
+  }
+
+  issueHasAutomaticLabel(issue) {
+    if (Object.prototype.hasOwnProperty.call(issue, 'labels') === false) {
+      return false;
     }
 
-    issueHasAutomaticLabel(issue) {
-        if (issue.hasOwnProperty('labels') === false) {
-            return false;
-        }
+    const issueLabels = issue.labels;
 
-        const issueLabels = issue.labels;
-
-        for (let index = 0; index < issueLabels.length; index++) {
-
-            const currentLabel = issueLabels[index];
-            if (currentLabel.hasOwnProperty('name') === false) {
-                continue;
-            }
-            if (this.isAutomaticLabel(currentLabel)) {
-                return true;
-            }
-        }
-
-        return false;
+    for (let index = 0; index < issueLabels.length; index += 1) {
+      const currentLabel = issueLabels[index];
+      if (Object.prototype.hasOwnProperty.call(currentLabel, 'name') && this.isAutomaticLabel(currentLabel)) {
+        return true;
+      }
     }
 
-    isAutomaticLabel(label) {
-        const automaticLabels = Object.values(this.config.labels).filter(function (el) {
-            return el.automatic === true;
+    return false;
+  }
+
+  isAutomaticLabel(label) {
+    const automaticLabels = Object.values(this.config.labels).filter((el) => el.automatic === true);
+    for (let i = 0; i < automaticLabels.length; i += 1) {
+      if (automaticLabels[i].name === label.name) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async moveCardTo(issueId, columnId) {
+    this.logger.info(`Moving issue #${issueId} card in Kanban`);
+
+    const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
+    const relatedCard = await getRelatedCardPromise;
+
+    await this.githubApiClient.projects.moveCard({
+      card_id: relatedCard.id,
+      position: 'bottom',
+      column_id: columnId,
+    });
+  }
+
+  async removeIssueAutomaticLabels(issue, owner, repo, newLabel = null) {
+    const issueId = issue.number;
+
+    for (let index = 0; index < issue.labels.length; index += 1) {
+      const label = issue.labels[index];
+
+      if (this.isAutomaticLabel(label)) {
+        if (newLabel && (newLabel.id === label.id || newLabel.name === label.name)) {
+          return;
+        }
+        this.logger.info(`[Rule Applier] Remove label ${label.name}`);
+
+        await this.githubApiClient.issues.removeLabel({
+          issue_number: issueId,
+          owner,
+          repo,
+          name: label.name,
         });
-        for (let i = 0; i < automaticLabels.length; i++) {
-            if (automaticLabels[i].name === label.name) {
-                return true;
-            }
-        }
-        return false;
+      }
     }
-
-    async moveCardTo(issueId, columnId) {
-        this.logger.info(`Moving issue #${issueId} card in Kanban`);
-
-        const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
-        const relatedCard = await getRelatedCardPromise;
-
-        this.githubApiClient.projects.moveCard({
-            card_id: relatedCard.id,
-            position: 'bottom',
-            column_id: columnId
-        });
-    }
-
-    async removeIssueAutomaticLabels(issue, owner, repo, newLabel = null) {
-        const issueId = issue.number;
-
-        for (const label of issue.labels) {
-            if (this.isAutomaticLabel(label)) {
-                if (newLabel && (newLabel.id === label.id || newLabel.name === label.name)) {
-                    continue;
-                }
-                this.logger.info(`[Rule Applier] Remove label ${label.name}`);
-
-                await this.githubApiClient.issues.removeLabel({
-                    issue_number: issueId,
-                    owner: owner,
-                    repo: repo,
-                    name: label.name
-                })
-            }
-        }
-    }
+  }
 };

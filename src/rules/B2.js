@@ -25,18 +25,17 @@
 const Rule = require('./Rule.js');
 
 module.exports = class B2 extends Rule {
-
-    /**
+  /**
      * @param {Context} context
      *
      * @public
      */
-    async apply(context) {
-        const issueId = context.payload.issue.number;
+  async apply(context) {
+    const issueId = context.payload.issue.number;
 
-        const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
-        const relatedCard = await getRelatedCardPromise;
+    const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
+    const relatedCard = await getRelatedCardPromise;
 
-        this.githubApiClient.projects.deleteCard({card_id: relatedCard.id});
-    }
-}
+    await this.githubApiClient.projects.deleteCard({card_id: relatedCard.id});
+  }
+};

@@ -26,20 +26,18 @@ const Rule = require('../rule');
 const Utils = require('./Utils');
 
 module.exports = class ProjectCardRuleFinder {
-
-
-    /**
+  /**
      * @param config
      * @param {ProjectCardDataProvider} projectCardDataProvider
      * @param {Logger} logger
      */
-    constructor(config, projectCardDataProvider, logger) {
-        this.config = config;
-        this.logger = logger;
-        this.projectCardDataProvider = projectCardDataProvider;
-    }
+  constructor(config, projectCardDataProvider, logger) {
+    this.config = config;
+    this.logger = logger;
+    this.projectCardDataProvider = projectCardDataProvider;
+  }
 
-    /**
+  /**
      * Try to find whether webhook context matches an ProjectCard rule requirements.
      *
      * @param {Context} context
@@ -48,33 +46,37 @@ module.exports = class ProjectCardRuleFinder {
      *
      * @public
      */
-    async findRules (context) {
-
-        const rules = [];
-        if (Utils.contextHasAction(context, 'created')) {
-            if (this.config.kanbanColumns.toDoColumnId === context.payload.project_card.column_id) {
-                rules.push(Rule.G2);
-            }
-            if (this.config.kanbanColumns.inProgressColumnId === context.payload.project_card.column_id) {
-                rules.push(Rule.H1);
-            }
-        }
-
-        if (Utils.contextHasAction(context, 'moved')) {
-            if (this.config.kanbanColumns.toBeTestedColumnId === context.payload.project_card.column_id) {
-                rules.push(Rule.J3);
-            }
-            if (this.config.kanbanColumns.doneColumnId === context.payload.project_card.column_id) {
-                rules.push(Rule.K1);
-            }
-            if (this.config.kanbanColumns.toBeSpecifiedColumnId === context.payload.project_card.column_id) {
-                rules.push(Rule.L1);
-            }
-        }
-
-        this.logger.info('Rules are : ' + rules.join(', '))
-
-        return rules;
+  async findRules(context) {
+    const rules = [];
+    if (Utils.contextHasAction(context, 'created')) {
+      if (this.config.kanbanColumns.toDoColumnId === context.payload.project_card.column_id) {
+        rules.push(Rule.G2);
+      }
+      if (this.config.kanbanColumns.inProgressColumnId === context.payload.project_card.column_id) {
+        rules.push(Rule.H1);
+      }
     }
 
+    if (Utils.contextHasAction(context, 'moved')) {
+      if (this.config.kanbanColumns.toDoColumnId === context.payload.project_card.column_id) {
+        rules.push(Rule.G2);
+      }
+      if (this.config.kanbanColumns.inProgressColumnId === context.payload.project_card.column_id) {
+        rules.push(Rule.H1);
+      }
+      if (this.config.kanbanColumns.toBeSpecifiedColumnId === context.payload.project_card.column_id) {
+        rules.push(Rule.L1);
+      }
+      if (this.config.kanbanColumns.toBeTestedColumnId === context.payload.project_card.column_id) {
+        rules.push(Rule.J3);
+      }
+      if (this.config.kanbanColumns.doneColumnId === context.payload.project_card.column_id) {
+        rules.push(Rule.K1);
+      }
+    }
+
+    this.logger.info(`Rules are : ${rules.join(', ')}`);
+
+    return rules;
+  }
 };

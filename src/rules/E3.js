@@ -25,32 +25,42 @@
 const Rule = require('./Rule.js');
 
 module.exports = class E3 extends Rule {
+  /**
+   * @param {Context} context
+   *
+   * @public
+   */
+  async apply(context) {
+    const pullRequestId = context.payload.pull_request.number;
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.repository.name;
 
-    /**
-     * @param {Context} context
-     *
-     * @public
-     */
-    async apply(context) {
-        const pullRequestId = context.payload.pull_request.number;
+    const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(
+      pullRequestId,
+      owner,
+      repo,
+    );
 
-        const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(
-            pullRequestId,
-            context.payload.repository.owner.login,
-            context.payload.repository.name
-        );
+    if (referencedIssuesIds.length > 0) {
+      for (let index = 0; index < referencedIssuesIds.length; index += 1) {
+        const referencedIssueId = referencedIssuesIds[index];
 
-        if (referencedIssuesIds.length > 0) {
-            for (const referencedIssueId of referencedIssuesIds) {
-                await this.moveCardTo(referencedIssueId, this.config.kanbanColumns.toBeTestedColumnId);
+        const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
 
-                await this.githubApiClient.issues.removeAssignees({
-                    issue_number: referencedIssueId,
-                    owner: context.payload.repository.owner.login,
-                    repo: context.payload.repository.name,
-                    assignees: context.payload.pull_request.user.login
-                })
-            }
-        }
+        // Remove automatic labels
+        this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
+
+        // Move card in toBeTested column
+        await this.moveCardTo(referencedIssueId, this.config.kanbanColumns.toBeTestedColumnId);
+
+        // Remove the previous assignee
+        await this.githubApiClient.issues.removeAssignees({
+          issue_number: referencedIssueId,
+          owner,
+          repo,
+          assignees: context.payload.pull_request.user.login,
+        });
+      }
     }
+  }
 };
