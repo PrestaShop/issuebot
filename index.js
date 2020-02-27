@@ -28,13 +28,18 @@ const IssueDataProvider = require('./src/issue-data-provider');
 const PullRequestDataProvider = require('./src/pull-request-data-provider');
 const ProjectCardDataProvider = require('./src/project-card-data-provider');
 const RuleApplier = require('./src/rule-applier');
+let config = require('./config');
+
+if (process.env.NODE_ENV === 'test') {
+  // eslint-disable-next-line global-require
+  config = require('./tests/config');
+}
 
 /**
  * This is the main entrypoint to your Probot app
  * @param {import('probot').Application} app
  */
 module.exports = (app) => {
-  // Your code here
   app.log('IssueBot app loaded!');
 
   app.on('issues.opened', async (context) => {
@@ -43,37 +48,6 @@ module.exports = (app) => {
   });
 
   app.on('*', async (context) => {
-    // @todo: parse this config from a YAML file
-    const config = {
-      nbRequiredApprovals: 2,
-      kanbanColumns: {
-        notReadyColumnId: 8032025,
-        backlogColumnId: 8032027,
-        toBeSpecifiedColumnId: 8032029,
-        toDoColumnId: 8032010,
-        inProgressColumnId: 8032011,
-        toBeReviewedColumnId: 8032031,
-        toBeTestedColumnId: 8032032,
-        toBerMergedColumnId: 8032037,
-        doneColumnId: 8032012,
-      },
-      labels: {
-        todo: {name: 'To Do', automatic: true},
-        inProgress: {name: 'WIP', automatic: false},
-        toBeReproduced: {name: 'TBR', automatic: true},
-        toBeSpecified: {name: 'TBS', automatic: true},
-        needsMoreInfo: {name: 'NMI', automatic: true},
-        toBeTested: {name: 'waiting for QA', automatic: false},
-        toBeMerged: {name: 'QA ✔️', automatic: false},
-        waitingAuthor: {name: 'waiting for author️', automatic: false},
-        fixed: {name: 'Fixed', automatic: true},
-      },
-      milestones: {
-        next_patch_milestone: '1.7.7.1',
-        next_minor_milestone: '1.7.8',
-      },
-    };
-
     const issueDataProvider = new IssueDataProvider(config, context.github, context.log);
     const pullRequestDataProvider = new PullRequestDataProvider(config, context.github, context.log);
     const projectCardDataProvider = new ProjectCardDataProvider(config, context.github, context.log);

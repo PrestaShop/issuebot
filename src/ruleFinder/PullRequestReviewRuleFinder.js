@@ -47,7 +47,6 @@ module.exports = class PullRequestReviewRuleFinder {
   async findRules(context) {
     const rules = [];
     if (Utils.contextHasAction(context, 'submitted')) {
-      this.logger.info(context.payload.review);
       if (context.payload.review.state === 'changes_requested') {
         rules.push(Rule.F1);
       }

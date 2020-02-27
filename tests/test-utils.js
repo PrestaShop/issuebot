@@ -22,6 +22,7 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+const config = require('./config');
 
 module.exports = class TestUtils {
   /**
@@ -31,12 +32,20 @@ module.exports = class TestUtils {
   getDefaultPayloadMock(action, issueNumber) {
     return {
       action,
+      label: {
+        name: config.labels.toBeMerged.name,
+      },
+      repository: {
+        owner: {
+          login: 'toto'
+        }
+      },
       issue: {
         id: 12345,
         node_id: 'abcd',
         number: issueNumber,
         title: 'An issue',
-        milestone: {title: '1.7.4.3'},
+        milestone: {title: config.milestones.next_patch_milestone},
         labels: [
           {
             id: 789,
@@ -45,7 +54,8 @@ module.exports = class TestUtils {
             name: 'todo',
             color: 'eadd85',
             default: false,
-          }],
+          }
+        ],
       },
     };
   }
@@ -53,7 +63,7 @@ module.exports = class TestUtils {
   getDefaultGithubAPIClientMock() {
     return {
       projects: {
-        getProjectCards: jest.fn().mockReturnValue(Promise.resolve({
+        listCards: jest.fn().mockReturnValue(Promise.resolve({
           data:
             [
               {
@@ -68,10 +78,24 @@ module.exports = class TestUtils {
               },
             ],
         })),
-        createProjectCard: jest.fn().mockReturnValue(Promise.resolve({})),
-        deleteProjectCard: jest.fn().mockReturnValue(Promise.resolve({})),
-        moveProjectCard: jest.fn().mockReturnValue(Promise.resolve({})),
+        createCard: jest.fn().mockReturnValue(Promise.resolve({})),
+        deleteCard: jest.fn().mockReturnValue(Promise.resolve({})),
+        moveCard: jest.fn().mockReturnValue(Promise.resolve({})),
       },
+      issues: {
+        get: jest.fn().mockReturnValue(Promise.resolve({
+          data: {
+            user: {
+              login: 'toto',
+            },
+            labels: [
+
+            ]
+          }
+        })),
+        addLabels: jest.fn().mockReturnValue(Promise.resolve({})),
+        removeAssignees: jest.fn().mockReturnValue(Promise.resolve({})),
+      }
     };
   }
 };

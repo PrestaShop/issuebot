@@ -18,7 +18,7 @@
     "start": "probot run ./index.js",
     "lint": "eslint -c .eslintrc.js --ext .js .",
     "lint-fix": "eslint -c .eslintrc.js --ext .js . --fix",
-    "test": "jest && standard",
+    "test": "jest",
     "test:watch": "jest --watch --notify --notifyMode=change --coverage"
   },
   "dependencies": {

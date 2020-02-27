@@ -36,7 +36,7 @@ module.exports = class L2 extends Rule {
     const repo = context.payload.repository.name;
 
     // Remove automatic labels
-    this.removeIssueAutomaticLabels(issueId, owner, repo, this.config.labels.toBeMerged);
+    this.removeIssueAutomaticLabels(context.payload.issue, owner, repo, this.config.labels.toBeMerged);
 
     const referencedIssue = await this.issueDataProvider.getData(issueId, owner, repo);
     // Remove the issue assignee

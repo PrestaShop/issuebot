@@ -1,6 +1,7 @@
 const {Application} = require('probot');
 const myProbotApp = require('..');
 const TestUtils = require('./test-utils');
+const config = require('./config');
 
 const testUtils = new TestUtils();
 
@@ -23,7 +24,7 @@ describe('PrestaShop Kanban automation app test: removes issues from Kanban', ()
       payload: webhookPayload,
     });
 
-    expect(githubApiClientMock.projects.deleteProjectCard).toHaveBeenCalledWith({card_id: 'a'});
+    expect(githubApiClientMock.projects.deleteCard).toHaveBeenCalledWith({card_id: 'a'});
   });
 
   test('scenario B2: issue is not in Kanban', async () => {
@@ -37,6 +38,6 @@ describe('PrestaShop Kanban automation app test: removes issues from Kanban', ()
       payload: webhookPayload,
     });
 
-    expect(githubApiClientMock.projects.deleteProjectCard).not.toHaveBeenCalled();
+    expect(githubApiClientMock.projects.deleteCard).not.toHaveBeenCalled();
   });
 });

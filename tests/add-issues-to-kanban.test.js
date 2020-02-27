@@ -1,6 +1,7 @@
 const {Application} = require('probot');
 const myProbotApp = require('..');
 const TestUtils = require('./test-utils');
+const config = require('./config');
 
 const testUtils = new TestUtils();
 
@@ -23,8 +24,8 @@ describe('PrestaShop Kanban automation app test: add issues to Kanban', () => {
       payload: webhookPayload,
     });
 
-    expect(githubApiClientMock.projects.createProjectCard).toHaveBeenCalledWith({
-      column_id: 3311230,
+    expect(githubApiClientMock.projects.createCard).toHaveBeenCalledWith({
+      column_id: config.kanbanColumns.toDoColumnId,
       content_id: 12345,
       content_type: 'Issue',
     });
@@ -35,7 +36,7 @@ describe('PrestaShop Kanban automation app test: add issues to Kanban', () => {
     const githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     // mock customization
-    githubApiClientMock.projects.getProjectCards = jest.fn().mockReturnValue(Promise.resolve({
+    githubApiClientMock.projects.listCards = jest.fn().mockReturnValue(Promise.resolve({
       data:
         [
           {content_url: 'https://github.com/prestashop/test-project-bot/issues/2', id: 'z'},
@@ -50,7 +51,7 @@ describe('PrestaShop Kanban automation app test: add issues to Kanban', () => {
       payload: webhookPayload,
     });
 
-    expect(githubApiClientMock.projects.createProjectCard).not.toHaveBeenCalled();
+    expect(githubApiClientMock.projects.createCard).not.toHaveBeenCalled();
   });
 
   test('scenario A1: bad milestone', async () => {
@@ -67,6 +68,6 @@ describe('PrestaShop Kanban automation app test: add issues to Kanban', () => {
       payload: webhookPayload,
     });
 
-    expect(githubApiClientMock.projects.createProjectCard).not.toHaveBeenCalled();
+    expect(githubApiClientMock.projects.createCard).not.toHaveBeenCalled();
   });
 });

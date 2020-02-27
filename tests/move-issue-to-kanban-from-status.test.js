@@ -3,6 +3,7 @@ const myProbotApp = require('..');
 const TestUtils = require('./test-utils');
 
 const testUtils = new TestUtils();
+const config = require('./config');
 
 describe('PrestaShop Kanban automation app test: move issues in Kanban from status', () => {
   let app;
@@ -23,10 +24,10 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
       payload: webhookPayload,
     });
 
-    expect(githubApiClientMock.projects.moveProjectCard).toHaveBeenCalledWith({
+    expect(githubApiClientMock.projects.moveCard).toHaveBeenCalledWith({
       card_id: 'z',
       position: 'bottom',
-      column_id: 3311230,
+      column_id: config.kanbanColumns.toDoColumnId,
     });
   });
 
@@ -51,7 +52,7 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
       payload: webhookPayload,
     });
 
-    expect(githubApiClientMock.projects.moveProjectCard).not.toHaveBeenCalled();
+    expect(githubApiClientMock.projects.moveCard).not.toHaveBeenCalled();
   });
 
   test('scenario C1: not the todo label', async () => {
@@ -75,7 +76,7 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
       payload: webhookPayload,
     });
 
-    expect(githubApiClientMock.projects.moveProjectCard).not.toHaveBeenCalled();
+    expect(githubApiClientMock.projects.moveCard).not.toHaveBeenCalled();
   });
 
   test('scenario C2: success', async () => {
@@ -89,10 +90,10 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
       payload: webhookPayload,
     });
 
-    expect(githubApiClientMock.projects.moveProjectCard).toHaveBeenCalledWith({
+    expect(githubApiClientMock.projects.moveCard).toHaveBeenCalledWith({
       card_id: 'z',
       position: 'bottom',
-      column_id: 3329348,
+      column_id: config.kanbanColumns.doneColumnId,
     });
   });
 
@@ -101,7 +102,7 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
     const githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     // mock customization
-    githubApiClientMock.projects.getProjectCards = jest.fn().mockReturnValue(Promise.resolve({
+    githubApiClientMock.projects.listCards = jest.fn().mockReturnValue(Promise.resolve({
       data:
         [{
           content_url: 'https://github.com/prestashop/test-project-bot/issues/8',
@@ -117,7 +118,7 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
       payload: webhookPayload,
     });
 
-    expect(githubApiClientMock.projects.moveProjectCard).not.toHaveBeenCalled();
+    expect(githubApiClientMock.projects.moveCard).not.toHaveBeenCalled();
   });
 
   test('scenario C2: not the kanban', async () => {
@@ -131,6 +132,6 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
       payload: webhookPayload,
     });
 
-    expect(githubApiClientMock.projects.moveProjectCard).not.toHaveBeenCalled();
+    expect(githubApiClientMock.projects.moveCard).not.toHaveBeenCalled();
   });
 });
