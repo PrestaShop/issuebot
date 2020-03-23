@@ -32,38 +32,39 @@ module.exports = class E5 extends Rule {
      */
   async apply(context) {
     const pullRequestId = context.payload.pull_request.number;
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.repository.name;
 
     const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(
       pullRequestId,
-      context.payload.repository.owner.login,
-      context.payload.repository.name,
+      owner,
+      repo,
     );
 
     if (referencedIssuesIds.length > 0) {
       for (let index = 0; index < referencedIssuesIds.length; index += 1) {
         const referencedIssueId = referencedIssuesIds[index];
+        const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
 
-        await this.moveCardTo(referencedIssueId, this.config.kanbanColumns.doneColumnId);
+        const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
+        const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
 
-        this.logger.info(`[Rule Applier] E5 - Add label ${this.config.labels.fixed.name}`);
+        await this.moveCardTo(referencedIssueId, projectConfig.kanbanColumns.doneColumnId);
+
+        this.logger.info(`[Rule Applier] E5 - Add label ${repositoryConfig.labels.fixed.name}`);
 
         await this.githubApiClient.issues.addLabels({
           issue_number: referencedIssueId,
-          owner: context.payload.repository.owner.login,
-          repo: context.payload.repository.name,
-          labels: {labels: [this.config.labels.fixed.name]},
+          owner,
+          repo,
+          labels: {labels: [repositoryConfig.labels.fixed.name]},
         });
 
-        const referencedIssue = await this.issueDataProvider.getData(
-          referencedIssueId,
-          context.payload.repository.owner.login,
-          context.payload.repository.name,
-        );
         // Remove the issue assignee
         await this.githubApiClient.issues.removeAssignees({
           issue_number: referencedIssueId,
-          owner: context.payload.repository.owner.login,
-          repo: context.payload.repository.name,
+          owner,
+          repo,
           assignees: referencedIssue.user.login,
         });
       }

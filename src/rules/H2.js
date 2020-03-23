@@ -33,12 +33,10 @@ module.exports = class H2 extends Rule {
      */
   async apply(context) {
     const pullRequestId = context.payload.pull_request.number;
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.repository.name;
 
-    const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(
-      pullRequestId,
-      context.payload.repository.owner.login,
-      context.payload.repository.name,
-    );
+    const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(pullRequestId, owner, repo);
 
     if (referencedIssuesIds.length > 0) {
       for (let index = 0; index < referencedIssuesIds.length; index += 1) {
@@ -48,27 +46,23 @@ module.exports = class H2 extends Rule {
         if (card) {
           const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(card.column_url), 10);
 
-          if (this.config.kanbanColumns.toDoColumnId === cardColumnId) {
-            await this.moveCardTo(referencedIssueId, this.config.kanbanColumns.inProgressColumnId);
+          const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+          const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
+          const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
 
-            const referencedIssue = await this.issueDataProvider.getData(
-              referencedIssueId,
-              context.payload.repository.owner.login,
-              context.payload.repository.name,
-            );
+          if (projectConfig.kanbanColumns.toDoColumnId === cardColumnId) {
+            await this.moveCardTo(referencedIssueId, projectConfig.kanbanColumns.inProgressColumnId);
+
             // Remove automatic labels
-            this.removeIssueAutomaticLabels(
-              referencedIssue,
-              context.payload.repository.owner.login,
-              context.payload.repository.name,
-            );
+            await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
+
             // Add In-Progress label
-            if (!Utils.issueHasLabel(referencedIssue, this.config.labels.inProgress.name)) {
+            if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.inProgress.name)) {
               await this.githubApiClient.issues.addLabels({
                 issue_number: referencedIssueId,
-                owner: context.payload.repository.owner.login,
-                repo: context.payload.repository.name,
-                labels: {labels: [this.config.labels.inProgress.name]},
+                owner,
+                repo,
+                labels: {labels: [repositoryConfig.labels.inProgress.name]},
               });
             }
           }

@@ -46,12 +46,13 @@ module.exports = class E3 extends Rule {
         const referencedIssueId = referencedIssuesIds[index];
 
         const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+        const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
 
         // Remove automatic labels
-        this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
+        await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
 
         // Move card in toBeTested column
-        await this.moveCardTo(referencedIssueId, this.config.kanbanColumns.toBeTestedColumnId);
+        await this.moveCardTo(referencedIssueId, projectConfig.kanbanColumns.toBeTestedColumnId);
 
         // Remove the previous assignee
         await this.githubApiClient.issues.removeAssignees({

@@ -48,6 +48,19 @@ module.exports = class ProjectCardDataProvider {
   }
 
   /**
+   * @param {int} projectCardId
+   *
+   * @returns {Promise<*>}
+   */
+  async getData(projectCardId) {
+    const {data} = await this.githubApiClient.projects.getCard({
+      card_id: projectCardId,
+    });
+
+    return data;
+  }
+
+  /**
    * Parse a github URL to extract Issue / Pull Request ID
    *
    * @param {string} url

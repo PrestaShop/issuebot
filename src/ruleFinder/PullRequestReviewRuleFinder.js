@@ -51,7 +51,17 @@ module.exports = class PullRequestReviewRuleFinder {
         rules.push(Rule.F1);
       }
       if (context.payload.review.state === 'approved') {
-        rules.push(Rule.J1);
+        const pullRequest = context.payload.pull_request;
+        const repositoryConfig = this.configProvider.getRepositoryConfigFromPullRequest(this.config, pullRequest);
+        const nbApprovals = await this.pullRequestDataProvider.getNumberOfApprovals(
+          pullRequest.number,
+          context.payload.repository.owner.login,
+          context.payload.repository.name,
+        );
+
+        if (nbApprovals >= repositoryConfig.nbRequiredApprovals) {
+          rules.push(Rule.J1);
+        }
       }
     }
 

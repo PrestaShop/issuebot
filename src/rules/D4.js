@@ -31,22 +31,27 @@ module.exports = class D4 extends Rule {
      * @public
      */
   async apply(context) {
-    if (this.isAutomaticLabel(context.payload.label)) {
-      const issueId = context.payload.issue.number;
+    const newLabel = context.payload.label;
+    const {issue} = context.payload;
 
-      for (let index = 0; index < context.payload.issue.labels.length; index += 1) {
-        const label = context.payload.issue.labels[index];
+    const repositoryConfig = this.getRepositoryConfigFromIssue(issue);
 
-        if (this.isAutomaticLabel(label)) {
-          this.logger.info(`[Rule Applier] D4 - Remove label ${label.name}`);
+    if (this.isAutomaticLabel(repositoryConfig, newLabel)) {
+      const issueId = parseInt(issue.number, 10);
 
-          await this.githubApiClient.issues.update({
-            issue_number: issueId,
-            owner: context.payload.repository.owner.login,
-            repo: context.payload.repository.name,
-            state: 'open',
-          });
-        }
+      // Reopen the issue
+      await this.githubApiClient.issues.update({
+        issue_number: issueId,
+        owner: context.payload.repository.owner.login,
+        repo: context.payload.repository.name,
+        state: 'open',
+      });
+
+
+      // Move to TBS column if new label is not To-Do => If its To-Do, it will be automatically moved to TO-DO column
+      if (newLabel !== repositoryConfig.labels.todo.name) {
+        const projectConfig = await this.getProjectConfigFromIssue(issue);
+        await this.moveCardTo(issueId, projectConfig.kanbanColumns.toBeSpecifiedColumnId);
       }
     }
   }

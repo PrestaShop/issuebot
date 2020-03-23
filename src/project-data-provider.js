@@ -22,18 +22,39 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-const Rule = require('./Rule.js');
-
-module.exports = class C2 extends Rule {
+module.exports = class ProjectDataProvider {
   /**
-     * @param {Context} context
-     *
-     * @public
-     */
-  async apply(context) {
-    const {issue} = context.payload;
-    const projectConfig = await this.getProjectConfigFromIssue(issue);
+   * @param config
+   * @param {import('probot').GitHubApi} githubApiClient
+   * @param {Logger} logger
+   */
+  constructor(config, githubApiClient, logger) {
+    this.config = config;
+    this.githubApiClient = githubApiClient;
+    this.logger = logger;
+  }
 
-    await this.moveCardTo(parseInt(issue.number, 10), projectConfig.kanbanColumns.doneColumnId);
+  /**
+   * @param {int} projectId
+   *
+   * @returns {Promise<*>}
+   */
+  async getData(projectId) {
+    const {data} = await this.githubApiClient.projects.get({
+      project_id: projectId,
+    });
+
+    return data;
+  }
+
+  /**
+   * Parse a github URL to extract Project ID
+   *
+   * @param {string} url
+   *
+   * @returns {string}
+   */
+  parseUrlForId(url) {
+    return url.substr(url.lastIndexOf('/') + 1);
   }
 };

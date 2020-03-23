@@ -31,9 +31,11 @@ module.exports = class D1 extends Rule {
      * @public
      */
   async apply(context) {
-    if (this.isAutomaticLabel(context.payload.label)) {
+    const repositoryConfig = this.getRepositoryConfigFromIssue(context.payload.issue);
+
+    if (this.isAutomaticLabel(repositoryConfig, context.payload.label)) {
       // Remove all other automatic labels except the one added
-      this.removeIssueAutomaticLabels(
+      await this.removeIssueAutomaticLabels(
         context.payload.issue,
         context.payload.repository.owner.login,
         context.payload.repository.name,

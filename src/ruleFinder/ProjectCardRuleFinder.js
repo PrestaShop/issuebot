@@ -28,13 +28,13 @@ const Utils = require('./Utils');
 module.exports = class ProjectCardRuleFinder {
   /**
      * @param config
-     * @param {ProjectCardDataProvider} projectCardDataProvider
+     * @param {ConfigProvider} configProvider
      * @param {Logger} logger
      */
-  constructor(config, projectCardDataProvider, logger) {
+  constructor(config, configProvider, logger) {
     this.config = config;
+    this.configProvider = configProvider;
     this.logger = logger;
-    this.projectCardDataProvider = projectCardDataProvider;
   }
 
   /**
@@ -48,29 +48,33 @@ module.exports = class ProjectCardRuleFinder {
      */
   async findRules(context) {
     const rules = [];
+    const config = await this.configProvider.getProjectConfigFromProjectCard(this.config, context.payload.project_card);
+
     if (Utils.contextHasAction(context, 'created')) {
-      if (this.config.kanbanColumns.toDoColumnId === context.payload.project_card.column_id) {
+      if (config.kanbanColumns.toDoColumnId === context.payload.project_card.column_id) {
         rules.push(Rule.G2);
       }
-      if (this.config.kanbanColumns.inProgressColumnId === context.payload.project_card.column_id) {
+      if (config.kanbanColumns.inProgressColumnId === context.payload.project_card.column_id) {
         rules.push(Rule.H1);
       }
     }
 
     if (Utils.contextHasAction(context, 'moved')) {
-      if (this.config.kanbanColumns.toDoColumnId === context.payload.project_card.column_id) {
+      const cardColumnId = context.payload.project_card.column_id;
+
+      if (config.kanbanColumns.toDoColumnId === cardColumnId) {
         rules.push(Rule.G2);
       }
-      if (this.config.kanbanColumns.inProgressColumnId === context.payload.project_card.column_id) {
+      if (config.kanbanColumns.inProgressColumnId === cardColumnId) {
         rules.push(Rule.H1);
       }
-      if (this.config.kanbanColumns.toBeSpecifiedColumnId === context.payload.project_card.column_id) {
+      if (config.kanbanColumns.toBeSpecifiedColumnId === cardColumnId) {
         rules.push(Rule.L1);
       }
-      if (this.config.kanbanColumns.toBeTestedColumnId === context.payload.project_card.column_id) {
+      if (config.kanbanColumns.toBeTestedColumnId === cardColumnId) {
         rules.push(Rule.J3);
       }
-      if (this.config.kanbanColumns.doneColumnId === context.payload.project_card.column_id) {
+      if (config.kanbanColumns.doneColumnId === cardColumnId) {
         rules.push(Rule.K1);
       }
     }

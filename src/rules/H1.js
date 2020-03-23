@@ -33,37 +33,43 @@ module.exports = class H1 extends Rule {
      */
   async apply(context) {
     const referencedIssueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card);
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.repository.name;
 
-    const referencedIssue = await this.issueDataProvider.getData(
-      referencedIssueId,
-      context.payload.repository.owner.login,
-      context.payload.repository.name,
-    );
+    const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+    const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
 
     // Re-open the issue if closed
     if (referencedIssue.state === 'closed') {
       await this.githubApiClient.issues.update({
         issue_number: referencedIssueId,
-        owner: context.payload.repository.owner.login,
-        repo: context.payload.repository.name,
+        owner,
+        repo,
         state: 'open',
       });
     }
 
     // Remove automatic labels
-    this.removeIssueAutomaticLabels(
-      referencedIssue,
-      context.payload.repository.owner.login,
-      context.payload.repository.name,
-    );
+    await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
+
+    // Remove Waiting for QA label
+    if (Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.toBeTested.name)) {
+      this.logger.info(`[Rule Applier] H1 - Remove label ${repositoryConfig.labels.toBeTested.name}`);
+      await this.githubApiClient.issues.removeLabel({
+        issue_number: referencedIssueId,
+        owner,
+        repo,
+        name: repositoryConfig.labels.toBeTested.name,
+      });
+    }
 
     // Add In-Progress label
-    if (!Utils.issueHasLabel(referencedIssue, this.config.labels.inProgress.name)) {
+    if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.inProgress.name)) {
       await this.githubApiClient.issues.addLabels({
         issue_number: referencedIssueId,
-        owner: context.payload.repository.owner.login,
-        repo: context.payload.repository.name,
-        labels: {labels: [this.config.labels.inProgress.name]},
+        owner,
+        repo,
+        labels: {labels: [repositoryConfig.labels.inProgress.name]},
       });
     }
   }

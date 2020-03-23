@@ -36,7 +36,7 @@ module.exports = class A1 extends Rule {
     const todoColumnId = this.config.kanbanColumns.toDoColumnId;
     const issueId = context.payload.issue.id;
 
-    this.githubApiClient.projects.createCard({
+    await this.githubApiClient.projects.createCard({
       column_id: todoColumnId,
       content_id: issueId,
       content_type: 'Issue',

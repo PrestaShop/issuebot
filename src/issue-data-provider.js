@@ -99,11 +99,24 @@ module.exports = class IssueDataProvider {
       'doneColumnId',
     ];
 
+    // => NOTE_REPLACE_CONFIG => Can we have project as param ?
     const allCards = [];
-    await Promise.all(vars.map(async (value) => {
-      const cards = await this.githubApiClient.projects.listCards({column_id: this.config.kanbanColumns[value]});
-      allCards.push(cards.data);
-    }));
+    for (let i = 0; i < this.config.repositories.length; i += 1) {
+      const repositoryConfig = this.config.repositories[i];
+
+      for (let j = 0; j < repositoryConfig.projects.length; j += 1) {
+        const projectConfig = repositoryConfig.projects[j];
+
+        await Promise.all(vars.map(async (value) => {
+          if (projectConfig.kanbanColumns[value]) {
+            const cards = await this.githubApiClient.projects.listCards({
+              column_id: projectConfig.kanbanColumns[value],
+            });
+            allCards.push(cards.data);
+          }
+        }));
+      }
+    }
 
     this.allCardsCache = Array.prototype.concat.apply([], allCards);
 

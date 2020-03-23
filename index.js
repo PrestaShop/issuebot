@@ -27,6 +27,8 @@ const RuleComputer = require('./src/rule-computer');
 const IssueDataProvider = require('./src/issue-data-provider');
 const PullRequestDataProvider = require('./src/pull-request-data-provider');
 const ProjectCardDataProvider = require('./src/project-card-data-provider');
+const ConfigProvider = require('./src/config-provider');
+const ProjectDataProvider = require('./src/project-data-provider');
 const RuleApplier = require('./src/rule-applier');
 let config = require('./config');
 
@@ -34,6 +36,8 @@ if (process.env.NODE_ENV === 'test') {
   // eslint-disable-next-line global-require
   config = require('./tests/config');
 }
+
+// config = config.projects[0];
 
 /**
  * This is the main entrypoint to your Probot app
@@ -48,7 +52,15 @@ module.exports = (app) => {
   });
 
   app.on('*', async (context) => {
+    const projectDataProvider = new ProjectDataProvider(config, context.github, context.log);
     const issueDataProvider = new IssueDataProvider(config, context.github, context.log);
+    const configProvider = new ConfigProvider(
+      config,
+      context.github,
+      issueDataProvider,
+      projectDataProvider,
+      context.log,
+    );
     const pullRequestDataProvider = new PullRequestDataProvider(config, context.github, context.log);
     const projectCardDataProvider = new ProjectCardDataProvider(config, context.github, context.log);
     const ruleComputer = new RuleComputer(
@@ -56,6 +68,7 @@ module.exports = (app) => {
       issueDataProvider,
       pullRequestDataProvider,
       projectCardDataProvider,
+      configProvider,
       context.log,
     );
     const ruleApplier = new RuleApplier(
@@ -63,6 +76,7 @@ module.exports = (app) => {
       issueDataProvider,
       pullRequestDataProvider,
       projectCardDataProvider,
+      configProvider,
       context.github,
       context.log,
     );

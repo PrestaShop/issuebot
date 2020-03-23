@@ -25,6 +25,7 @@
 const {graphql} = require('@octokit/graphql');
 const {createAppAuth} = require('@octokit/auth-app');
 const DomParser = require('dom-parser');
+const fs = require('fs')
 
 
 module.exports = class PullRequestDataProvider {
@@ -59,11 +60,12 @@ module.exports = class PullRequestDataProvider {
     return data;
   }
 
-  async getReferencedIssues(pullRequestId, owner, repo) {
+  async getReferencedIssues(pullRequestNumber, owner, repo) {
     const issues = [];
+    const privateKey = await fs.readFileSync(process.env.PRIVATE_KEY_PATH, 'utf8');
     const auth = createAppAuth({
       id: process.env.APP_ID,
-      privateKey: process.env.PRIVATE_KEY,
+      privateKey,
       installationId: 6855379,
     });
     const graphqlWithAuth = graphql.defaults({
@@ -134,7 +136,7 @@ module.exports = class PullRequestDataProvider {
       const {repository} = await graphqlWithAuth(
         `{
             repository(owner: "${owner}", name: "${repo}") {
-              pullRequest(number: ${pullRequestId}) {
+              pullRequest(number: ${pullRequestNumber}) {
                 bodyHTML
               }
             }

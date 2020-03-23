@@ -72,11 +72,11 @@ const Rules = {
    */
   D2: 'D2',
   /*
-   * Scenario: label an Issue when it is reopened
-   * GIVEN a closed Issue
-   * WHEN it is reopened
-   * AND there is no other automatic label
-   * THEN labeled it “To Do”
+   * Scenario: remove automatic status labels when closing an Issue in the kanban
+   * GIVEN an open Issue
+   * WHEN it is closed
+   * THEN any automatic status label is removed
+   * AND add the FIxed label
    */
   D3: 'D3',
   /*

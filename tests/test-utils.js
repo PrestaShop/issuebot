@@ -28,8 +28,19 @@ module.exports = class TestUtils {
   /**
    * @param {string} action
    * @param {int} issueNumber
+   * @param {string} label
+   * @param {string} milestone
    */
-  getDefaultPayloadMock(action, issueNumber) {
+  getDefaultPayloadMock(action, issueNumber, label, milestone) {
+
+    let payload = require("./payload/issue/" + action);
+
+    payload = replaceInObject(payload, 'ISSUE_NUMBER', issueNumber);
+    payload = replaceInObject(payload, 'ISSUE_LABEL', label);
+    payload = replaceInObject(payload, 'MILESTONE', milestone);
+
+    return payload;
+
     return {
       action,
       label: {
@@ -68,7 +79,7 @@ module.exports = class TestUtils {
             [
               {
                 content_url: 'https://github.com/prestashop/test-project-bot/issues/8',
-                column_url: 'https://api.github.com/projects/columns/3311239',
+                column_url: 'https://api.github.com/projects/columns/8032027',
                 id: 'z',
               },
               {
@@ -94,8 +105,24 @@ module.exports = class TestUtils {
           }
         })),
         addLabels: jest.fn().mockReturnValue(Promise.resolve({})),
+        removeLabel: jest.fn().mockReturnValue(Promise.resolve({})),
         removeAssignees: jest.fn().mockReturnValue(Promise.resolve({})),
       }
     };
   }
 };
+
+function replaceInObject (object, pattern, replacement) {
+  for (const key in object) {
+    if (object.hasOwnProperty(key)) {
+      if (typeof object[key] === 'object') {
+        object[key] = replaceInObject(object[key], pattern, replacement);
+      } else if (typeof object[key] === 'string') {
+        const r = new RegExp(pattern, "s");
+        object[key] = object[key].replace(r, replacement);
+      }
+    }
+  }
+
+  return object;
+}

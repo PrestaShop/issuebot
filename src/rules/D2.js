@@ -32,31 +32,29 @@ module.exports = class D2 extends Rule {
      * @public
      */
   async apply(context) {
-    const issueId = context.payload.issue.number;
+    const {issue} = context.payload;
+    const issueId = parseInt(issue.number, 10);
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
 
-    if (Utils.issueHasLabel(context.payload.issue, this.config.labels.fixed.name)) {
-      this.logger.info(`[Rule Applier] D2 - Remove label ${this.config.labels.fixed.name}`);
+    const repositoryConfig = await this.getRepositoryConfigFromIssue(issue);
+
+    if (Utils.issueHasLabel(issue, repositoryConfig.labels.fixed.name)) {
+      this.logger.info(`[Rule Applier] D2 - Remove label ${repositoryConfig.labels.fixed.name}`);
       await this.githubApiClient.issues.removeLabel({
         issue_number: issueId,
         owner,
         repo,
-        name: this.config.labels.fixed.name,
+        name: repositoryConfig.labels.fixed.name,
       });
     }
 
-    const issue = await this.issueDataProvider.getData(issueId, owner, repo);
-
-    if (!this.issueHasAutomaticLabel(issue)) {
-      this.logger.info(`[Rule Applier] D2 - Add label ${this.config.labels.todo.name}`);
-
-      await this.githubApiClient.issues.addLabels({
-        issue_number: issueId,
-        owner,
-        repo,
-        labels: {labels: [this.config.labels.todo.name]},
-      });
-    }
+    this.logger.info(`[Rule Applier] D2 - Add label ${repositoryConfig.labels.toBeSpecified.name}`);
+    await this.githubApiClient.issues.addLabels({
+      issue_number: issueId,
+      owner,
+      repo,
+      labels: {labels: [repositoryConfig.labels.toBeSpecified.name]},
+    });
   }
 };

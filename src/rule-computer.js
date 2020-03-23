@@ -33,24 +33,28 @@ module.exports = class RuleComputer {
    * @param {IssueDataProvider} issueDataProvider
    * @param {PullRequestDataProvider} pullRequestDataProvider
    * @param {ProjectCardDataProvider} projectCardDataProvider
+   * @param {ConfigProvider} configProvider
    * @param {Logger} logger
    */
-  constructor(config, issueDataProvider, pullRequestDataProvider, projectCardDataProvider, logger) {
+  constructor(config, issueDataProvider, pullRequestDataProvider, projectCardDataProvider, configProvider, logger) {
     this.config = config;
     this.logger = logger;
     this.issueDataProvider = issueDataProvider;
     this.pullRequestDataProvider = pullRequestDataProvider;
     this.projectCardDataProvider = projectCardDataProvider;
+    this.configProvider = configProvider;
 
     this.issueRuleFinder = new IssueRuleFinder(
       this.config,
       this.issueDataProvider,
+      this.configProvider,
       this.logger,
     );
     this.pullRequestRuleFinder = new PullRequestRuleFinder(
       this.config,
       this.issueDataProvider,
       this.pullRequestDataProvider,
+      this.configProvider,
       this.logger,
     );
     this.pullRequestReviewRuleFinder = new PullRequestReviewRuleFinder(
@@ -59,7 +63,7 @@ module.exports = class RuleComputer {
     );
     this.projectCardRuleFinder = new ProjectCardRuleFinder(
       this.config,
-      this.projectCardDataProvider,
+      this.configProvider,
       this.logger,
     );
   }

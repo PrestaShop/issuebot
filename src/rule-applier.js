@@ -23,9 +23,9 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 /* eslint-disable no-unused-vars */
-const A1 = require('./rules/A1.js'); 
-const B2 = require('./rules/B2.js');
-const C1 = require('./rules/C1.js'); 
+// const A1 = require('./rules/A1.js');
+// const B2 = require('./rules/B2.js');
+const C1 = require('./rules/C1.js');
 const C2 = require('./rules/C2.js');
 const D1 = require('./rules/D1.js');
 const D2 = require('./rules/D2.js');
@@ -46,7 +46,7 @@ const J3 = require('./rules/J3.js');
 const J4 = require('./rules/J4.js');
 const K1 = require('./rules/K1.js');
 const L1 = require('./rules/L1.js');
-const L2 = require('./rules/L2.js'); 
+const L2 = require('./rules/L2.js');
 /* eslint-enable */
 
 module.exports = class RuleApplier {
@@ -55,14 +55,24 @@ module.exports = class RuleApplier {
    * @param {IssueDataProvider} issueDataProvider
    * @param {PullRequestDataProvider} pullRequestDataProvider
    * @param {ProjectCardDataProvider} projectCardDataProvider
+   * @param {ConfigProvider} configProvider
    * @param {import('probot').GitHubApi} githubApiClient
    * @param {Logger} logger
    */
-  constructor(config, issueDataProvider, pullRequestDataProvider, projectCardDataProvider, githubApiClient, logger) {
+  constructor(
+    config,
+    issueDataProvider,
+    pullRequestDataProvider,
+    projectCardDataProvider,
+    configProvider,
+    githubApiClient,
+    logger
+  ) {
     this.config = config;
     this.issueDataProvider = issueDataProvider;
     this.pullRequestDataProvider = pullRequestDataProvider;
     this.projectCardDataProvider = projectCardDataProvider;
+    this.configProvider = configProvider;
     this.githubApiClient = githubApiClient;
     this.logger = logger;
   }
@@ -76,7 +86,7 @@ module.exports = class RuleApplier {
       this.logger.debug(`[Rule Applier] Applying rule ${rule}`);
 
       /**
-       * @type {A1|B2|C1|C2|D1|D2|D3|D4|E1|E3|E4|E5|E6|F1|G2|H1|H2|I1|J1|J3|J4|K1|L1|L2} rule
+       * @type {C1|C2|D1|D2|D3|D4|E1|E3|E4|E5|E6|F1|G2|H1|H2|I1|J1|J3|J4|K1|L1|L2} rule
        */
       const ruleApplier = eval( // eslint-disable-line no-eval
         `new ${rule}(
@@ -84,6 +94,7 @@ module.exports = class RuleApplier {
         this.issueDataProvider,
         this.pullRequestDataProvider,
         this.projectCardDataProvider,
+        this.configProvider,
         this.githubApiClient,this.logger
         );`,
       );

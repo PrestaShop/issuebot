@@ -46,30 +46,32 @@ module.exports = class J4 extends Rule {
         if (card) {
           const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(card.column_url), 10);
 
-          if (this.config.kanbanColumns.toBeTestedColumnId === cardColumnId) {
-            await this.moveCardTo(referencedIssueId, this.config.kanbanColumns.inProgressColumnId);
+          const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+          const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
+          const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
 
-            const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+          if (projectConfig.kanbanColumns.toBeTestedColumnId === cardColumnId) {
+            await this.moveCardTo(referencedIssueId, projectConfig.kanbanColumns.inProgressColumnId);
 
             // Remove automatic labels
-            this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
+            await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
 
             // Remove label toBeTested
-            if (Utils.issueHasLabel(referencedIssue, this.config.labels.toBeTested.name)) {
+            if (Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.toBeTested.name)) {
               await this.githubApiClient.issues.removeLabel({
                 issue_number: referencedIssueId,
                 owner,
                 repo,
-                name: this.config.labels.toBeTested.name,
+                name: repositoryConfig.labels.toBeTested.name,
               });
             }
             // Add In-Progress label
-            if (!Utils.issueHasLabel(referencedIssue, this.config.labels.inProgress.name)) {
+            if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.inProgress.name)) {
               await this.githubApiClient.issues.addLabels({
                 issue_number: referencedIssueId,
                 owner,
                 repo,
-                labels: {labels: [this.config.labels.inProgress.name]},
+                labels: {labels: [repositoryConfig.labels.inProgress.name]},
               });
             }
           }

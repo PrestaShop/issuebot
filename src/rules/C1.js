@@ -31,6 +31,11 @@ module.exports = class C1 extends Rule {
      * @public
      */
   async apply(context) {
-    await this.moveCardTo(context.payload.issue.number, this.config.kanbanColumns.toDoColumnId);
+    const projectConfig = await this.getProjectConfigFromIssue(context.payload.issue);
+
+    await this.moveCardTo(
+      parseInt(context.payload.issue.number, 10),
+      projectConfig.kanbanColumns.toDoColumnId,
+    );
   }
 };

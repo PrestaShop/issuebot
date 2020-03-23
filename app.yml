@@ -23,7 +23,7 @@ default_events:
 # - fork
 # - gollum
 # - issue_comment
-- issues
+  - issues
 # - label
 # - milestone
 # - member
@@ -31,9 +31,9 @@ default_events:
 # - org_block
 # - organization
 # - page_build
- - project
- - project_card
- - project_column
+  - project
+  - project_card
+  - project_column
 # - public
 # - pull_request
 # - pull_request_review
@@ -126,14 +126,14 @@ default_permissions:
 
 
 # The name of the GitHub App. Defaults to the name specified in package.json
- name: issuebot
+  name: issuebot
 
 # The homepage of your GitHub App.
 # url: https://example.com/
 
 # A description of the GitHub App.
- description: Github App to automate PrestaShop project workflow
+  description: Github App to automate PrestaShop project workflow
 
 # Set to true when your GitHub App is available to the public or false when it is only accessible to the owner of the app.
 # Default: true
- public: false
+  public: false

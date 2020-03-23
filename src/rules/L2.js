@@ -31,14 +31,16 @@ module.exports = class L2 extends Rule {
      * @public
      */
   async apply(context) {
-    const issueId = context.payload.issue.number;
+    const issueId = parseInt(context.payload.issue.number, 10);
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
 
-    // Remove automatic labels
-    this.removeIssueAutomaticLabels(context.payload.issue, owner, repo, this.config.labels.toBeMerged);
-
     const referencedIssue = await this.issueDataProvider.getData(issueId, owner, repo);
+    const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
+
+    // Remove automatic labels
+    await this.removeIssueAutomaticLabels(context.payload.issue, owner, repo, repositoryConfig.labels.toBeMerged);
+
     // Remove the issue assignee
     await this.githubApiClient.issues.removeAssignees({
       issue_number: issueId,
@@ -51,8 +53,9 @@ module.exports = class L2 extends Rule {
     if (card) {
       const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(card.column_url), 10);
 
-      if (this.config.kanbanColumns.toBeTestedColumnId === cardColumnId) {
-        await this.moveCardTo(issueId, this.config.kanbanColumns.toBerMergedColumnId);
+      const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
+      if (projectConfig.kanbanColumns.toBeTestedColumnId === cardColumnId) {
+        await this.moveCardTo(issueId, projectConfig.kanbanColumns.toBerMergedColumnId);
       }
     }
   }

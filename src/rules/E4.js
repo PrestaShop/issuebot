@@ -46,24 +46,27 @@ module.exports = class E4 extends Rule {
       for (let index = 0; index < referencedIssuesIds.length; index += 1) {
         const referencedIssueId = referencedIssuesIds[index];
 
-        await this.moveCardTo(referencedIssueId, this.config.kanbanColumns.toBerMergedColumnId);
-
         const referencedIssue = await this.issueDataProvider.getData(
           referencedIssueId,
           owner,
           repo,
         );
 
-        // Remove automatic labels
-        this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
+        const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
+        const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
 
-        if (Utils.issueHasLabel(referencedIssue, this.config.labels.toBeTested.name)) {
+        await this.moveCardTo(referencedIssueId, projectConfig.kanbanColumns.toBerMergedColumnId);
+
+        // Remove automatic labels
+        await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
+
+        if (Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.toBeTested.name)) {
           // Remove label toBeTested
           await this.githubApiClient.issues.removeLabel({
             issue_number: referencedIssueId,
             owner,
             repo,
-            name: this.config.labels.toBeTested.name,
+            name: repositoryConfig.labels.toBeTested.name,
           });
         }
 

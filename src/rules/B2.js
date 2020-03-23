@@ -31,7 +31,7 @@ module.exports = class B2 extends Rule {
      * @public
      */
   async apply(context) {
-    const issueId = context.payload.issue.number;
+    const issueId = parseInt(context.payload.issue.number, 10);
 
     const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
     const relatedCard = await getRelatedCardPromise;

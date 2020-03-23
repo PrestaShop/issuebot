@@ -29,12 +29,14 @@ module.exports = class IssueRuleFinder {
   /**
      * @param config
      * @param {IssueDataProvider} issueDataProvider
+     * @param {ConfigProvider} configProvider
      * @param {Logger} logger
      */
-  constructor(config, issueDataProvider, logger) {
+  constructor(config, issueDataProvider, configProvider, logger) {
     this.config = config;
     this.logger = logger;
     this.issueDataProvider = issueDataProvider;
+    this.configProvider = configProvider;
   }
 
   /**
@@ -48,54 +50,33 @@ module.exports = class IssueRuleFinder {
      */
   async findRules(context) {
     const rules = [];
-    if (Utils.contextHasAction(context, 'milestoned')) {
-      const milestone = context.payload.issue.milestone.title;
-
-      if ((milestone === this.config.milestones.next_minor_milestone)
-                || (milestone === this.config.milestones.next_patch_milestone)) {
-        const issueId = context.payload.issue.number;
-        const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
-        const isIssueInKanban = await isIssueInKanbanPromise;
-
-        if (isIssueInKanban === false) {
-          rules.push(Rule.A1);
-        }
-      }
-    }
-
-    if (Utils.contextHasAction(context, 'demilestoned')) {
-      const issueId = context.payload.issue.number;
-      const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
-      const isIssueInKanban = await isIssueInKanbanPromise;
-
-      if (isIssueInKanban === true) {
-        rules.push(Rule.B2);
-      }
-    }
 
     if (Utils.contextHasAction(context, 'labeled')) {
       const {issue} = context.payload;
-      const issueId = issue.number;
+      const issueId = parseInt(issue.number, 10);
+      const repositoryConfig = this.configProvider.getRepositoryConfigFromIssue(this.config, issue);
 
+      // make automatic status labels mutually exclusive
       rules.push(Rule.D1);
 
-      if (issue.state === 'closed' && context.payload.label.name !== this.config.labels.fixed.name) {
+      // reopen an closed Issue when automatic label is added except FIXED
+      if (
+        issue.state === 'closed' && context.payload.label.name !== repositoryConfig.labels.fixed.name) {
         rules.push(Rule.D4);
       }
 
-      if (context.payload.label.name === this.config.labels.toBeMerged.name) {
+      if (context.payload.label.name === repositoryConfig.labels.toBeMerged.name) {
         rules.push(Rule.L2);
       }
 
-      const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
-      const getCardInKanban = await getCardInKanbanPromise;
-
-      if (getCardInKanban !== null) {
-        const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url), 10);
-
+      const cardInKanban = await this.issueDataProvider.getRelatedCardInKanban(issueId);
+      if (cardInKanban !== null) {
+        const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(cardInKanban.column_url), 10);
+        const projectConfig = await this.configProvider.getProjectConfigFromProjectCard(this.config, cardInKanban);
         if (
-          this.config.kanbanColumns.toDoColumnId !== cardColumnId
-            && Utils.issueHasLabel(issue, this.config.labels.todo.name)
+          projectConfig
+          && projectConfig.kanbanColumns.toDoColumnId !== cardColumnId
+          && Utils.issueHasLabel(issue, repositoryConfig.labels.todo.name)
         ) {
           rules.push(Rule.C1);
         }
@@ -103,16 +84,17 @@ module.exports = class IssueRuleFinder {
     }
 
     if (Utils.contextHasAction(context, 'closed')) {
+      const issueId = context.payload.issue.number;
+
+      // remove automatic status labels when closing an Issue in the kanban + Add fixed Label
       rules.push(Rule.D3);
 
-      const issueId = context.payload.issue.number;
-      const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
-      const getCardInKanban = await getCardInKanbanPromise;
-
-      if (getCardInKanban !== null) {
-        const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url), 10);
-
-        if (this.config.kanbanColumns.doneColumnId !== cardColumnId) {
+      // place an Issue in the “Done” column when it is closed
+      const cardInKanban = await this.issueDataProvider.getRelatedCardInKanban(issueId);
+      if (cardInKanban !== null) {
+        const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(cardInKanban.column_url), 10);
+        const projectConfig = await this.configProvider.getProjectConfigFromProjectCard(this.config, cardInKanban);
+        if (projectConfig.kanbanColumns.doneColumnId !== cardColumnId) {
           rules.push(Rule.C2);
         }
       }

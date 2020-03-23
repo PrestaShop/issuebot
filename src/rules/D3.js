@@ -31,18 +31,19 @@ module.exports = class D3 extends Rule {
      * @public
      */
   async apply(context) {
+    const {issue} = context.payload;
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.repository.name;
+
+    const repositoryConfig = await this.getRepositoryConfigFromIssue(issue);
+
     await this.githubApiClient.issues.addLabels({
-      issue_number: context.payload.issue.number,
-      owner: context.payload.repository.owner.login,
-      repo: context.payload.repository.name,
-      labels: {labels: [this.config.labels.fixed.name]},
+      issue_number: parseInt(issue.number, 10),
+      owner,
+      repo,
+      labels: {labels: [repositoryConfig.labels.fixed.name]},
     });
 
-    this.removeIssueAutomaticLabels(
-      context.payload.issue,
-      context.payload.repository.owner.login,
-      context.payload.repository.name,
-      this.config.labels.fixed,
-    );
+    await this.removeIssueAutomaticLabels(issue, owner, repo, repositoryConfig.labels.fixed);
   }
 };

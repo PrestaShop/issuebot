@@ -41,18 +41,20 @@ module.exports = class F1 extends Rule {
     if (referencedIssuesIds.length > 0) {
       for (let index = 0; index < referencedIssuesIds.length; index += 1) {
         const referencedIssueId = referencedIssuesIds[index];
-
-        await this.moveCardTo(referencedIssueId, this.config.kanbanColumns.inProgressColumnId);
-
         const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
 
-        if (Utils.issueHasLabel(referencedIssue, this.config.labels.todo.name)) {
+        const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
+        const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
+
+        await this.moveCardTo(referencedIssueId, projectConfig.kanbanColumns.inProgressColumnId);
+
+        if (Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.todo.name)) {
           // Remove label To-do
           await this.githubApiClient.issues.removeLabel({
             issue_number: referencedIssueId,
             owner,
             repo,
-            name: this.config.labels.todo.name,
+            name: repositoryConfig.labels.todo.name,
           });
         }
 

@@ -31,24 +31,29 @@ module.exports = class E1 extends Rule {
    * @public
    */
   async apply(context) {
-    const pullRequestId = context.payload.issue.number;
+    const pullRequestNumber = parseInt(context.payload.issue.number, 10);
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
 
     const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(
-      pullRequestId,
+      pullRequestNumber,
       owner,
       repo,
     );
 
-    if (referencedIssuesIds.length > 0) {
+    const repositoryConfig = this.getRepositoryConfigFromIssue(context.payload.issue);
+    const projectConfig = this.getProjectConfigFromMilestone(repositoryConfig, context.payload.issue.milestone.title);
+
+    if (projectConfig && referencedIssuesIds.length > 0) {
       for (let index = 0; index < referencedIssuesIds.length; index += 1) {
         const referencedIssueId = referencedIssuesIds[index];
-        await this.githubApiClient.issues.update({
-          issue_number: referencedIssueId,
-          owner,
-          repo,
-          milestone: context.payload.issue.milestone.number,
+        const {inProgressColumnId} = projectConfig.kanbanColumns;
+        const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+
+        await this.githubApiClient.projects.createCard({
+          column_id: inProgressColumnId,
+          content_id: referencedIssue.id,
+          content_type: 'Issue',
         });
       }
     }

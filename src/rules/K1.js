@@ -37,17 +37,18 @@ module.exports = class K1 extends Rule {
     const repo = context.payload.repository.name;
 
     const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+    const repositoryConfig = await this.getRepositoryConfigFromIssue(referencedIssue);
 
     // Remove automatic labels except FIXED
-    this.removeIssueAutomaticLabels(referencedIssue, owner, repo, this.config.labels.fixed);
+    await this.removeIssueAutomaticLabels(referencedIssue, owner, repo, repositoryConfig.labels.fixed);
 
     // Add Fixed label if it does not exist
-    if (!Utils.issueHasLabel(referencedIssue, this.config.labels.fixed.name)) {
+    if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.fixed.name)) {
       await this.githubApiClient.issues.addLabels({
         issue_number: referencedIssueId,
         owner,
         repo,
-        labels: {labels: [this.config.labels.fixed.name]},
+        labels: {labels: [repositoryConfig.labels.fixed.name]},
       });
     }
 

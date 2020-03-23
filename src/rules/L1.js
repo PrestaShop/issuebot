@@ -37,17 +37,18 @@ module.exports = class L1 extends Rule {
     const repo = context.payload.repository.name;
 
     const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+    const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
 
     // Remove automatic labels
-    this.removeIssueAutomaticLabels(referencedIssue, owner, repo, this.config.labels.toBeSpecified);
+    await this.removeIssueAutomaticLabels(referencedIssue, owner, repo, repositoryConfig.labels.toBeSpecified);
 
     // Add TBS label
-    if (!Utils.issueHasLabel(referencedIssue, this.config.labels.toBeSpecified.name)) {
+    if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.toBeSpecified.name)) {
       await this.githubApiClient.issues.addLabels({
         issue_number: referencedIssueId,
         owner,
         repo,
-        labels: {labels: [this.config.labels.toBeSpecified.name]},
+        labels: {labels: [repositoryConfig.labels.toBeSpecified.name]},
       });
     }
 

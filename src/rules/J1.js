@@ -33,12 +33,10 @@ module.exports = class J1 extends Rule {
      */
   async apply(context) {
     const pullRequestId = context.payload.pull_request.number;
+    const owner = context.payload.repository.owner.login;
+    const repo = context.payload.repository.name;
 
-    const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(
-      pullRequestId,
-      context.payload.repository.owner.login,
-      context.payload.repository.name,
-    );
+    const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(pullRequestId, owner, repo);
 
     if (referencedIssuesIds.length > 0) {
       for (let index = 0; index < referencedIssuesIds.length; index += 1) {
@@ -46,28 +44,24 @@ module.exports = class J1 extends Rule {
         const card = await this.issueDataProvider.getRelatedCardInKanban(referencedIssueId);
         if (card) {
           const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(card.column_url), 10);
+          const projectConfig = await this.getProjectConfigFromProjectCard(card);
 
-          if (this.config.kanbanColumns.toBeReviewedColumnId === cardColumnId) {
-            await this.moveCardTo(referencedIssueId, this.config.kanbanColumns.toBeTestedColumnId);
+          if (projectConfig.kanbanColumns.toBeReviewedColumnId === cardColumnId) {
+            await this.moveCardTo(referencedIssueId, projectConfig.kanbanColumns.toBeTestedColumnId);
 
-            const referencedIssue = await this.issueDataProvider.getData(
-              referencedIssueId,
-              context.payload.repository.owner.login,
-              context.payload.repository.name,
-            );
+            const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+            const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
+
             // Remove automatic labels
-            this.removeIssueAutomaticLabels(
-              referencedIssue,
-              context.payload.repository.owner.login,
-              context.payload.repository.name,
-            );
+            await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
+
             // Add In-Progress label
-            if (!Utils.issueHasLabel(referencedIssue, this.config.labels.toBeTested.name)) {
+            if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.toBeTested.name)) {
               await this.githubApiClient.issues.addLabels({
                 issue_number: referencedIssueId,
-                owner: context.payload.repository.owner.login,
-                repo: context.payload.repository.name,
-                labels: {labels: [this.config.labels.toBeTested.name]},
+                owner,
+                repo,
+                labels: {labels: [repositoryConfig.labels.toBeTested.name]},
               });
             }
           }
@@ -76,8 +70,8 @@ module.exports = class J1 extends Rule {
         // Remove the issue assignee
         await this.githubApiClient.issues.removeAssignees({
           issue_number: referencedIssueId,
-          owner: context.payload.repository.owner.login,
-          repo: context.payload.repository.name,
+          owner,
+          repo,
           assignees: context.payload.pull_request.user.login,
         });
       }

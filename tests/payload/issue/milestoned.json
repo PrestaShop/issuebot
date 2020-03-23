@@ -1,0 +1,28 @@
+{
+  "action": "milestoned",
+  "label": {
+    "name": "ISSUE_LABEL"
+  },
+  "repository": {
+    "owner": {
+      "login": "toto"
+    }
+  },
+  "issue": {
+    "id": 12345,
+    "node_id": "abcd",
+    "number": "ISSUE_NUMBER",
+    "title": "An issue",
+    "milestone": { "title": "MILESTONE" },
+    "labels": [
+      {
+        "id": 789,
+        "node_id": "abcd",
+        "url": "https://github.com/prestashop/test-project-bot/labels/todo",
+        "name": "To Do",
+        "color": "eadd85",
+        "default": false
+      }
+    ]
+  }
+}
