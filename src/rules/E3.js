@@ -35,30 +35,39 @@ module.exports = class E3 extends Rule {
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
 
-    const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(
+    const referencedIssuesData = await this.pullRequestDataProvider.getReferencedIssues(
       pullRequestId,
       owner,
       repo,
     );
 
-    if (referencedIssuesIds.length > 0) {
-      for (let index = 0; index < referencedIssuesIds.length; index += 1) {
-        const referencedIssueId = referencedIssuesIds[index];
+    if (referencedIssuesData.length > 0) {
+      for (let index = 0; index < referencedIssuesData.length; index += 1) {
+        const referencedIssueData = referencedIssuesData[index];
 
-        const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+        const referencedIssue = await this.issueDataProvider.getData(
+          referencedIssueData.number,
+          referencedIssueData.owner,
+          referencedIssueData.repo,
+        );
         const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
 
         // Remove automatic labels
         await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
 
         // Move card in toBeTested column
-        await this.moveCardTo(referencedIssueId, projectConfig.kanbanColumns.toBeTestedColumnId);
+        await this.moveCardTo(
+          referencedIssueData.number,
+          referencedIssueData.owner,
+          referencedIssueData.repo,
+          projectConfig.kanbanColumns.toBeTestedColumnId,
+        );
 
         // Remove the previous assignee
         await this.githubApiClient.issues.removeAssignees({
-          issue_number: referencedIssueId,
-          owner,
-          repo,
+          issue_number: referencedIssueData.number,
+          owner: referencedIssueData.owner,
+          repo: referencedIssueData.repo,
           assignees: context.payload.pull_request.user.login,
         });
       }

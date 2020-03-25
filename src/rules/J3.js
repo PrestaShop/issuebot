@@ -23,7 +23,7 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 const Rule = require('./Rule.js');
-const Utils = require('../ruleFinder/Utils');
+// const Utils = require('../ruleFinder/Utils');
 
 module.exports = class J3 extends Rule {
   /**
@@ -41,20 +41,20 @@ module.exports = class J3 extends Rule {
       owner,
       repo,
     );
-    const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
+    // const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
 
     // Remove automatic labels except To-Do
-    await this.removeIssueAutomaticLabels(referencedIssue, owner, repo, repositoryConfig.labels.todo);
+    await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
 
     // Add TBT label
-    if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.toBeTested.name)) {
-      await this.githubApiClient.issues.addLabels({
-        issue_number: referencedIssueId,
-        owner,
-        repo,
-        labels: {labels: [repositoryConfig.labels.toBeTested.name]},
-      });
-    }
+    // if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.toBeTested.name)) {
+    //   await this.githubApiClient.issues.addLabels({
+    //     issue_number: referencedIssueId,
+    //     owner,
+    //     repo,
+    //     labels: {labels: [repositoryConfig.labels.toBeTested.name]},
+    //   });
+    // }
 
     // Remove the issue assignee
     await this.githubApiClient.issues.removeAssignees({

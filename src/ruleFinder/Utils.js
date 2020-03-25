@@ -52,3 +52,22 @@ module.exports.issueHasLabel = (issue, labelTitle) => {
  * @returns {boolean}
  */
 module.exports.contextHasAction = (context, actionName) => (context.payload.action === actionName);
+
+
+
+/**
+ * Parse a github URL to extract Issue / Pull Request informations
+ *
+ * @param {string} url
+ *
+ * @returns {object}
+ */
+module.exports.parseUrlForData = (url) => {
+  const matches = url.match(/(.+)\/(.+)\/(.+)\/issues\/(\d+)/);
+
+  return {
+    number: parseInt(matches[4], 10),
+    owner: matches[2],
+    repo: matches[3],
+  };
+};

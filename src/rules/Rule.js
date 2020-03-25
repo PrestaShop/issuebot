@@ -84,10 +84,10 @@ module.exports = class Rule {
     return false;
   }
 
-  async moveCardTo(issueId, columnId) {
+  async moveCardTo(issueId, issueOwner, issueRepo, columnId) {
     this.logger.info(`Moving issue #${issueId} card in Kanban`);
 
-    const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
+    const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId, issueOwner, issueRepo);
     const relatedCard = await getRelatedCardPromise;
 
     await this.githubApiClient.projects.moveCard({
@@ -106,7 +106,8 @@ module.exports = class Rule {
 
       if (this.isAutomaticLabel(repositoryConfig, label)) {
         if (newLabel && (newLabel.id === label.id || newLabel.name === label.name)) {
-          return;
+          // eslint-disable-next-line no-continue
+          continue;
         }
         this.logger.info(`[Rule Applier] Remove label ${label.name}`);
 

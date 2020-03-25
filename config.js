@@ -55,6 +55,43 @@ const config = {
         },
       ],
     },
+    {
+      name: 'wuffle-test-2',
+      nbRequiredApprovals: 2,
+      projects: [
+        {
+          name: 'Wuffle 2',
+          kanbanColumns: {
+            notReadyColumnId: 8437263,
+            backlogColumnId: 8437257,
+            toBeSpecifiedColumnId: 8437270,
+            toDoColumnId: 8342936,
+            inProgressColumnId: 8342937,
+            toBeReviewedColumnId: 8437290,
+            toBeTestedColumnId: 8437301,
+            toBerMergedColumnId: 8437304,
+            doneColumnId: 8342938,
+          },
+        },
+      ],
+      labels: {
+        todo: {name: 'To Do', automatic: true},
+        inProgress: {name: 'WIP', automatic: false},
+        toBeReproduced: {name: 'TBR', automatic: true},
+        toBeSpecified: {name: 'TBS', automatic: true},
+        needsMoreInfo: {name: 'NMI', automatic: true},
+        toBeTested: {name: 'waiting for QA', automatic: false},
+        toBeMerged: {name: 'QA ✔️', automatic: false},
+        waitingAuthor: {name: 'waiting for author️', automatic: false},
+        fixed: {name: 'Fixed', automatic: true},
+      },
+      milestones: [
+        {
+          name: 'Next version',
+          project: 'Wuffle 2',
+        },
+      ],
+    },
   ],
 };
 

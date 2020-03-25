@@ -53,7 +53,6 @@ module.exports = class IssueRuleFinder {
 
     if (Utils.contextHasAction(context, 'labeled')) {
       const {issue} = context.payload;
-      const issueId = parseInt(issue.number, 10);
       const repositoryConfig = this.configProvider.getRepositoryConfigFromIssue(this.config, issue);
 
       // make automatic status labels mutually exclusive
@@ -65,11 +64,7 @@ module.exports = class IssueRuleFinder {
         rules.push(Rule.D4);
       }
 
-      if (context.payload.label.name === repositoryConfig.labels.toBeMerged.name) {
-        rules.push(Rule.L2);
-      }
-
-      const cardInKanban = await this.issueDataProvider.getRelatedCardInKanban(issueId);
+      const cardInKanban = await this.getCardFromIssue(issue);
       if (cardInKanban !== null) {
         const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(cardInKanban.column_url), 10);
         const projectConfig = await this.configProvider.getProjectConfigFromProjectCard(this.config, cardInKanban);
@@ -84,13 +79,11 @@ module.exports = class IssueRuleFinder {
     }
 
     if (Utils.contextHasAction(context, 'closed')) {
-      const issueId = context.payload.issue.number;
-
       // remove automatic status labels when closing an Issue in the kanban + Add fixed Label
       rules.push(Rule.D3);
 
       // place an Issue in the “Done” column when it is closed
-      const cardInKanban = await this.issueDataProvider.getRelatedCardInKanban(issueId);
+      const cardInKanban = await this.getCardFromIssue(context.payload.issue);
       if (cardInKanban !== null) {
         const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(cardInKanban.column_url), 10);
         const projectConfig = await this.configProvider.getProjectConfigFromProjectCard(this.config, cardInKanban);
@@ -107,5 +100,32 @@ module.exports = class IssueRuleFinder {
     this.logger.info(`Rules are : ${rules.join(', ')}`);
 
     return rules;
+  }
+
+  /**
+   * Parse a github URL to extract Issue / Pull Request informations
+   *
+   * @param {string} url
+   *
+   * @returns {object}
+   */
+  parseUrlForData(url) {
+    const matches = url.match(/(.+)\/(.+)\/(.+)\/issues\/(\d+)/);
+
+    return {
+      number: parseInt(matches[4], 10),
+      owner: matches[2],
+      repo: matches[3],
+    };
+  }
+
+  async getCardFromIssue(issue) {
+    const issueData = this.parseUrlForData(issue.url);
+
+    return this.issueDataProvider.getRelatedCardInKanban(
+      issueData.number,
+      issueData.owner,
+      issueData.repo,
+    );
   }
 };

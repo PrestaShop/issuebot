@@ -37,24 +37,28 @@ module.exports = class I1 extends Rule {
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
 
-    const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(
-      pullRequestId,
-      owner,
-      repo,
-    );
+    const referencedIssuesData = await this.pullRequestDataProvider.getReferencedIssues(pullRequestId, owner, repo);
 
-    if (referencedIssuesIds.length > 0) {
-      for (let index = 0; index < referencedIssuesIds.length; index += 1) {
-        const referencedIssueId = referencedIssuesIds[index];
+    if (referencedIssuesData.length > 0) {
+      for (let index = 0; index < referencedIssuesData.length; index += 1) {
+        const referencedIssueData = referencedIssuesData[index];
 
-        const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+        const referencedIssue = await this.issueDataProvider.getData(
+          referencedIssueData.number,
+          referencedIssueData.owner,
+          referencedIssueData.repo,
+        );
         const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
         const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
 
         if (
           !(Utils.issueHasLabel(pullRequest, repositoryConfig.labels.inProgress.name) || pullRequest.draft === true)
         ) {
-          const card = await this.issueDataProvider.getRelatedCardInKanban(referencedIssueId);
+          const card = await this.issueDataProvider.getRelatedCardInKanban(
+            referencedIssueData.number,
+            referencedIssueData.owner,
+            referencedIssueData.repo,
+          );
           if (card) {
             const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(card.column_url), 10);
 
@@ -62,17 +66,26 @@ module.exports = class I1 extends Rule {
               projectConfig.kanbanColumns.toDoColumnId === cardColumnId
               || projectConfig.kanbanColumns.inProgressColumnId === cardColumnId
             ) {
-              await this.moveCardTo(referencedIssueId, projectConfig.kanbanColumns.toBeReviewedColumnId);
+              await this.moveCardTo(
+                referencedIssueData.number,
+                referencedIssueData.owner,
+                referencedIssueData.repo,
+                projectConfig.kanbanColumns.toBeReviewedColumnId,
+              );
 
               // Remove automatic labels
-              await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
+              await this.removeIssueAutomaticLabels(
+                referencedIssue,
+                referencedIssueData.owner,
+                referencedIssueData.repo,
+              );
 
               if (Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.inProgress.name)) {
                 // Remove label WIP
                 await this.githubApiClient.issues.removeLabel({
-                  issue_number: referencedIssueId,
-                  owner,
-                  repo,
+                  issue_number: referencedIssueData.number,
+                  owner: referencedIssueData.owner,
+                  repo: referencedIssueData.repo,
                   name: repositoryConfig.labels.inProgress.name,
                 });
               }

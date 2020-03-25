@@ -59,6 +59,8 @@ module.exports = class RuleComputer {
     );
     this.pullRequestReviewRuleFinder = new PullRequestReviewRuleFinder(
       this.config,
+      this.pullRequestDataProvider,
+      this.configProvider,
       this.logger,
     );
     this.projectCardRuleFinder = new ProjectCardRuleFinder(

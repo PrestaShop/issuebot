@@ -36,45 +36,50 @@ module.exports = class E4 extends Rule {
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
 
-    const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(
+    const referencedIssuesData = await this.pullRequestDataProvider.getReferencedIssues(
       pullRequestId,
       owner,
       repo,
     );
 
-    if (referencedIssuesIds.length > 0) {
-      for (let index = 0; index < referencedIssuesIds.length; index += 1) {
-        const referencedIssueId = referencedIssuesIds[index];
+    if (referencedIssuesData.length > 0) {
+      for (let index = 0; index < referencedIssuesData.length; index += 1) {
+        const referencedIssueData = referencedIssuesData[index];
 
         const referencedIssue = await this.issueDataProvider.getData(
-          referencedIssueId,
-          owner,
-          repo,
+          referencedIssueData.number,
+          referencedIssueData.owner,
+          referencedIssueData.repo,
         );
 
         const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
         const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
 
-        await this.moveCardTo(referencedIssueId, projectConfig.kanbanColumns.toBerMergedColumnId);
+        await this.moveCardTo(
+          referencedIssueData.number,
+          referencedIssueData.owner,
+          referencedIssueData.repo,
+          projectConfig.kanbanColumns.toBerMergedColumnId,
+        );
 
         // Remove automatic labels
-        await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
+        await this.removeIssueAutomaticLabels(referencedIssue, referencedIssueData.owner, referencedIssueData.repo);
 
         if (Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.toBeTested.name)) {
           // Remove label toBeTested
           await this.githubApiClient.issues.removeLabel({
-            issue_number: referencedIssueId,
-            owner,
-            repo,
+            issue_number: referencedIssueData.number,
+            owner: referencedIssueData.owner,
+            repo: referencedIssueData.repo,
             name: repositoryConfig.labels.toBeTested.name,
           });
         }
 
         // Remove the issue assignee
         await this.githubApiClient.issues.removeAssignees({
-          issue_number: referencedIssueId,
-          owner,
-          repo,
+          issue_number: referencedIssueData.number,
+          owner: referencedIssueData.owner,
+          repo: referencedIssueData.repo,
           assignees: referencedIssue.user.login,
         });
       }

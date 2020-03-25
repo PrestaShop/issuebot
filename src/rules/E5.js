@@ -35,36 +35,45 @@ module.exports = class E5 extends Rule {
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
 
-    const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(
+    const referencedIssuesData = await this.pullRequestDataProvider.getReferencedIssues(
       pullRequestId,
       owner,
       repo,
     );
 
-    if (referencedIssuesIds.length > 0) {
-      for (let index = 0; index < referencedIssuesIds.length; index += 1) {
-        const referencedIssueId = referencedIssuesIds[index];
-        const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+    if (referencedIssuesData.length > 0) {
+      for (let index = 0; index < referencedIssuesData.length; index += 1) {
+        const referencedIssueData = referencedIssuesData[index];
+        const referencedIssue = await this.issueDataProvider.getData(
+          referencedIssueData.number,
+          referencedIssueData.owner,
+          referencedIssueData.repo,
+        );
 
         const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
         const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
 
-        await this.moveCardTo(referencedIssueId, projectConfig.kanbanColumns.doneColumnId);
+        await this.moveCardTo(
+          referencedIssueData.number,
+          referencedIssueData.owner,
+          referencedIssueData.repo,
+          projectConfig.kanbanColumns.doneColumnId,
+        );
 
         this.logger.info(`[Rule Applier] E5 - Add label ${repositoryConfig.labels.fixed.name}`);
 
         await this.githubApiClient.issues.addLabels({
-          issue_number: referencedIssueId,
-          owner,
-          repo,
+          issue_number: referencedIssueData.number,
+          owner: referencedIssueData.owner,
+          repo: referencedIssueData.repo,
           labels: {labels: [repositoryConfig.labels.fixed.name]},
         });
 
         // Remove the issue assignee
         await this.githubApiClient.issues.removeAssignees({
-          issue_number: referencedIssueId,
-          owner,
-          repo,
+          issue_number: referencedIssueData.number,
+          owner: referencedIssueData.owner,
+          repo: referencedIssueData.repo,
           assignees: referencedIssue.user.login,
         });
       }

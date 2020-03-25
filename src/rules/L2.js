@@ -31,31 +31,45 @@ module.exports = class L2 extends Rule {
      * @public
      */
   async apply(context) {
-    const issueId = parseInt(context.payload.issue.number, 10);
+    const pullRequestId = context.payload.pull_request.number;
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
 
-    const referencedIssue = await this.issueDataProvider.getData(issueId, owner, repo);
-    const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
-
-    // Remove automatic labels
-    await this.removeIssueAutomaticLabels(context.payload.issue, owner, repo, repositoryConfig.labels.toBeMerged);
-
-    // Remove the issue assignee
-    await this.githubApiClient.issues.removeAssignees({
-      issue_number: issueId,
+    const referencedIssuesData = await this.pullRequestDataProvider.getReferencedIssues(
+      pullRequestId,
       owner,
       repo,
-      assignees: referencedIssue.user.login,
-    });
+    );
 
-    const card = await this.issueDataProvider.getRelatedCardInKanban(issueId);
-    if (card) {
-      const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(card.column_url), 10);
+    if (referencedIssuesData.length > 0) {
+      for (let index = 0; index < referencedIssuesData.length; index += 1) {
+        const referencedIssueData = referencedIssuesData[index];
 
-      const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
-      if (projectConfig.kanbanColumns.toBeTestedColumnId === cardColumnId) {
-        await this.moveCardTo(issueId, projectConfig.kanbanColumns.toBerMergedColumnId);
+        const referencedIssue = await this.issueDataProvider.getData(
+          referencedIssueData.number,
+          referencedIssueData.owner,
+          referencedIssueData.repo,
+        );
+        const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
+
+        // Remove automatic labels
+        await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
+
+        // Move card in toBeTested column
+        await this.moveCardTo(
+          referencedIssueData.number,
+          referencedIssueData.owner,
+          referencedIssueData.repo,
+          projectConfig.kanbanColumns.toBerMergedColumnId,
+        );
+
+        // Remove the previous assignee
+        await this.githubApiClient.issues.removeAssignees({
+          issue_number: referencedIssueData.number,
+          owner: referencedIssueData.owner,
+          repo: referencedIssueData.repo,
+          assignees: context.payload.pull_request.user.login,
+        });
       }
     }
   }

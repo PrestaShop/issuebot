@@ -23,6 +23,7 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 const Rule = require('./Rule.js');
+const Utils = require('../ruleFinder/Utils');
 
 module.exports = class C1 extends Rule {
   /**
@@ -31,10 +32,14 @@ module.exports = class C1 extends Rule {
      * @public
      */
   async apply(context) {
-    const projectConfig = await this.getProjectConfigFromIssue(context.payload.issue);
+    const {issue} = context.payload;
+    const projectConfig = await this.getProjectConfigFromIssue(issue);
+    const issueData = Utils.parseUrlForData(issue.url);
 
     await this.moveCardTo(
-      parseInt(context.payload.issue.number, 10),
+      issueData.number,
+      issueData.owner,
+      issueData.repo,
       projectConfig.kanbanColumns.toDoColumnId,
     );
   }

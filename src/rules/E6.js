@@ -35,33 +35,42 @@ module.exports = class E6 extends Rule {
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
 
-    const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(
+    const referencedIssuesData = await this.pullRequestDataProvider.getReferencedIssues(
       pullRequestId,
       owner,
       repo,
     );
 
-    if (referencedIssuesIds.length > 0) {
-      for (let index = 0; index < referencedIssuesIds.length; index += 1) {
-        const referencedIssueId = referencedIssuesIds[index];
+    if (referencedIssuesData.length > 0) {
+      for (let index = 0; index < referencedIssuesData.length; index += 1) {
+        const referencedIssueData = referencedIssuesData[index];
 
-        const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+        const referencedIssue = await this.issueDataProvider.getData(
+          referencedIssueData.number,
+          referencedIssueData.owner,
+          referencedIssueData.repo,
+        );
         if (referencedIssue.state === 'closed') {
-          this.logger.info(`[Rule Applier] E6 - Re-open issue ${referencedIssueId}`);
+          this.logger.info(`[Rule Applier] E6 - Re-open issue ${referencedIssueData.number}`);
 
           await this.githubApiClient.issues.update({
-            issue_number: referencedIssueId,
-            owner,
-            repo,
+            issue_number: referencedIssueData.number,
+            owner: referencedIssueData.owner,
+            repo: referencedIssueData.repo,
             state: 'open',
           });
 
           // Remove automatic labels
           // await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
 
-          const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
-
-          await this.moveCardTo(referencedIssueId, projectConfig.kanbanColumns.toBeReviewedColumnId);
+          // const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
+          //
+          // await this.moveCardTo(
+          //   referencedIssueData.number,
+          //   referencedIssueData.owner,
+          //   referencedIssueData.repo,
+          //   projectConfig.kanbanColumns.toBeReviewedColumnId,
+          // );
         }
       }
     }

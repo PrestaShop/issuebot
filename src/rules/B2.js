@@ -23,6 +23,7 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 const Rule = require('./Rule.js');
+const Utils = require('../ruleFinder/Utils');
 
 module.exports = class B2 extends Rule {
   /**
@@ -31,9 +32,12 @@ module.exports = class B2 extends Rule {
      * @public
      */
   async apply(context) {
-    const issueId = parseInt(context.payload.issue.number, 10);
-
-    const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
+    const issueData = Utils.parseUrlForData(context.payload.issue.url);
+    const getRelatedCardPromise = await this.issueDataProvider.getRelatedCardInKanban(
+      issueData.number,
+      issueData.owner,
+      issueData.repo,
+    );
     const relatedCard = await getRelatedCardPromise;
 
     await this.githubApiClient.projects.deleteCard({card_id: relatedCard.id});

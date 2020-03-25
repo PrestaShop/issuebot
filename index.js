@@ -84,7 +84,7 @@ module.exports = (app) => {
     const rulePromise = ruleComputer.findRules(context);
     const rules = await rulePromise;
 
-    if (rules != null) {
+    if (rules) {
       rules.forEach((rule) => {
         context.log.info(`[Index] Received webhook matches rule ${rule} requirements`);
       });

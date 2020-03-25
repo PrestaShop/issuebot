@@ -71,8 +71,12 @@ module.exports = class ConfigProvider {
   }
 
   async getProjectConfigFromIssue(config, issue) {
-    // const repositoryConfig = this.getRepositoryConfigFromIssue(config, issue);
-    const cardInKanban = await this.issueDataProvider.getRelatedCardInKanban(issue.number);
+    const issueData = this.parseUrlForData(issue.url);
+    const cardInKanban = await this.issueDataProvider.getRelatedCardInKanban(
+      issueData.number,
+      issueData.owner,
+      issueData.repo,
+    );
     if (cardInKanban !== null) {
       return this.getProjectConfigFromProjectCard(config, cardInKanban);
     }
@@ -157,5 +161,22 @@ module.exports = class ConfigProvider {
 
   parseRepositoryUrlForName(repositoryUrl) {
     return repositoryUrl.substr(repositoryUrl.lastIndexOf('/') + 1);
+  }
+
+  /**
+   * Parse a github URL to extract Issue / Pull Request informations
+   *
+   * @param {string} url
+   *
+   * @returns {object}
+   */
+  parseUrlForData(url) {
+    const matches = url.match(/(.+)\/(.+)\/(.+)\/issues\/(\d+)/);
+
+    return {
+      number: parseInt(matches[4], 10),
+      owner: matches[2],
+      repo: matches[3],
+    };
   }
 };

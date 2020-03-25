@@ -35,7 +35,7 @@ module.exports = class E1 extends Rule {
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
 
-    const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(
+    const referencedIssuesData = await this.pullRequestDataProvider.getReferencedIssues(
       pullRequestNumber,
       owner,
       repo,
@@ -44,12 +44,17 @@ module.exports = class E1 extends Rule {
     const repositoryConfig = this.getRepositoryConfigFromIssue(context.payload.issue);
     const projectConfig = this.getProjectConfigFromMilestone(repositoryConfig, context.payload.issue.milestone.title);
 
-    if (projectConfig && referencedIssuesIds.length > 0) {
-      for (let index = 0; index < referencedIssuesIds.length; index += 1) {
-        const referencedIssueId = referencedIssuesIds[index];
+    if (projectConfig && referencedIssuesData.length > 0) {
+      for (let index = 0; index < referencedIssuesData.length; index += 1) {
+        const referencedIssueData = referencedIssuesData[index];
         const {inProgressColumnId} = projectConfig.kanbanColumns;
-        const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+        const referencedIssue = await this.issueDataProvider.getData(
+          referencedIssueData.number,
+          referencedIssueData.owner,
+          referencedIssueData.repo,
+        );
 
+        // TODO contentID must refer to an issue or pull request in the same repository as the project
         await this.githubApiClient.projects.createCard({
           column_id: inProgressColumnId,
           content_id: referencedIssue.id,

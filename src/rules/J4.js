@@ -36,22 +36,35 @@ module.exports = class J4 extends Rule {
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
 
-    const referencedIssuesIds = await this.pullRequestDataProvider.getReferencedIssues(pullRequestId, owner, repo);
+    const referencedIssuesData = await this.pullRequestDataProvider.getReferencedIssues(pullRequestId, owner, repo);
 
-    if (referencedIssuesIds.length > 0) {
-      for (let index = 0; index < referencedIssuesIds.length; index += 1) {
-        const referencedIssueId = referencedIssuesIds[index];
+    if (referencedIssuesData.length > 0) {
+      for (let index = 0; index < referencedIssuesData.length; index += 1) {
+        const referencedIssueData = referencedIssuesData[index];
 
-        const card = await this.issueDataProvider.getRelatedCardInKanban(referencedIssueId);
+        const card = await this.issueDataProvider.getRelatedCardInKanban(
+          referencedIssueData.number,
+          referencedIssueData.owner,
+          referencedIssueData.repo,
+        );
         if (card) {
           const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(card.column_url), 10);
 
-          const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+          const referencedIssue = await this.issueDataProvider.getData(
+            referencedIssueData.number,
+            referencedIssueData.owner,
+            referencedIssueData.repo,
+          );
           const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
           const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
 
           if (projectConfig.kanbanColumns.toBeTestedColumnId === cardColumnId) {
-            await this.moveCardTo(referencedIssueId, projectConfig.kanbanColumns.inProgressColumnId);
+            await this.moveCardTo(
+              referencedIssueData.number,
+              referencedIssueData.owner,
+              referencedIssueData.repo,
+              projectConfig.kanbanColumns.inProgressColumnId,
+            );
 
             // Remove automatic labels
             await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
@@ -59,18 +72,18 @@ module.exports = class J4 extends Rule {
             // Remove label toBeTested
             if (Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.toBeTested.name)) {
               await this.githubApiClient.issues.removeLabel({
-                issue_number: referencedIssueId,
-                owner,
-                repo,
+                issue_number: referencedIssueData.number,
+                owner: referencedIssueData.owner,
+                repo: referencedIssueData.repo,
                 name: repositoryConfig.labels.toBeTested.name,
               });
             }
             // Add In-Progress label
             if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.inProgress.name)) {
               await this.githubApiClient.issues.addLabels({
-                issue_number: referencedIssueId,
-                owner,
-                repo,
+                issue_number: referencedIssueData.number,
+                owner: referencedIssueData.owner,
+                repo: referencedIssueData.repo,
                 labels: {labels: [repositoryConfig.labels.inProgress.name]},
               });
             }

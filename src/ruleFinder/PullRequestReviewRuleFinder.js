@@ -28,10 +28,14 @@ const Utils = require('./Utils');
 module.exports = class PullRequestReviewRuleFinder {
   /**
      * @param config
+     * @param {PullRequestDataProvider} pullRequestDataProvider
+     * @param {ConfigProvider} configProvider
      * @param {Logger} logger
      */
-  constructor(config, logger) {
+  constructor(config, pullRequestDataProvider, configProvider, logger) {
     this.config = config;
+    this.pullRequestDataProvider = pullRequestDataProvider;
+    this.configProvider = configProvider;
     this.logger = logger;
   }
 

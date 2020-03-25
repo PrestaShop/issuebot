@@ -39,22 +39,12 @@ module.exports = class IssueDataProvider {
 
   /**
    * @param {int} issueId
-   *
-   * @returns {Promise<boolean>}
-   */
-  async isIssueInTheKanban(issueId) {
-    const cardPromise = this.getRelatedCardInKanban(issueId);
-    const card = await cardPromise;
-
-    return (card !== null);
-  }
-
-  /**
-   * @param {int} issueId
+   * @param {string} issueOwner
+   * @param {string} issueRepo
    *
    * @returns {Promise<*>}
    */
-  async getRelatedCardInKanban(issueId) {
+  async getRelatedCardInKanban(issueId, issueOwner, issueRepo) {
     const allCardsPromise = this.getAllCardsInKanban();
     const allCards = await allCardsPromise;
 
@@ -62,9 +52,12 @@ module.exports = class IssueDataProvider {
 
     for (let index = 0; index < allCards.length; index += 1) {
       currentCard = allCards[index];
+      const cardData = this.parseUrlForData(currentCard.content_url);
       if (
         Object.prototype.hasOwnProperty.call(currentCard, 'content_url')
-          && issueId === parseInt(this.parseCardUrlForId(currentCard.content_url), 10)
+          && issueId === parseInt(cardData.number, 10)
+          && issueOwner === cardData.owner
+          && issueRepo === cardData.repo
       ) {
         return currentCard;
       }
@@ -149,5 +142,22 @@ module.exports = class IssueDataProvider {
    */
   parseCardUrlForId(url) {
     return url.substr(url.lastIndexOf('/') + 1);
+  }
+
+  /**
+   * Parse a github URL to extract Issue / Pull Request informations
+   *
+   * @param {string} url
+   *
+   * @returns {object}
+   */
+  parseUrlForData(url) {
+    const matches = url.match(/(.+)\/(.+)\/(.+)\/issues\/(\d+)/);
+
+    return {
+      owner: matches[2],
+      repo: matches[3],
+      number: matches[4],
+    };
   }
 };

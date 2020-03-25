@@ -38,6 +38,7 @@ module.exports = class D2 extends Rule {
     const repo = context.payload.repository.name;
 
     const repositoryConfig = await this.getRepositoryConfigFromIssue(issue);
+    const projectConfig = await this.getProjectConfigFromIssue(issue);
 
     if (Utils.issueHasLabel(issue, repositoryConfig.labels.fixed.name)) {
       this.logger.info(`[Rule Applier] D2 - Remove label ${repositoryConfig.labels.fixed.name}`);
@@ -56,5 +57,12 @@ module.exports = class D2 extends Rule {
       repo,
       labels: {labels: [repositoryConfig.labels.toBeSpecified.name]},
     });
+
+    await this.moveCardTo(
+      issueId,
+      owner,
+      repo,
+      projectConfig.kanbanColumns.toBeSpecifiedColumnId,
+    );
   }
 };

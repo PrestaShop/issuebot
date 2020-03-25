@@ -23,6 +23,7 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 const Rule = require('./Rule.js');
+const Utils = require('../ruleFinder/Utils');
 
 module.exports = class D4 extends Rule {
   /**
@@ -37,13 +38,13 @@ module.exports = class D4 extends Rule {
     const repositoryConfig = this.getRepositoryConfigFromIssue(issue);
 
     if (this.isAutomaticLabel(repositoryConfig, newLabel)) {
-      const issueId = parseInt(issue.number, 10);
+      const issueData = Utils.parseUrlForData(issue.url);
 
       // Reopen the issue
       await this.githubApiClient.issues.update({
-        issue_number: issueId,
-        owner: context.payload.repository.owner.login,
-        repo: context.payload.repository.name,
+        issue_number: issueData.number,
+        owner: issueData.owner,
+        repo: issueData.repo,
         state: 'open',
       });
 
@@ -51,7 +52,12 @@ module.exports = class D4 extends Rule {
       // Move to TBS column if new label is not To-Do => If its To-Do, it will be automatically moved to TO-DO column
       if (newLabel !== repositoryConfig.labels.todo.name) {
         const projectConfig = await this.getProjectConfigFromIssue(issue);
-        await this.moveCardTo(issueId, projectConfig.kanbanColumns.toBeSpecifiedColumnId);
+        await this.moveCardTo(
+          issueData.number,
+          issueData.owner,
+          issueData.repo,
+          projectConfig.kanbanColumns.toBeSpecifiedColumnId,
+        );
       }
     }
   }

@@ -12,6 +12,18 @@ npm install
 npm start
 ```
 
+If you want to use multiple node versions on your development environment, consider using NVM
+
+[See NVM installation guide](https://github.com/nvm-sh/nvm#install-script)
+
+```shell script
+nvm install 12.16.0
+
+nvm use 12.16.0
+
+node --version #will output v12.16.0
+```
+
 ## Development environment
 
 See Probot doc [for local development](https://probot.github.io/docs/development/) and
@@ -45,3 +57,7 @@ The idea behind is to define a set of Rules for PrestaShop
 project workflow and the bot applies them.
 
 Rules are described in `src/rule.js` file.
+
+A config file have been introduced to setup your repositories
+
+
