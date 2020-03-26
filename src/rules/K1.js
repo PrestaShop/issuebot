@@ -27,10 +27,10 @@ const Utils = require('../ruleFinder/Utils');
 
 module.exports = class K1 extends Rule {
   /**
-     * @param {Context} context
-     *
-     * @public
-     */
+   * @param {Context} context
+   *
+   * @public
+   */
   async apply(context) {
     const referencedIssueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card);
     const owner = context.payload.repository.owner.login;

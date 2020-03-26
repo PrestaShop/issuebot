@@ -22,19 +22,16 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-
-const Utils = require('../ruleFinder/Utils');
-
 module.exports = class Rule {
   /**
-     * @param config
-     * @param {IssueDataProvider} issueDataProvider
-     * @param {PullRequestDataProvider} pullRequestDataProvider
-     * @param {ProjectCardDataProvider} projectCardDataProvider
-     * @param {ConfigProvider} configProvider
-     * @param {import('probot').GitHubApi} githubApiClient
-     * @param {Logger} logger
-     */
+   * @param config
+   * @param {IssueDataProvider} issueDataProvider
+   * @param {PullRequestDataProvider} pullRequestDataProvider
+   * @param {ProjectCardDataProvider} projectCardDataProvider
+   * @param {ConfigProvider} configProvider
+   * @param {import('probot').GitHubApi} githubApiClient
+   * @param {Logger} logger
+   */
   constructor(
     config,
     issueDataProvider,

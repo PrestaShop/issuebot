@@ -40,14 +40,14 @@ module.exports = class PullRequestReviewRuleFinder {
   }
 
   /**
-     * Try to find whether webhook context matches an PR reviews rule requirements.
-     *
-     * @param {Context} context
-     *
-     * @returns {Promise<*>}
-     *
-     * @public
-     */
+   * Try to find whether webhook context matches an PR reviews rule requirements.
+   *
+   * @param {Context} context
+   *
+   * @returns {Promise<*>}
+   *
+   * @public
+   */
   async findRules(context) {
     const rules = [];
     if (Utils.contextHasAction(context, 'submitted')) {

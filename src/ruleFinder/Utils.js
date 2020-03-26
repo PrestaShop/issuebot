@@ -53,8 +53,6 @@ module.exports.issueHasLabel = (issue, labelTitle) => {
  */
 module.exports.contextHasAction = (context, actionName) => (context.payload.action === actionName);
 
-
-
 /**
  * Parse a github URL to extract Issue / Pull Request informations
  *

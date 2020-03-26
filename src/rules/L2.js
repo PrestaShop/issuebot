@@ -26,10 +26,10 @@ const Rule = require('./Rule.js');
 
 module.exports = class L2 extends Rule {
   /**
-     * @param {Context} context
-     *
-     * @public
-     */
+   * @param {Context} context
+   *
+   * @public
+   */
   async apply(context) {
     const pullRequestId = context.payload.pull_request.number;
     const owner = context.payload.repository.owner.login;

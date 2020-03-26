@@ -27,10 +27,10 @@ const Utils = require('../ruleFinder/Utils');
 
 module.exports = class D2 extends Rule {
   /**
-     * @param {Context} context
-     *
-     * @public
-     */
+   * @param {Context} context
+   *
+   * @public
+   */
   async apply(context) {
     const {issue} = context.payload;
     const issueId = parseInt(issue.number, 10);

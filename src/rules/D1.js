@@ -26,10 +26,10 @@ const Rule = require('./Rule.js');
 
 module.exports = class D1 extends Rule {
   /**
-     * @param {Context} context
-     *
-     * @public
-     */
+   * @param {Context} context
+   *
+   * @public
+   */
   async apply(context) {
     const repositoryConfig = this.getRepositoryConfigFromIssue(context.payload.issue);
 

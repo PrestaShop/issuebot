@@ -23,8 +23,6 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 /* eslint-disable no-unused-vars */
-// const A1 = require('./rules/A1.js');
-// const B2 = require('./rules/B2.js');
 const C1 = require('./rules/C1.js');
 const C2 = require('./rules/C2.js');
 const D1 = require('./rules/D1.js');
@@ -66,7 +64,7 @@ module.exports = class RuleApplier {
     projectCardDataProvider,
     configProvider,
     githubApiClient,
-    logger
+    logger,
   ) {
     this.config = config;
     this.issueDataProvider = issueDataProvider;

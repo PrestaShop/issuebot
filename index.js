@@ -22,7 +22,6 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-
 const RuleComputer = require('./src/rule-computer');
 const IssueDataProvider = require('./src/issue-data-provider');
 const PullRequestDataProvider = require('./src/pull-request-data-provider');
@@ -36,8 +35,6 @@ if (process.env.NODE_ENV === 'test') {
   // eslint-disable-next-line global-require
   config = require('./tests/config');
 }
-
-// config = config.projects[0];
 
 /**
  * This is the main entrypoint to your Probot app

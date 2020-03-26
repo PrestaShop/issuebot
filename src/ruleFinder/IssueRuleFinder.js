@@ -119,6 +119,12 @@ module.exports = class IssueRuleFinder {
     };
   }
 
+  /**
+   * Get card related to an issue
+   *
+   * @param {Object} issue
+   * @returns {Promise<*>}
+   */
   async getCardFromIssue(issue) {
     const issueData = this.parseUrlForData(issue.url);
 

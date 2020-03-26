@@ -38,6 +38,13 @@ module.exports = class ConfigProvider {
     this.logger = logger;
   }
 
+  /**
+   * Get repository configuration by milestone object
+   *
+   * @param {Object} config
+   * @param {Object} milestone
+   * @returns {null|Object}
+   */
   getRepositoryConfigFromMilestone(config, milestone) {
     return this.getRepositoryConfigByName(
       config,
@@ -45,6 +52,41 @@ module.exports = class ConfigProvider {
     );
   }
 
+  /**
+   * Get project configuration by milestone object
+   *
+   * @param {Object} repositoryConfig
+   * @param {Object} milestone
+   * @returns {
+   *   Promise
+   *   <
+   *     null|
+   *     *|
+   *     {
+   *       name: string,
+   *       kanbanColumns: {
+   *         inProgressColumnId: number,
+   *         notReadyColumnId: number,
+   *         toBeReviewedColumnId: number,
+   *         toBeSpecifiedColumnId: number,
+   *         toBeTestedColumnId: number,
+   *         doneColumnId: number,
+   *         toBerMergedColumnId: number,
+   *         backlogColumnId: number,
+   *         toDoColumnId: number
+   *       }
+   *     }|
+   *     {
+   *       name: string,
+   *       kanbanColumns: {
+   *         inProgressColumnId: number,
+   *         doneColumnId: number,
+   *         toDoColumnId: number
+   *       }
+   *     }
+   *   >
+   * }
+   */
   getProjectConfigFromMilestone(repositoryConfig, milestone) {
     let projectName = null;
     for (let index = 0; index < repositoryConfig.milestones.length; index += 1) {
@@ -64,12 +106,54 @@ module.exports = class ConfigProvider {
     return null;
   }
 
+  /**
+   * Get repository configuration by issue object
+   *
+   * @param {Object} config
+   * @param {Object} issue
+   * @returns {null|Object}
+   */
   getRepositoryConfigFromIssue(config, issue) {
     const projectName = this.parseRepositoryUrlForName(issue.repository_url);
 
     return this.getRepositoryConfigByName(config, projectName);
   }
 
+  /**
+   * Get project configuration by issue object
+   *
+   * @param {object} config
+   * @param {object} issue
+   * @returns {
+   *   Promise
+   *   <
+   *     null|
+   *     *|
+   *     {
+   *       name: string,
+   *       kanbanColumns: {
+   *         inProgressColumnId: number,
+   *         notReadyColumnId: number,
+   *         toBeReviewedColumnId: number,
+   *         toBeSpecifiedColumnId: number,
+   *         toBeTestedColumnId: number,
+   *         doneColumnId: number,
+   *         toBerMergedColumnId: number,
+   *         backlogColumnId: number,
+   *         toDoColumnId: number
+   *       }
+   *     }|
+   *     {
+   *       name: string,
+   *       kanbanColumns: {
+   *         inProgressColumnId: number,
+   *         doneColumnId: number,
+   *         toDoColumnId: number
+   *       }
+   *     }
+   *   >
+   * }
+   */
   async getProjectConfigFromIssue(config, issue) {
     const issueData = this.parseUrlForData(issue.url);
     const cardInKanban = await this.issueDataProvider.getRelatedCardInKanban(
@@ -84,20 +168,24 @@ module.exports = class ConfigProvider {
     return null;
   }
 
+  /**
+   * Get repository configuration by pull_request object
+   *
+   * @param {object} config
+   * @param {object} pullRequest
+   * @returns {null|object}
+   */
   getRepositoryConfigFromPullRequest(config, pullRequest) {
     return this.getRepositoryConfigByName(config, pullRequest.base.repo.name);
   }
 
-  getProjectFromPullRequest(config, pullRequest) {
-    for (let index = 0; index < config.milestones.length; index += 1) {
-      if (config.milestones[index].name === milestone) {
-        return this.getRepositoryConfigByName(config, config.milestones[index].project);
-      }
-    }
-
-    return null;
-  }
-
+  /**
+   * Get repository configuration by it's name
+   *
+   * @param {object} config
+   * @param {string} projectName
+   * @returns {null|object}
+   */
   getRepositoryConfigByName(config, projectName) {
     for (let index = 0; index < config.repositories.length; index += 1) {
       if (config.repositories[index].name === projectName) {
@@ -159,6 +247,12 @@ module.exports = class ConfigProvider {
     return null;
   }
 
+  /**
+   * Get repository name from URL
+   *
+   * @param {string} repositoryUrl
+   * @returns {string}
+   */
   parseRepositoryUrlForName(repositoryUrl) {
     return repositoryUrl.substr(repositoryUrl.lastIndexOf('/') + 1);
   }
@@ -168,7 +262,7 @@ module.exports = class ConfigProvider {
    *
    * @param {string} url
    *
-   * @returns {object}
+   * @returns {object}|{number: {int}, owner: {string}, repo: {string}}
    */
   parseUrlForData(url) {
     const matches = url.match(/(.+)\/(.+)\/(.+)\/issues\/(\d+)/);

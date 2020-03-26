@@ -26,10 +26,10 @@ const Rule = require('./Rule.js');
 
 module.exports = class D3 extends Rule {
   /**
-     * @param {Context} context
-     *
-     * @public
-     */
+   * @param {Context} context
+   *
+   * @public
+   */
   async apply(context) {
     const {issue} = context.payload;
     const owner = context.payload.repository.owner.login;

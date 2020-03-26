@@ -25,7 +25,7 @@
 const {graphql} = require('@octokit/graphql');
 const {createAppAuth} = require('@octokit/auth-app');
 const DomParser = require('dom-parser');
-const fs = require('fs')
+const fs = require('fs');
 
 
 module.exports = class PullRequestDataProvider {
@@ -44,6 +44,8 @@ module.exports = class PullRequestDataProvider {
   }
 
   /**
+   * Get pull_request informations
+   *
    * @param {int} pullRequestId
    * @param {string} owner
    * @param {string} repo
@@ -60,6 +62,14 @@ module.exports = class PullRequestDataProvider {
     return data;
   }
 
+  /**
+   * Get data of issues linked to a pull_request
+   *
+   * @param {int} pullRequestNumber
+   * @param {string} owner
+   * @param {string} repo
+   * @returns {Promise<[]>}
+   */
   async getReferencedIssues(pullRequestNumber, owner, repo) {
     const issues = [];
     const privateKey = await fs.readFileSync(process.env.PRIVATE_KEY_PATH, 'utf8');
@@ -163,6 +173,14 @@ module.exports = class PullRequestDataProvider {
     return issues;
   }
 
+  /**
+   * Get number of approvals for a given pull_request
+   *
+   * @param {int} pullRequestId
+   * @param {string} owner
+   * @param {string} repo
+   * @returns {Promise<number>}
+   */
   async getNumberOfApprovals(pullRequestId, owner, repo) {
     const reviews = await this.githubApiClient.pulls.listReviews({
       pull_number: pullRequestId,

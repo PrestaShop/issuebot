@@ -27,10 +27,10 @@ const Utils = require('../ruleFinder/Utils');
 
 module.exports = class B2 extends Rule {
   /**
-     * @param {Context} context
-     *
-     * @public
-     */
+   * @param {Context} context
+   *
+   * @public
+   */
   async apply(context) {
     const issueData = Utils.parseUrlForData(context.payload.issue.url);
     const getRelatedCardPromise = await this.issueDataProvider.getRelatedCardInKanban(

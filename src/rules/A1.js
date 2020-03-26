@@ -26,12 +26,12 @@ const Rule = require('./Rule.js');
 
 module.exports = class A1 extends Rule {
   /**
-     * Apply Rule A1
-     *
-     * @param {Context} context
-     *
-     * @public
-     */
+   * Apply Rule A1
+   *
+   * @param {Context} context
+   *
+   * @public
+   */
   async apply(context) {
     const todoColumnId = this.config.kanbanColumns.toDoColumnId;
     const issueId = context.payload.issue.id;

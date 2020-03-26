@@ -142,7 +142,7 @@ module.exports = class PullRequestRuleFinder {
             rules.push(Rule.I1);
           }
         }
-        const issues = await this.getPullRequestIssues(issuesData);
+        const issues = await this.getIssues(issuesData);
 
         for (let index = 0; index < issues.length; index += 1) {
           if (issues[index].state === 'closed') {
@@ -159,7 +159,13 @@ module.exports = class PullRequestRuleFinder {
     return rules;
   }
 
-  async getPullRequestIssues(issuesData) {
+  /**
+   * Get issues objects by given data
+   *
+   * @param {array} issuesData
+   * @returns {Promise<[]>}
+   */
+  async getIssues(issuesData) {
     const issues = [];
     for (let index = 0; index < issuesData.length; index += 1) {
       const issueData = issuesData[index];

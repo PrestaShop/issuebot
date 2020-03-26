@@ -27,10 +27,10 @@ const Utils = require('../ruleFinder/Utils');
 
 module.exports = class F1 extends Rule {
   /**
-     * @param {Context} context
-     *
-     * @public
-     */
+   * @param {Context} context
+   *
+   * @public
+   */
   async apply(context) {
     const pullRequestId = context.payload.pull_request.number;
     const owner = context.payload.repository.owner.login;
@@ -54,7 +54,7 @@ module.exports = class F1 extends Rule {
           referencedIssueData.number,
           referencedIssueData.owner,
           referencedIssueData.repo,
-          projectConfig.kanbanColumns.inProgressColumnId
+          projectConfig.kanbanColumns.inProgressColumnId,
         );
 
         if (Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.todo.name)) {
