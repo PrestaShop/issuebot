@@ -56,6 +56,20 @@ module.exports = class PullRequestRuleFinder {
     if (Utils.contextHasAction(context, 'opened')) {
       rules.push(Rule.I1);
       rules.push(Rule.E6);
+
+      const pullRequest = context.payload.pull_request;
+      const repositoryConfig = this.configProvider.getRepositoryConfigFromPullRequest(this.config, pullRequest);
+
+      if (Utils.issueHasLabel(pullRequest, repositoryConfig.labels.inProgress.name) || pullRequest.draft === true) {
+        const issueIds = await this.pullRequestDataProvider.getReferencedIssues(
+          pullRequest.number,
+          context.payload.repository.owner.login,
+          context.payload.repository.name,
+        );
+        if (issueIds.length > 0) {
+          rules.push(Rule.H2);
+        }
+      }
     }
 
     if (Utils.contextHasAction(context, 'ready_for_review')) {

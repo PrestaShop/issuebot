@@ -44,8 +44,12 @@ module.exports = (app) => {
   app.log('IssueBot app loaded!');
 
   app.on('issues.opened', async (context) => {
-    const issueComment = context.issue({body: 'Thanks for opening this issue!'});
-    return context.github.issues.createComment(issueComment);
+    return context.github.issues.createComment({
+      issue_number: context.payload.issue.number,
+      owner: context.payload.repository.owner.login,
+      repo: context.payload.repository.name,
+      body: 'Thanks for opening this issue! We will help you to keep its state consistent',
+    });
   });
 
   app.on('*', async (context) => {

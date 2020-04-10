@@ -79,7 +79,14 @@ module.exports = class RuleComputer {
    */
   async findRules(context) {
     if (context.payload.action) {
-      this.logger.debug(`[Rule Computer] Context action is ${context.payload.action}`);
+      this.logger.info(`[Rule Computer] Context action is ${context.payload.action}`);
+      if (context.payload.pull_request) {
+        this.logger.info(`[Rule Computer] Context target is Pull request ${context.payload.pull_request.title}`);
+      } else if (context.payload.issue) {
+        this.logger.info(`[Rule Computer] Context target is Issue [${context.payload.issue.title}]`);
+      } else if (context.payload.project_card) {
+        this.logger.info(`[Rule Computer] Context target is Project card ${context.payload.project_card.title}`);
+      }
     }
 
     switch (context.name) {

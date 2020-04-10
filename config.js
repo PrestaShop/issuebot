@@ -1,76 +1,35 @@
 const config = {
   repositories: [
     {
-      name: 'wuffle-test-1',
-      nbRequiredApprovals: 1,
-      projects: [
-        {
-          name: 'Multi-board',
-          kanbanColumns: {
-            notReadyColumnId: 8032025,
-            backlogColumnId: 8032027,
-            toBeSpecifiedColumnId: 8032029,
-            toDoColumnId: 8032010,
-            inProgressColumnId: 8032011,
-            toBeReviewedColumnId: 8032031,
-            toBeTestedColumnId: 8032032,
-            toBerMergedColumnId: 8032037,
-            doneColumnId: 8032012,
-          },
-        },
-        {
-          name: '1.7.8',
-          kanbanColumns: {
-            // notReadyColumnId: 8032025,
-            // backlogColumnId: 8032027,
-            // toBeSpecifiedColumnId: 8032029,
-            toDoColumnId: 8356281,
-            inProgressColumnId: 8356282,
-            // toBeReviewedColumnId: 8032031,
-            // toBeTestedColumnId: 8032032,
-            // toBerMergedColumnId: 8032037,
-            doneColumnId: 8356283,
-          },
-        },
-      ],
-      labels: {
-        todo: {name: 'To Do', automatic: true},
-        inProgress: {name: 'WIP', automatic: false},
-        toBeReproduced: {name: 'TBR', automatic: true},
-        toBeSpecified: {name: 'TBS', automatic: true},
-        needsMoreInfo: {name: 'NMI', automatic: true},
-        toBeTested: {name: 'waiting for QA', automatic: false},
-        toBeMerged: {name: 'QA ✔️', automatic: false},
-        waitingAuthor: {name: 'waiting for author️', automatic: false},
-        fixed: {name: 'Fixed', automatic: true},
-      },
-      milestones: [
-        {
-          name: '1.7.7.1',
-          project: 'Multi-board',
-        },
-        {
-          name: '1.7.8',
-          project: '1.7.8',
-        },
-      ],
-    },
-    {
-      name: 'wuffle-test-2',
+      name: 'PrestaShop',
       nbRequiredApprovals: 2,
       projects: [
         {
-          name: 'Wuffle 2',
+          name: 'PrestaShop 1.7.7',
           kanbanColumns: {
-            notReadyColumnId: 8437263,
-            backlogColumnId: 8437257,
-            toBeSpecifiedColumnId: 8437270,
-            toDoColumnId: 8342936,
-            inProgressColumnId: 8342937,
-            toBeReviewedColumnId: 8437290,
-            toBeTestedColumnId: 8437301,
-            toBerMergedColumnId: 8437304,
-            doneColumnId: 8342938,
+            // notReadyColumnId: xxxxxxx,
+            backlogColumnId: 4843009,
+            toBeSpecifiedColumnId: 7804937,
+            toDoColumnId: 4336345,
+            inProgressColumnId: 4336346,
+            toBeReviewedColumnId: 4336353,
+            toBeTestedColumnId: 4867632,
+            toBerMergedColumnId: 4336379,
+            doneColumnId: 4336347,
+          },
+        },
+        {
+          name: 'PrestaShop 1.7.8',
+          kanbanColumns: {
+            notReadyColumnId: 7977635,
+            backlogColumnId: 6728638,
+            toBeSpecifiedColumnId: 7977630,
+            toDoColumnId: 6728615,
+            inProgressColumnId: 6728616,
+            toBeReviewedColumnId: 7309753,
+            toBeTestedColumnId: 7309755,
+            toBerMergedColumnId: 7309760,
+            doneColumnId: 6728617,
           },
         },
       ],
@@ -87,8 +46,12 @@ const config = {
       },
       milestones: [
         {
-          name: 'Next version',
-          project: 'Wuffle 2',
+          name: '1.7.7.0',
+          project: 'PrestaShop 1.7.7',
+        },
+        {
+          name: '1.7.8.0',
+          project: 'PrestaShop 1.7.8',
         },
       ],
     },

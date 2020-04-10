@@ -23,6 +23,7 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 const Rule = require('./Rule.js');
+const Utils = require('../ruleFinder/Utils');
 
 module.exports = class E3 extends Rule {
   /**
@@ -50,10 +51,22 @@ module.exports = class E3 extends Rule {
           referencedIssueData.owner,
           referencedIssueData.repo,
         );
+        const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
         const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
 
         // Remove automatic labels
         await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
+
+        // Remove WIP label
+        if (Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.inProgress.name)) {
+          // Remove label toBeTested
+          await this.githubApiClient.issues.removeLabel({
+            issue_number: referencedIssueData.number,
+            owner: referencedIssueData.owner,
+            repo: referencedIssueData.repo,
+            name: repositoryConfig.labels.inProgress.name,
+          });
+        }
 
         // Move card in toBeTested column
         await this.moveCardTo(
