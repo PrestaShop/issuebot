@@ -83,14 +83,14 @@ module.exports = class IssueRuleFinder {
       rules.push(Rule.D3);
 
       // place an Issue in the “Done” column when it is closed
-      const cardInKanban = await this.getCardFromIssue(context.payload.issue);
-      if (cardInKanban !== null) {
-        const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(cardInKanban.column_url), 10);
-        const projectConfig = await this.configProvider.getProjectConfigFromProjectCard(this.config, cardInKanban);
-        if (projectConfig.kanbanColumns.doneColumnId !== cardColumnId) {
-          rules.push(Rule.C2);
-        }
-      }
+      // const cardInKanban = await this.getCardFromIssue(context.payload.issue);
+      // if (cardInKanban !== null) {
+      //   const cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(cardInKanban.column_url), 10);
+      //   const projectConfig = await this.configProvider.getProjectConfigFromProjectCard(this.config, cardInKanban);
+      //   if (projectConfig.kanbanColumns.doneColumnId !== cardColumnId) {
+      //     rules.push(Rule.C2);
+      //   }
+      // }
     }
 
     if (Utils.contextHasAction(context, 'reopened')) {
