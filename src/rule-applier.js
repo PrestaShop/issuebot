@@ -22,112 +22,81 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-var Rule = require('./rule.js');
+/* eslint-disable no-unused-vars */
+const C1 = require('./rules/C1.js');
+const C2 = require('./rules/C2.js');
+const D1 = require('./rules/D1.js');
+const D2 = require('./rules/D2.js');
+const D3 = require('./rules/D3.js');
+const D4 = require('./rules/D4.js');
+const E1 = require('./rules/E1.js');
+const E3 = require('./rules/E3.js');
+const E4 = require('./rules/E4.js');
+const E5 = require('./rules/E5.js');
+const E6 = require('./rules/E6.js');
+const F1 = require('./rules/F1.js');
+const G2 = require('./rules/G2.js');
+const H1 = require('./rules/H1.js');
+const H2 = require('./rules/H2.js');
+const I1 = require('./rules/I1.js');
+const J1 = require('./rules/J1.js');
+const J3 = require('./rules/J3.js');
+const J4 = require('./rules/J4.js');
+const K1 = require('./rules/K1.js');
+const L1 = require('./rules/L1.js');
+const L2 = require('./rules/L2.js');
+/* eslint-enable */
 
 module.exports = class RuleApplier {
-
   /**
    * @param config
    * @param {IssueDataProvider} issueDataProvider
-   * @param {GithubAPI} githubApiClient
+   * @param {PullRequestDataProvider} pullRequestDataProvider
+   * @param {ProjectCardDataProvider} projectCardDataProvider
+   * @param {ConfigProvider} configProvider
+   * @param {import('probot').GitHubApi} githubApiClient
    * @param {Logger} logger
    */
-  constructor (config, issueDataProvider, githubApiClient, logger) {
+  constructor(
+    config,
+    issueDataProvider,
+    pullRequestDataProvider,
+    projectCardDataProvider,
+    configProvider,
+    githubApiClient,
+    logger,
+  ) {
     this.config = config;
     this.issueDataProvider = issueDataProvider;
+    this.pullRequestDataProvider = pullRequestDataProvider;
+    this.projectCardDataProvider = projectCardDataProvider;
+    this.configProvider = configProvider;
     this.githubApiClient = githubApiClient;
     this.logger = logger;
   }
 
   /**
-   * @param {string} rule
+   * @param {array} rules
    * @param {Context} context
    */
-  applyRule (rule, context) {
-    this.logger.debug('[Rule Applier] Applying rule ' + rule);
+  applyRules(rules, context) {
+    rules.forEach((rule) => {
+      this.logger.debug(`[Rule Applier] Applying rule ${rule}`);
 
-    switch (rule) {
-      case Rule.A1:
-        this.applyRuleA1(context);
-        break;
-
-      case Rule.B2:
-        this.applyRuleB2(context);
-        break;
-
-      case Rule.C1:
-        this.applyRuleC1(context);
-        break;
-
-      case Rule.C2:
-        this.applyRuleC2(context);
-        break;
-
-      default:
-        this.logger.error('[Rule Applier] Cannot apply ' + rule);
-
-    }
-  }
-
-  /**
-   * Apply Rule A1
-   *
-   * @param {Context} context
-   *
-   * @private
-   */
-  async applyRuleA1 (context) {
-    const todoColumnId = this.config.kanbanColumns.toDoColumnId;
-    const issueId = context.payload.issue.id;
-
-    this.githubApiClient.projects.createProjectCard({
-      column_id: todoColumnId,
-      content_id: issueId,
-      content_type: 'Issue'
-    });
-  }
-
-  /**
-   * @param {Context} context
-   */
-  async applyRuleB2 (context) {
-    const issueId = context.payload.issue.number;
-
-    const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
-    const relatedCard = await getRelatedCardPromise;
-
-    this.githubApiClient.projects.deleteProjectCard({card_id: relatedCard.id});
-  }
-
-  /**
-   * @param {Context} context
-   */
-  async applyRuleC1 (context) {
-    const issueId = context.payload.issue.number;
-
-    const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
-    const relatedCard = await getRelatedCardPromise;
-
-    this.githubApiClient.projects.moveProjectCard({
-      card_id: relatedCard.id,
-      position: 'bottom',
-      column_id: this.config.kanbanColumns.toDoColumnId
-    });
-  }
-
-  /**
-   * @param {Context} context
-   */
-  async applyRuleC2 (context) {
-    const issueId = context.payload.issue.number;
-
-    const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
-    const relatedCard = await getRelatedCardPromise;
-
-    this.githubApiClient.projects.moveProjectCard({
-      card_id: relatedCard.id,
-      position: 'bottom',
-      column_id: this.config.kanbanColumns.doneColumnId
+      /**
+       * @type {C1|C2|D1|D2|D3|D4|E1|E3|E4|E5|E6|F1|G2|H1|H2|I1|J1|J3|J4|K1|L1|L2} rule
+       */
+      const ruleApplier = eval( // eslint-disable-line no-eval
+        `new ${rule}(
+        this.config,
+        this.issueDataProvider,
+        this.pullRequestDataProvider,
+        this.projectCardDataProvider,
+        this.configProvider,
+        this.githubApiClient,this.logger
+        );`,
+      );
+      ruleApplier.apply(context);
     });
   }
 };

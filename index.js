@@ -22,46 +22,76 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-
-const RuleComputer = require('./src/rule-computer.js');
-const IssueDataProvider = require('./src/issue-data-provider.js');
+const RuleComputer = require('./src/rule-computer');
+const IssueDataProvider = require('./src/issue-data-provider');
+const PullRequestDataProvider = require('./src/pull-request-data-provider');
+const ProjectCardDataProvider = require('./src/project-card-data-provider');
+const ConfigProvider = require('./src/config-provider');
+const ProjectDataProvider = require('./src/project-data-provider');
 const RuleApplier = require('./src/rule-applier');
+let config = require('./config');
+
+if (process.env.NODE_ENV === 'test') {
+  // eslint-disable-next-line global-require
+  config = require('./tests/config');
+}
 
 /**
- * Entry point for Probot App
- * @param {import('probot').Application} app - Probot's Application class.
+ * This is the main entrypoint to your Probot app
+ * @param {import('probot').Application} app
  */
-module.exports = app => {
-  app.on('*', async context => {
+module.exports = (app) => {
+  app.log('IssueBot app loaded!');
 
-    // @todo: parse this config from a YAML file
-    const config = {
-      kanbanColumns: {
-        toDoColumnId: 3311230,
-        inProgressColumnId: 3311231,
-        toBeReviewedColumnId: 3311232,
-        toBeTestedColumnId: 3329346,
-        toBerMergedColumnId: 3329347,
-        doneColumnId: 3329348,
-      },
-      milestones: {
-        next_patch_milestone: '1.7.4.3',
-        next_minor_milestone: '1.7.5.0',
-      }
-    };
+  app.on('issues.opened', async (context) => {
+    return context.github.issues.createComment({
+      issue_number: context.payload.issue.number,
+      owner: context.payload.repository.owner.login,
+      repo: context.payload.repository.name,
+      body: 'Thanks for opening this issue! We will help you to keep its state consistent',
+    });
+  });
 
+  app.on('*', async (context) => {
+    const projectDataProvider = new ProjectDataProvider(config, context.github, context.log);
     const issueDataProvider = new IssueDataProvider(config, context.github, context.log);
-    const ruleComputer = new RuleComputer(config, issueDataProvider, context.log);
-    const ruleApplier = new RuleApplier(config, issueDataProvider, context.github, context.log);
+    const configProvider = new ConfigProvider(
+      config,
+      context.github,
+      issueDataProvider,
+      projectDataProvider,
+      context.log,
+    );
+    const pullRequestDataProvider = new PullRequestDataProvider(config, context.github, context.log);
+    const projectCardDataProvider = new ProjectCardDataProvider(config, context.github, context.log);
+    const ruleComputer = new RuleComputer(
+      config,
+      issueDataProvider,
+      pullRequestDataProvider,
+      projectCardDataProvider,
+      configProvider,
+      context.log,
+    );
+    const ruleApplier = new RuleApplier(
+      config,
+      issueDataProvider,
+      pullRequestDataProvider,
+      projectCardDataProvider,
+      configProvider,
+      context.github,
+      context.log,
+    );
 
-    let rulePromise = ruleComputer.findRule(context);
-    let rule = await rulePromise;
+    const rulePromise = ruleComputer.findRules(context);
+    const rules = await rulePromise;
 
-    if (rule != null) {
-      context.log.info('[Index] Received webhook matches rule ' + rule + ' requirements');
-      ruleApplier.applyRule(rule, context);
+    if (rules) {
+      rules.forEach((rule) => {
+        context.log.info(`[Index] Received webhook matches rule ${rule} requirements`);
+      });
+      ruleApplier.applyRules(rules, context);
     } else {
-      context.log.info('[Index] No rule applies to received webhook: ' + context.name);
+      context.log.info(`[Index] No rule applies to received webhook: ${context.name}`);
     }
   });
 };

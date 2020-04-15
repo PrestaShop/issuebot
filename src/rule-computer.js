@@ -22,18 +22,52 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-var Rule = require('./rule.js');
+const IssueRuleFinder = require('./ruleFinder/IssueRuleFinder.js');
+const PullRequestRuleFinder = require('./ruleFinder/PullRequestRuleFinder.js');
+const PullRequestReviewRuleFinder = require('./ruleFinder/PullRequestReviewRuleFinder.js');
+const ProjectCardRuleFinder = require('./ruleFinder/ProjectCardRuleFinder.js');
 
 module.exports = class RuleComputer {
   /**
    * @param config
    * @param {IssueDataProvider} issueDataProvider
+   * @param {PullRequestDataProvider} pullRequestDataProvider
+   * @param {ProjectCardDataProvider} projectCardDataProvider
+   * @param {ConfigProvider} configProvider
    * @param {Logger} logger
    */
-  constructor (config, issueDataProvider, logger) {
+  constructor(config, issueDataProvider, pullRequestDataProvider, projectCardDataProvider, configProvider, logger) {
     this.config = config;
     this.logger = logger;
     this.issueDataProvider = issueDataProvider;
+    this.pullRequestDataProvider = pullRequestDataProvider;
+    this.projectCardDataProvider = projectCardDataProvider;
+    this.configProvider = configProvider;
+
+    this.issueRuleFinder = new IssueRuleFinder(
+      this.config,
+      this.issueDataProvider,
+      this.configProvider,
+      this.logger,
+    );
+    this.pullRequestRuleFinder = new PullRequestRuleFinder(
+      this.config,
+      this.issueDataProvider,
+      this.pullRequestDataProvider,
+      this.configProvider,
+      this.logger,
+    );
+    this.pullRequestReviewRuleFinder = new PullRequestReviewRuleFinder(
+      this.config,
+      this.pullRequestDataProvider,
+      this.configProvider,
+      this.logger,
+    );
+    this.projectCardRuleFinder = new ProjectCardRuleFinder(
+      this.config,
+      this.configProvider,
+      this.logger,
+    );
   }
 
   /**
@@ -43,131 +77,55 @@ module.exports = class RuleComputer {
    *
    * @returns {Promise<*>}
    */
-  async findRule (context) {
+  async findRules(context) {
+    if (context.payload.action) {
+      this.logger.info(`[Rule Computer] Context action is ${context.payload.action}`);
+      if (context.payload.pull_request) {
+        this.logger.info(`[Rule Computer] Context target is Pull request ${context.payload.pull_request.title}`);
+      } else if (context.payload.issue) {
+        this.logger.info(`[Rule Computer] Context target is Issue [${context.payload.issue.title}]`);
+      } else if (context.payload.project_card) {
+        this.logger.info(`[Rule Computer] Context target is Project card ${context.payload.project_card.title}`);
+      }
+    }
 
     switch (context.name) {
       case 'issues':
+        /**
+         * Got this case one time, added this specific case
+         */
+        if (context.payload.pull_request || context.payload.issue.pull_request) {
+          this.logger.debug('[Rule Computer] Got this case one time, added this specific case');
+          return this.pullRequestRuleFinder.findRules(context);
+        }
+
         this.logger.debug('[Rule Computer] Context type is issue');
-        return this.findIssueRule(context);
+
+        return this.issueRuleFinder.findRules(context);
+
+      case 'pull_request':
+        this.logger.debug('[Rule Computer] Context type is Pull Request');
+
+        return this.pullRequestRuleFinder.findRules(context);
+
+      case 'pull_request_review':
+        this.logger.debug('[Rule Computer] Context type is Pull Request');
+
+        return this.pullRequestReviewRuleFinder.findRules(context);
+
+      case 'project_card':
+        this.logger.debug('[Rule Computer] Context type is Project Card');
+
+        return this.projectCardRuleFinder.findRules(context);
 
       case 'issue_comment':
         this.logger.debug('[Rule Computer] Context type is issue comment');
         break;
 
       default:
-        this.logger.debug('[Rule Computer] No rule applies to ' + context.name);
-    }
-  }
-
-  /**
-   * Try to find whether webhook context matches an Issue rule requirements.
-   *
-   * @param {Context} context
-   *
-   * @returns {Promise<*>}
-   *
-   * @private
-   */
-  async findIssueRule (context) {
-
-    if (this.contextHasAction(context, 'milestoned')) {
-      const milestone = context.payload.issue.milestone.title;
-
-      if ((milestone === this.config.milestones.next_minor_milestone) ||
-        (milestone === this.config.milestones.next_patch_milestone)) {
-        const issueId = context.payload.issue.number;
-        const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
-        const isIssueInKanban = await isIssueInKanbanPromise;
-
-        if (isIssueInKanban === false) {
-          return Rule.A1;
-        }
-      }
+        this.logger.debug(`[Rule Computer] No rule applies to ${context.name}`);
     }
 
-    if (this.contextHasAction(context, 'demilestoned')) {
-      const issueId = context.payload.issue.number;
-      const isIssueInKanbanPromise = this.issueDataProvider.isIssueInTheKanban(issueId);
-      const isIssueInKanban = await isIssueInKanbanPromise;
-
-      if (isIssueInKanban === true) {
-        return Rule.B2;
-      }
-    }
-
-    if (this.contextHasAction(context, 'labeled')) {
-      const issue = context.payload.issue;
-      const issueId = issue.number;
-      const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
-      const getCardInKanban = await getCardInKanbanPromise;
-
-      if (getCardInKanban !== null) {
-        let cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
-
-        // @todo: check this is indeed 'todo'
-        if (this.config.kanbanColumns.toDoColumnId !== cardColumnId && this.issueHasLabel(issue, 'todo')) {
-          return Rule.C1;
-        }
-      }
-    }
-
-    if (this.contextHasAction(context, 'closed')) {
-      const issueId = context.payload.issue.number;
-      const getCardInKanbanPromise = this.issueDataProvider.getRelatedCardInKanban(issueId);
-      const getCardInKanban = await getCardInKanbanPromise;
-
-      if (getCardInKanban !== null) {
-        let cardColumnId = parseInt(this.issueDataProvider.parseCardUrlForId(getCardInKanban.column_url));
-
-        if (this.config.kanbanColumns.doneColumnId !== cardColumnId) {
-          return Rule.C2;
-        }
-      }
-    }
-
-    return Promise.resolve(null);
-  }
-
-  /**
-   * @param issue
-   * @param {string} labelTitle
-   *
-   * @returns {boolean}
-   */
-  issueHasLabel (issue, labelTitle) {
-    if (issue.hasOwnProperty('labels') === false) {
-      return false;
-    }
-
-    const issueLabels = issue.labels;
-
-    for (let index = 0; index < issueLabels.length; index++) {
-
-      let currentLabel = issueLabels[index];
-      if (currentLabel.hasOwnProperty('name') === false) {
-        continue;
-      }
-
-      if (currentLabel.name === labelTitle) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * @param {Context} context
-   * @param string actionName
-   *
-   * @returns {boolean}
-   */
-  contextHasAction (context, actionName) {
-    if (context.payload.action === actionName) {
-      this.logger.debug('[Rule Computer] Context action is ' + actionName);
-      return true;
-    }
-
-    return false;
+    return [];
   }
 };
