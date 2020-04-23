@@ -77,12 +77,12 @@ module.exports = class E3 extends Rule {
         );
 
         // Remove the previous assignee
-        await this.githubApiClient.issues.removeAssignees({
-          issue_number: referencedIssueData.number,
-          owner: referencedIssueData.owner,
-          repo: referencedIssueData.repo,
-          assignees: context.payload.pull_request.user.login,
-        });
+        // await this.githubApiClient.issues.removeAssignees({
+        //   issue_number: referencedIssueData.number,
+        //   owner: referencedIssueData.owner,
+        //   repo: referencedIssueData.repo,
+        //   assignees: context.payload.pull_request.user.login,
+        // });
       }
     }
   }
