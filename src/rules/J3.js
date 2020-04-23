@@ -57,11 +57,11 @@ module.exports = class J3 extends Rule {
     // }
 
     // Remove the issue assignee
-    await this.githubApiClient.issues.removeAssignees({
-      issue_number: referencedIssueId,
-      owner,
-      repo,
-      assignees: referencedIssue.user.login,
-    });
+    // await this.githubApiClient.issues.removeAssignees({
+    //   issue_number: referencedIssueId,
+    //   owner,
+    //   repo,
+    //   assignees: referencedIssue.user.login,
+    // });
   }
 };
