@@ -5,7 +5,7 @@ const config = {
       nbRequiredApprovals: 2,
       projects: [
         {
-          name: 'PrestaShop 1.7.7',
+          name: 'PrestaShop 1.7.7.3',
           kanbanColumns: {
             // notReadyColumnId: xxxxxxx,
             backlogColumnId: 4843009,
@@ -19,7 +19,7 @@ const config = {
           },
         },
         {
-          name: 'PrestaShop 1.7.8',
+          name: 'PrestaShop 1.7.8.0',
           kanbanColumns: {
             notReadyColumnId: 7977635,
             backlogColumnId: 6728638,
