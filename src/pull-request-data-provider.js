@@ -53,13 +53,11 @@ module.exports = class PullRequestDataProvider {
    * @returns {Promise<boolean>}
    */
   async getData(pullRequestId, owner, repo) {
-    const data = await this.githubApiClient.pulls.get({
+    return this.githubApiClient.pulls.get({
       pull_number: pullRequestId,
       owner,
       repo,
     });
-
-    return data;
   }
 
   /**

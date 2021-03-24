@@ -69,6 +69,9 @@ module.exports = class E3 extends Rule {
         }
 
         // Move card in toBeTested column
+        this.logger.info(
+          `E3 - Moving issue #${referencedIssueData.number} card in ToBeTested linked to #${pullRequestId}`
+        );
         await this.moveCardTo(
           referencedIssueData.number,
           referencedIssueData.owner,
