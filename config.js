@@ -5,17 +5,17 @@ const config = {
       nbRequiredApprovals: 2,
       projects: [
         {
-          name: 'PrestaShop 1.7.7.4',
+          name: 'PrestaShop 1.7.7.5',
           kanbanColumns: {
             // notReadyColumnId: xxxxxxx,
-            backlogColumnId: 13559932,
-            toBeSpecifiedColumnId: 13559940,
-            toDoColumnId: 13168782,
-            inProgressColumnId: 13168783,
-            toBeReviewedColumnId: 13559943,
-            toBeTestedColumnId: 13559944,
-            toBerMergedColumnId: 13559948,
-            doneColumnId: 13168786,
+            backlogColumnId: 14065915,
+            toBeSpecifiedColumnId: 14065931,
+            toDoColumnId: 14065924,
+            inProgressColumnId: 14065935,
+            toBeReviewedColumnId: 14065943,
+            toBeTestedColumnId: 14065945,
+            toBerMergedColumnId: 14065951,
+            doneColumnId: 14065955,
           },
         },
         {
@@ -46,8 +46,8 @@ const config = {
       },
       milestones: [
         {
-          name: '1.7.7.4',
-          project: 'PrestaShop 1.7.7.4',
+          name: '1.7.7.5',
+          project: 'PrestaShop 1.7.7.5',
         },
         {
           name: '1.7.8.0',
