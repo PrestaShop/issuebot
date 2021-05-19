@@ -228,6 +228,13 @@ const Rules = {
    * AND add the label “TBS” to the Issue
    * AND remove assignee if there is one
    */
+  M1: 'M1',
+  /*
+   * Scenario: add label topwatchers if comments threshold reached
+   * WHEN a comment is added to an issue
+   * AND number of comments excluding author and maintainers reach defined threshold
+   * THEN add label "topwatchers" to the issue
+   */
 };
 
 module.exports = Rules;

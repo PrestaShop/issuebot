@@ -23,6 +23,7 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 const IssueRuleFinder = require('./ruleFinder/IssueRuleFinder.js');
+const IssueCommentsRuleFinder = require('./ruleFinder/IssueCommentsRuleFinder.js');
 const PullRequestRuleFinder = require('./ruleFinder/PullRequestRuleFinder.js');
 const PullRequestReviewRuleFinder = require('./ruleFinder/PullRequestReviewRuleFinder.js');
 const ProjectCardRuleFinder = require('./ruleFinder/ProjectCardRuleFinder.js');
@@ -31,15 +32,17 @@ module.exports = class RuleComputer {
   /**
    * @param config
    * @param {IssueDataProvider} issueDataProvider
+   * @param {IssueCommentsDataProvider} issueCommentsDataProvider
    * @param {PullRequestDataProvider} pullRequestDataProvider
    * @param {ProjectCardDataProvider} projectCardDataProvider
    * @param {ConfigProvider} configProvider
    * @param {Logger} logger
    */
-  constructor(config, issueDataProvider, pullRequestDataProvider, projectCardDataProvider, configProvider, logger) {
+  constructor(config, issueDataProvider, issueCommentsDataProvider, pullRequestDataProvider, projectCardDataProvider, configProvider, logger) {
     this.config = config;
     this.logger = logger;
     this.issueDataProvider = issueDataProvider;
+    this.issueCommentsDataProvider = issueCommentsDataProvider;
     this.pullRequestDataProvider = pullRequestDataProvider;
     this.projectCardDataProvider = projectCardDataProvider;
     this.configProvider = configProvider;
@@ -47,6 +50,12 @@ module.exports = class RuleComputer {
     this.issueRuleFinder = new IssueRuleFinder(
       this.config,
       this.issueDataProvider,
+      this.configProvider,
+      this.logger,
+    );
+    this.issueCommentsRuleFinder = new IssueCommentsRuleFinder(
+      this.config,
+      this.issueCommentsDataProvider,
       this.configProvider,
       this.logger,
     );
@@ -119,8 +128,9 @@ module.exports = class RuleComputer {
         return this.projectCardRuleFinder.findRules(context);
 
       case 'issue_comment':
-        this.logger.debug('[Rule Computer] Context type is issue comment');
-        break;
+        this.logger.info('[Rule Computer] Context type is issue comment');
+
+        return this.issueCommentsRuleFinder.findRules(context);
 
       default:
         this.logger.debug(`[Rule Computer] No rule applies to ${context.name}`);

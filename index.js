@@ -24,6 +24,7 @@
  */
 const RuleComputer = require('./src/rule-computer');
 const IssueDataProvider = require('./src/issue-data-provider');
+const IssueCommentsDataProvider = require('./src/issue-comments-data-provider');
 const PullRequestDataProvider = require('./src/pull-request-data-provider');
 const ProjectCardDataProvider = require('./src/project-card-data-provider');
 const ConfigProvider = require('./src/config-provider');
@@ -46,6 +47,7 @@ module.exports = (app) => {
   app.on('*', async (context) => {
     const projectDataProvider = new ProjectDataProvider(config, context.github, context.log);
     const issueDataProvider = new IssueDataProvider(config, context.github, context.log);
+    const issueCommentsDataProvider = new IssueCommentsDataProvider(config, context.github, context.log);
     const configProvider = new ConfigProvider(
       config,
       context.github,
@@ -58,6 +60,7 @@ module.exports = (app) => {
     const ruleComputer = new RuleComputer(
       config,
       issueDataProvider,
+      issueCommentsDataProvider,
       pullRequestDataProvider,
       projectCardDataProvider,
       configProvider,
