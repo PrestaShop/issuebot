@@ -86,7 +86,7 @@ const config = {
         toBeMerged: {name: 'QA ✔️', automatic: false},
         waitingAuthor: {name: 'waiting for author️', automatic: false},
         fixed: {name: 'Fixed', automatic: true},
-        Topwatchers: {name: 'Topwatchers', automatic: false},
+        topwatchers: {name: 'Topwatchers', automatic: false},
       },
       milestones: [
         {

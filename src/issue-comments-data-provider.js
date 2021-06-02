@@ -62,13 +62,12 @@ module.exports = class IssueCommentsDataProvider {
       excludedUsers.push(owner)
     }
 
-    for (let index = 0; index < data.length; index += 1) {
-      const comment = data[index];
+    data.forEach(comment => {
       if (!excludedUsers.includes(comment.user.login)) {
         commentAuthors.authors.push(comment.user.login)
         ++commentAuthors.count;
       }
-    }
+    });
 
     return commentAuthors;
   }
@@ -94,12 +93,11 @@ module.exports = class IssueCommentsDataProvider {
       excludedUsers.push(owner)
     }
 
-    for (let index = 0; index < data.length; index += 1) {
-      const reaction = data[index];
+    data.forEach(reaction => {
       if (positiveReactions.includes(reaction.content) && !excludedUsers.includes(reaction.user.login)) {
         ++positiveReactionsCount;
       }
-    }
+    });
 
     return positiveReactionsCount;
   }
