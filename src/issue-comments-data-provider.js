@@ -101,32 +101,4 @@ module.exports = class IssueCommentsDataProvider {
 
     return positiveReactionsCount;
   }
-
-  /**
-   * Parse a github URL to extract Issue / Pull Request ID
-   *
-   * @param {string} url
-   *
-   * @returns {string}
-   */
-  parseCardUrlForId(url) {
-    return url.substr(url.lastIndexOf('/') + 1);
-  }
-
-  /**
-   * Parse a github URL to extract Issue / Pull Request informations
-   *
-   * @param {string} url
-   *
-   * @returns {object}
-   */
-  parseUrlForData(url) {
-    const matches = url.match(/(.+)\/(.+)\/(.+)\/issues\/(\d+)/);
-
-    return {
-      owner: matches[2],
-      repo: matches[3],
-      number: matches[4],
-    };
-  }
 };

@@ -103,30 +103,13 @@ module.exports = class IssueRuleFinder {
   }
 
   /**
-   * Parse a github URL to extract Issue / Pull Request informations
-   *
-   * @param {string} url
-   *
-   * @returns {object}
-   */
-  parseUrlForData(url) {
-    const matches = url.match(/(.+)\/(.+)\/(.+)\/issues\/(\d+)/);
-
-    return {
-      number: parseInt(matches[4], 10),
-      owner: matches[2],
-      repo: matches[3],
-    };
-  }
-
-  /**
    * Get card related to an issue
    *
    * @param {Object} issue
    * @returns {Promise<*>}
    */
   async getCardFromIssue(issue) {
-    const issueData = this.parseUrlForData(issue.url);
+    const issueData = Utils.parseUrlForData(issue.url);
 
     return this.issueDataProvider.getRelatedCardInKanban(
       issueData.number,

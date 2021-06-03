@@ -27,11 +27,11 @@ const Utils = require('./Utils');
 
 module.exports = class IssueCommentsRuleFinder {
   /**
-     * @param config
-     * @param {IssueCommentsDataProvider} issueCommentsDataProvider
-     * @param {ConfigProvider} configProvider
-     * @param {Logger} logger
-     */
+   * @param config
+   * @param {IssueCommentsDataProvider} issueCommentsDataProvider
+   * @param {ConfigProvider} configProvider
+   * @param {Logger} logger
+   */
   constructor(config, issueCommentsDataProvider, configProvider, logger) {
     this.config = config;
     this.logger = logger;
@@ -40,14 +40,14 @@ module.exports = class IssueCommentsRuleFinder {
   }
 
   /**
-     * Try to find whether webhook context matches an Issue rule requirements.
-     *
-     * @param {Context} context
-     *
-     * @returns {Promise<*>}
-     *
-     * @public
-     */
+   * Try to find whether webhook context matches an Issue rule requirements.
+   *
+   * @param {Context} context
+   *
+   * @returns {Promise<*>}
+   *
+   * @public
+   */
   async findRules(context) {
     const rules = [];
 
@@ -58,54 +58,39 @@ module.exports = class IssueCommentsRuleFinder {
     const {issue} = context.payload;
     const repositoryConfig = this.configProvider.getRepositoryConfigFromIssue(this.config, issue);
     // No need to go further if comments is lowest than threshold
-    if (issue.comments >= repositoryConfig.topwatchersThreshold) {
-      const issueData = this.parseUrlForData(issue.url);
-      // Get number of comment authors different from issue owner and maintainers
-      const commentAuthors = await this.issueCommentsDataProvider.getCommentAuthors(
+    if (issue.comments < repositoryConfig.topwatchersThreshold) {
+      return [];
+    }
+
+    const issueData = Utils.parseUrlForData(issue.url);
+    // Get number of comment authors different from issue owner and maintainers
+    const commentAuthors = await this.issueCommentsDataProvider.getCommentAuthors(
+      issueData.number,
+      issueData.owner,
+      issueData.repo,
+      true,
+      repositoryConfig.excludedUsersFromTopwatchers
+    );
+    this.logger.info(commentAuthors);
+    const numberOfCommentAuthors = parseInt(commentAuthors.count, 10);
+    const numberOfPositiveReactions = parseInt(
+      await this.issueCommentsDataProvider.getNumberOfPositiveReactions(
         issueData.number,
         issueData.owner,
         issueData.repo,
         true,
-        repositoryConfig.excludedUsersFromTopwatchers
-      );
-      this.logger.info(commentAuthors);
-      const numberOfCommentAuthors = parseInt(commentAuthors.count, 10);
-      const numberOfPositiveReactions = parseInt(
-        await this.issueCommentsDataProvider.getNumberOfPositiveReactions(
-          issueData.number,
-          issueData.owner,
-          issueData.repo,
-          true,
-          commentAuthors.authors.concat(repositoryConfig.excludedUsersFromTopwatchers)
-        ),
-      10
-      );
-      this.logger.info(`${numberOfCommentAuthors} comments`);
-      this.logger.info(`${numberOfPositiveReactions} positive reactions`);
-      if ((numberOfCommentAuthors + numberOfPositiveReactions) >= repositoryConfig.topwatchersThreshold) {
-        rules.push(Rule.M1);
-      }
+        commentAuthors.authors.concat(repositoryConfig.excludedUsersFromTopwatchers)
+      ),
+    10
+    );
+    this.logger.info(`${numberOfCommentAuthors} comments`);
+    this.logger.info(`${numberOfPositiveReactions} positive reactions`);
+    if ((numberOfCommentAuthors + numberOfPositiveReactions) >= repositoryConfig.topwatchersThreshold) {
+      rules.push(Rule.M1);
     }
 
     this.logger.info(`Rules are : ${rules.join(', ')}`);
 
     return rules;
-  }
-
-  /**
-   * Parse a github URL to extract Issue / Pull Request informations
-   *
-   * @param {string} url
-   *
-   * @returns {object}
-   */
-  parseUrlForData(url) {
-    const matches = url.match(/(.+)\/(.+)\/(.+)\/issues\/(\d+)/);
-
-    return {
-      number: parseInt(matches[4], 10),
-      owner: matches[2],
-      repo: matches[3],
-    };
   }
 };

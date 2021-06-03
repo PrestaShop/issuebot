@@ -25,7 +25,7 @@
 const Rule = require('./Rule.js');
 const Utils = require('../ruleFinder/Utils');
 
-module.exports = class D1 extends Rule {
+module.exports = class M1 extends Rule {
   /**
    * @param {Context} context
    *

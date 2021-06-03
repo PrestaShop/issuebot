@@ -22,6 +22,8 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+const Utils = require('./ruleFinder/Utils');
+
 module.exports = class ConfigProvider {
   /**
    * @param config
@@ -155,7 +157,7 @@ module.exports = class ConfigProvider {
    * }
    */
   async getProjectConfigFromIssue(config, issue) {
-    const issueData = this.parseUrlForData(issue.url);
+    const issueData = Utils.parseUrlForData(issue.url);
     const cardInKanban = await this.issueDataProvider.getRelatedCardInKanban(
       issueData.number,
       issueData.owner,
@@ -255,22 +257,5 @@ module.exports = class ConfigProvider {
    */
   parseRepositoryUrlForName(repositoryUrl) {
     return repositoryUrl.substr(repositoryUrl.lastIndexOf('/') + 1);
-  }
-
-  /**
-   * Parse a github URL to extract Issue / Pull Request informations
-   *
-   * @param {string} url
-   *
-   * @returns {object}|{number: {int}, owner: {string}, repo: {string}}
-   */
-  parseUrlForData(url) {
-    const matches = url.match(/(.+)\/(.+)\/(.+)\/issues\/(\d+)/);
-
-    return {
-      number: parseInt(matches[4], 10),
-      owner: matches[2],
-      repo: matches[3],
-    };
   }
 };

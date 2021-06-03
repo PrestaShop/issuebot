@@ -26,7 +26,7 @@ const {graphql} = require('@octokit/graphql');
 const {createAppAuth} = require('@octokit/auth-app');
 const DomParser = require('dom-parser');
 const fs = require('fs');
-
+const Utils = require('./ruleFinder/Utils');
 
 module.exports = class PullRequestDataProvider {
   /**
@@ -161,7 +161,7 @@ module.exports = class PullRequestDataProvider {
         const issueUrl = issueLink.getAttribute('data-url');
 
         if (issueUrl) {
-          issues.push(this.parseUrlForData(issueUrl));
+          issues.push(Utils.parseUrlForData(issueUrl));
         }
       });
     } catch (error) {
@@ -194,33 +194,5 @@ module.exports = class PullRequestDataProvider {
     });
 
     return nbApprovals;
-  }
-
-  /**
-   * Parse a github URL to extract Issue / Pull Request ID
-   *
-   * @param {string} url
-   *
-   * @returns {int}
-   */
-  parseUrlForId(url) {
-    return parseInt(url.substr(url.lastIndexOf('/') + 1), 10);
-  }
-
-  /**
-   * Parse a github URL to extract Issue / Pull Request informations
-   *
-   * @param {string} url
-   *
-   * @returns {object}
-   */
-  parseUrlForData(url) {
-    const matches = url.match(/(.+)\/(.+)\/(.+)\/issues\/(\d+)/);
-
-    return {
-      number: parseInt(matches[4], 10),
-      owner: matches[2],
-      repo: matches[3],
-    };
   }
 };
