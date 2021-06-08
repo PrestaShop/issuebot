@@ -31,46 +31,45 @@
  */
 const Rules = {
   /* Scenarios A: Add an Issue to the kanban */
-  A1: 'A1',
   /*
    * Scenario: Auto-add an Issue to the kanban when setting the milestone
    * GIVEN an Issue not in the kanban
    * WHEN it is milestoned for the next patch or minor release
    * THEN it is added to the kanban in "To Do" column
    */
+  A1: 'A1',
 
   /* Scenarios B: Remove Issue from the kanban */
-  B2: 'B2',
   /*
    * Scenario: remove an Issue from the kanban when the milestone is unset
    * GIVEN an Issue in the kanban
    * WHEN its milestone is unset
    * THEN remove the Issue from the kanban
    */
+  B2: 'B2',
 
   /* Scenarios C: Move issue in the kanban according to its status */
-  C1: 'C1',
   /*
    * Scenario: place an Issue in the "To do" column according to its label
    * GIVEN an Issue in the kanban not in the "To do" column
    * WHEN it is labeled "To Do"
    * THEN it is placed in the "To do" column
    */
-  C2: 'C2',
+  C1: 'C1',
   /*
    * Scenario: place an Issue in the "Done" column when it is closed
    * GIVEN an Issue in the kanban not in the "Done" column
    * WHEN it is closed
    * THEN it is placed in the "Done" column
    */
-  D1: 'D1',
+  C2: 'C2',
   /*
    * Scenario: make automatic status labels mutually exclusive
    * GIVEN an Issue
    * WHEN it is labeled using one of the automatic status labels
    * THEN any other automatic status label is removed
    */
-  D2: 'D2',
+  D1: 'D1',
   /*
    * Scenario: remove automatic status labels when closing an Issue in the kanban
    * GIVEN an open Issue
@@ -78,21 +77,21 @@ const Rules = {
    * THEN any automatic status label is removed
    * AND add the FIxed label
    */
-  D3: 'D3',
+  D2: 'D2',
   /*
    * Scenario: remove status label when closing an Issue
    * GIVEN an open Issue
    * WHEN it is closed
    * THEN any automatic status label is removed
    */
-  D4: 'D4',
+  D3: 'D3',
   /*
    * Scenario: reopen an Issue when its status label is changed
    * GIVEN a closed Issue
    * WHEN it is labeled using one of the automatic status labels
    * THEN it is reopened
    */
-  E1: 'E1',
+  D4: 'D4',
   /*
    * Scenario: reflect the Pull Request milestone in the linked Issue
    * GIVEN an open Issue
@@ -100,7 +99,7 @@ const Rules = {
    * WHEN the PR is set to a milestone
    * THEN apply that milestone to the Issue
    */
-  E3: 'E3',
+  E1: 'E1',
   /*
    * Scenario: move Issue in kanban to the “To be tested” column when the linked PR is ready for test
    * GIVEN an open Issue
@@ -108,7 +107,7 @@ const Rules = {
    * WHEN the PR is labeled “Waiting for QA”
    * THEN move the linked issue to the “To be tested” column
    */
-  E4: 'E4',
+  E3: 'E3',
   /*
    * Scenario: move Issue in kanban to the “To be merged” column when the linked PR is ready for merge
    * GIVEN an open Issue
@@ -118,7 +117,7 @@ const Rules = {
    * THEN move the linked issue to the “To be merged” column
    * AND remove assignee if there is one
    */
-  E5: 'E5',
+  E4: 'E4',
   /*
    * Scenario: close the Issue in kanban when the linked PR is merged
    * GIVEN an open Issue
@@ -128,7 +127,7 @@ const Rules = {
    * AND label the issue “Fixed”
    * AND remove assignee if there is one
    */
-  E6: 'E6',
+  E5: 'E5',
   /*
    * Scenario: linking a PR to a closed issue re-opens it
    * GIVEN a closed Issue
@@ -136,7 +135,7 @@ const Rules = {
    * THEN re-open the Issue
    * AND apply the PR automation rules to update it
    */
-  F1: 'F1',
+  E6: 'E6',
   /*
    * Scenario: requesting changes in a PR moves the linked issue to the “In progress” column
    * GIVEN an open Issue
@@ -144,7 +143,7 @@ const Rules = {
    * WHEN changes are requested in the PR
    * THEN move the linked Issue to the “In progress” column
    */
-  G2: 'G2',
+  F1: 'F1',
   /*
    * Scenario: label new Issue created in “To Do” column
    * GIVEN an Issue in any state
@@ -155,7 +154,7 @@ const Rules = {
    * AND IF the Issue is closed
    * THEN re-open it
    */
-  H1: 'H1',
+  G2: 'G2',
   /*
    * Scenario: label Issue as in progress when moved to “In progress” column
    * GIVEN an Issue in any state
@@ -165,7 +164,7 @@ const Rules = {
    * AND IF the Issue is closed
    * THEN re-open it
    */
-  H2: 'H2',
+  H1: 'H1',
   /*
    * Scenario: mark Issue as in-progress if WIP PR is linked
    * WHEN a PR is linked to an Issue
@@ -174,7 +173,7 @@ const Rules = {
    * THEN move the Issue into “In progress” column
    * AND remove “To Do” label if it exists
    */
-  I1: 'I1',
+  H2: 'H2',
   /*
    * Scenario: mark Issue as TBR if PR is linked
    * WHEN a PR is linked to an Issue
@@ -183,7 +182,7 @@ const Rules = {
    * THEN move the Issue into “To be reviewed” column
    * AND remove “To Do” label if it exists
    */
-  J1: 'J1',
+  I1: 'I1',
   /*
    * Scenario: mark Issue as TBT if PR is approved
    * WHEN a PR is approved
@@ -192,26 +191,33 @@ const Rules = {
    * AND add the label TBT
    * AND remove assignee if there is one
    */
-  J3: 'J3',
+  J1: 'J1',
   /*
    * Scenario: label Issue when moved to “To be tested” column
    * WHEN an Issue is moved into the column “To be tested”
    * IF the Issue has not the label “waiting for QA”
    * THEN add the label “waiting for QA” to the Issue
    */
-  J4: 'J4',
+  J3: 'J3',
   /*
    * Scenario: mark Issue as in-progress if QA disapproves
    * WHEN a PR is labeled “waiting for author”
    * IF the linked Issue is in “In To be tested” column
    * THEN move the Issue into “In progress” column
    */
-  K1: 'K1',
+  J4: 'J4',
   /*
    * Scenario: label/update Issue moved in “Done” column
    * WHEN an Issue is moved into the column “Done”
    * THEN add the label “Fixed” to the Issue
    * AND close the Issue if it is open
+   * AND remove assignee if there is one
+   */
+  K1: 'K1',
+  /*
+   * Scenario: label/update Issue moved in “TBS” column
+   * WHEN an Issue is moved into the column “TBS”
+   * AND add the label “TBS” to the Issue
    * AND remove assignee if there is one
    */
   L1: 'L1',
@@ -223,11 +229,12 @@ const Rules = {
    */
   L2: 'L2',
   /*
-   * Scenario: label/update Issue moved in “TBS” column
-   * WHEN an Issue is moved into the column “TBS”
-   * AND add the label “TBS” to the Issue
-   * AND remove assignee if there is one
+   * Scenario: add label topwatchers if comments threshold reached
+   * WHEN a comment is added to an issue
+   * AND number of comments excluding author and maintainers reach defined threshold
+   * THEN add label "topwatchers" to the issue
    */
+  M1: 'M1',
 };
 
 module.exports = Rules;
