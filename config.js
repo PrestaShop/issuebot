@@ -48,17 +48,17 @@ const config = {
       ],
       projects: [
         {
-          name: 'PrestaShop 1.7.7.5',
+          name: 'PrestaShop 1.7.7.6',
           kanbanColumns: {
             // notReadyColumnId: xxxxxxx,
-            backlogColumnId: 14065915,
-            toBeSpecifiedColumnId: 14065931,
-            toDoColumnId: 14065924,
-            inProgressColumnId: 14065935,
-            toBeReviewedColumnId: 14065943,
-            toBeTestedColumnId: 14065945,
-            toBerMergedColumnId: 14065951,
-            doneColumnId: 14065955,
+            backlogColumnId: 14540711,
+            toBeSpecifiedColumnId: 14540716,
+            toDoColumnId: 14540712,
+            inProgressColumnId: 14540718,
+            toBeReviewedColumnId: 14540720,
+            toBeTestedColumnId: 14540726,
+            toBerMergedColumnId: 14540727,
+            doneColumnId: 14540728,
           },
         },
         {
@@ -90,8 +90,8 @@ const config = {
       },
       milestones: [
         {
-          name: '1.7.7.5',
-          project: 'PrestaShop 1.7.7.5',
+          name: '1.7.7.6',
+          project: 'PrestaShop 1.7.7.6',
         },
         {
           name: '1.7.8.0',
