@@ -73,7 +73,7 @@ module.exports = class ConfigProvider {
    *         toBeSpecifiedColumnId: number,
    *         toBeTestedColumnId: number,
    *         doneColumnId: number,
-   *         toBerMergedColumnId: number,
+   *         toBeMergedColumnId: number,
    *         backlogColumnId: number,
    *         toDoColumnId: number
    *       }
@@ -140,7 +140,7 @@ module.exports = class ConfigProvider {
    *         toBeSpecifiedColumnId: number,
    *         toBeTestedColumnId: number,
    *         doneColumnId: number,
-   *         toBerMergedColumnId: number,
+   *         toBeMergedColumnId: number,
    *         backlogColumnId: number,
    *         toDoColumnId: number
    *       }
@@ -215,7 +215,7 @@ module.exports = class ConfigProvider {
    *         toBeSpecifiedColumnId: number,
    *         toBeTestedColumnId: number,
    *         doneColumnId: number,
-   *         toBerMergedColumnId: number,
+   *         toBeMergedColumnId: number,
    *         backlogColumnId: number,
    *         toDoColumnId: number
    *       }

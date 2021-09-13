@@ -60,7 +60,7 @@ module.exports = class L2 extends Rule {
           referencedIssueData.number,
           referencedIssueData.owner,
           referencedIssueData.repo,
-          projectConfig.kanbanColumns.toBerMergedColumnId,
+          projectConfig.kanbanColumns.toBeMergedColumnId,
         );
 
         // Remove the previous assignee
