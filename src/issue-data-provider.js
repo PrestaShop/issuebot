@@ -90,7 +90,7 @@ module.exports = class IssueDataProvider {
       'inProgressColumnId',
       'toBeReviewedColumnId',
       'toBeTestedColumnId',
-      'toBerMergedColumnId',
+      'toBeMergedColumnId',
       'doneColumnId',
     ];
 

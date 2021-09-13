@@ -59,7 +59,7 @@ module.exports = class E4 extends Rule {
           referencedIssueData.number,
           referencedIssueData.owner,
           referencedIssueData.repo,
-          projectConfig.kanbanColumns.toBerMergedColumnId,
+          projectConfig.kanbanColumns.toBeMergedColumnId,
         );
 
         // Remove automatic labels

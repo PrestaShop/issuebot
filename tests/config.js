@@ -8,7 +8,7 @@ const config = {
         inProgressColumnId: 3311231,
         toBeReviewedColumnId: 3311232,
         toBeTestedColumnId: 3329346,
-        toBerMergedColumnId: 3329347,
+        toBeMergedColumnId: 3329347,
         doneColumnId: 3329348,
     },
     labels: {
