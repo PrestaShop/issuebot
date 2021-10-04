@@ -74,7 +74,7 @@ module.exports = class PullRequestDataProvider {
     const auth = createAppAuth({
       id: process.env.APP_ID,
       privateKey,
-      installationId: 6855379,
+      installationId: process.env.INSTALLATION_ID,
     });
     const graphqlWithAuth = graphql.defaults({
       request: {
