@@ -64,6 +64,13 @@ const Rules = {
    */
   C2: 'C2',
   /*
+   * Scenario: close an issue when it is rejected
+   * GIVEN an issue exists
+   * WHEN it is given the label "Rejected"
+   * THEN it is closed
+   */
+  C3: 'C3',
+  /*
    * Scenario: make automatic status labels mutually exclusive
    * GIVEN an Issue
    * WHEN it is labeled using one of the automatic status labels
@@ -71,11 +78,11 @@ const Rules = {
    */
   D1: 'D1',
   /*
-   * Scenario: remove automatic status labels when closing an Issue in the kanban
-   * GIVEN an open Issue
-   * WHEN it is closed
-   * THEN any automatic status label is removed
-   * AND add the FIxed label
+   * Scenario: when issue is re-opened, move it in 'to be specified' column
+   * GIVEN a closed Issue
+   * WHEN it is re-opened
+   * THEN Fixed label is removed
+   * AND issue is moved in to be specified column
    */
   D2: 'D2',
   /*
@@ -215,19 +222,25 @@ const Rules = {
    */
   K1: 'K1',
   /*
-   * Scenario: label/update Issue moved in “TBS” column
-   * WHEN an Issue is moved into the column “TBS”
-   * AND add the label “TBS” to the Issue
+   * Scenario: label/update Issue moved in “Not Ready” column
+   * WHEN an Issue is moved into the column “Not Ready”
+   * Add the label “In Analysis” to the Issue
    * AND remove assignee if there is one
    */
   L1: 'L1',
   /*
-   * Scenario: label/update Issue moved in “TBS” column
-   * WHEN an Issue is moved into the column “TBS”
-   * AND add the label “TBS” to the Issue
-   * AND remove assignee if there is one
+   * Scenario: move issue having "QA ✔" label
+   * WHEN a PR is assigned the label "QA ✔"
+   * Move card in "to be merged" column
    */
   L2: 'L2',
+  /*
+   * Scenario: label/update Issue moved in “Blocked” column
+   * WHEN an Issue is moved into the column “Blocked”
+   * Add the label “Blocked” to the Issue
+   * AND remove assignee if there is one
+   */
+  L3: 'L3',
   /*
    * Scenario: add label topwatchers if comments threshold reached
    * WHEN a comment is added to an issue
