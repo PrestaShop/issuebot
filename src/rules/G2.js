@@ -22,8 +22,8 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-const Rule = require('./Rule.js');
-const Utils = require('../ruleFinder/Utils');
+const Rule = require('./Rule.js')
+const Utils = require('../ruleFinder/Utils')
 
 module.exports = class G2 extends Rule {
   /**
@@ -31,14 +31,14 @@ module.exports = class G2 extends Rule {
    *
    * @public
    */
-  async apply(context) {
-    const referencedIssueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card);
-    const owner = context.payload.repository.owner.login;
-    const repo = context.payload.repository.name;
+  async apply (context) {
+    const referencedIssueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card)
+    const owner = context.payload.repository.owner.login
+    const repo = context.payload.repository.name
 
-    const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
+    const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo)
 
-    const repositoryConfig = await this.getRepositoryConfigFromIssue(referencedIssue);
+    const repositoryConfig = await this.getRepositoryConfigFromIssue(referencedIssue)
 
     // Re-open the issue if closed
     if (referencedIssue.state === 'closed') {
@@ -46,21 +46,21 @@ module.exports = class G2 extends Rule {
         issue_number: referencedIssueId,
         owner,
         repo,
-        state: 'open',
-      });
+        state: 'open'
+      })
     }
 
     // Remove automatic labels
-    await this.removeIssueAutomaticLabels(referencedIssue, owner, repo, repositoryConfig.labels.todo);
+    await this.removeIssueAutomaticLabels(referencedIssue, owner, repo, repositoryConfig.labels.ready)
 
-    // Add To-Do label
-    if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.todo.name)) {
+    // Add Ready label
+    if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.ready.name)) {
       await this.githubApiClient.issues.addLabels({
         issue_number: referencedIssueId,
         owner,
         repo,
-        labels: {labels: [repositoryConfig.labels.todo.name]},
-      });
+        labels: { labels: [repositoryConfig.labels.ready.name] }
+      })
     }
   }
-};
+}

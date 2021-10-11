@@ -62,7 +62,7 @@ module.exports = class D2 extends Rule {
       issueId,
       owner,
       repo,
-      projectConfig.kanbanColumns.toBeSpecifiedColumnId,
+      projectConfig.kanbanColumns.notReadyColumnId,
     );
   }
 };

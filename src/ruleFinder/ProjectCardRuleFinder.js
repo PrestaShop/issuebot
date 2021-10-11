@@ -65,14 +65,20 @@ module.exports = class ProjectCardRuleFinder {
       if (config.kanbanColumns.toDoColumnId === cardColumnId) {
         rules.push(Rule.G2);
       }
-      if (config.kanbanColumns.inProgressColumnId === cardColumnId) {
+      if (config.kanbanColumns.inProgressColumnId === cardColumnId ||
+        config.kanbanColumns.toBeReviewedColumnId === cardColumnId ||
+        config.kanbanColumns.toBeMergedColumnId === cardColumnId) {
         rules.push(Rule.H1);
       }
-      if (config.kanbanColumns.toBeSpecifiedColumnId === cardColumnId) {
+      if (config.kanbanColumns.notReadyColumnId === cardColumnId) {
         rules.push(Rule.L1);
       }
+      if (config.kanbanColumns.toBeSpecifiedColumnId === cardColumnId) {
+        rules.push(Rule.L3);
+      }
+
       if (config.kanbanColumns.toBeTestedColumnId === cardColumnId) {
-        rules.push(Rule.J3);
+        rules.push(Rule.H1);
       }
       if (config.kanbanColumns.doneColumnId === cardColumnId) {
         rules.push(Rule.K1);

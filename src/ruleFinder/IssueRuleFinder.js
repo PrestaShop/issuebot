@@ -75,6 +75,9 @@ module.exports = class IssueRuleFinder {
         ) {
           rules.push(Rule.C1);
         }
+        if (projectConfig && Utils.issueHasLabel(issue, repositoryConfig.labels.rejected.name)) {
+          rules.push(Rule.C3);
+        }
       }
     }
 
@@ -94,6 +97,7 @@ module.exports = class IssueRuleFinder {
     }
 
     if (Utils.contextHasAction(context, 'reopened')) {
+
       rules.push(Rule.D2);
     }
 
