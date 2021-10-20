@@ -42,7 +42,7 @@ module.exports = class L1 extends Rule {
     // Remove automatic labels
     await this.removeIssueAutomaticLabels(referencedIssue, owner, repo, repositoryConfig.labels.inAnalysis)
 
-    // Add in alanysis label
+    // Add in analysis label
     if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.inAnalysis.name)) {
       await this.githubApiClient.issues.addLabels({
         issue_number: referencedIssueId,
