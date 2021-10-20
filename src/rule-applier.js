@@ -48,6 +48,7 @@ const L1 = require('./rules/L1.js');
 const L2 = require('./rules/L2.js');
 const L3 = require('./rules/L3.js');
 const M1 = require('./rules/M1.js');
+const Rule = require('./rules/Rule.js');
 /* eslint-enable */
 
 module.exports = class RuleApplier {
@@ -87,7 +88,7 @@ module.exports = class RuleApplier {
       this.logger.debug(`[Rule Applier] Applying rule ${rule}`);
 
       /**
-       * @type {C1|C2|C3|D1|D2|D3|D4|E1|E3|E4|E5|E6|F1|G2|H1|H2|I1|J1|J3|J4|K1|L1|L2|L3|M1} rule
+       * @type {Rule} rule
        */
       const ruleApplier = eval( // eslint-disable-line no-eval
         `new ${rule}(
