@@ -76,7 +76,6 @@ module.exports = class ProjectCardRuleFinder {
       if (config.kanbanColumns.toBeSpecifiedColumnId === cardColumnId) {
         rules.push(Rule.L3);
       }
-
       if (config.kanbanColumns.toBeTestedColumnId === cardColumnId) {
         rules.push(Rule.H1);
       }
