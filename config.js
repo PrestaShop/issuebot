@@ -50,8 +50,7 @@ const config = {
         {
           name: 'PrestaShop 1.7.8.1',
           kanbanColumns: {
-            // notReadyColumnId: xxxxxxx,
-            backlogColumnId: 15345351,
+            notReadyColumnId: 15345351,
             toDoColumnId: 15345339,
             toBeSpecifiedColumnId: 15345356,
             inProgressColumnId: 15345340,
@@ -65,7 +64,6 @@ const config = {
           name: 'PrestaShop 8.0.0',
           kanbanColumns: {
             notReadyColumnId: 10578078,
-            backlogColumnId: 10578079,
             toDoColumnId: 10578080,
             toBeSpecifiedColumnId: 10578091,
             inProgressColumnId: 10578096,
@@ -77,16 +75,20 @@ const config = {
         },
       ],
       labels: {
-        todo: {name: 'To Do', automatic: true},
-        inProgress: {name: 'WIP', automatic: false},
-        toBeReproduced: {name: 'TBR', automatic: true},
-        toBeSpecified: {name: 'TBS', automatic: true},
-        needsMoreInfo: {name: 'NMI', automatic: false},
-        toBeTested: {name: 'waiting for QA', automatic: false},
-        toBeMerged: {name: 'QA ✔️', automatic: false},
-        waitingAuthor: {name: 'waiting for author️', automatic: false},
-        fixed: {name: 'Fixed', automatic: true},
-        topwatchers: {name: 'Topwatchers', automatic: false},
+        todo: { name: 'To Do', automatic: true },
+        ready: { name: 'Ready', automatic: true },
+        inAnalysis: { name: 'In analysis', automatic: true },
+        inProgress: { name: 'WIP', automatic: true },
+        toBeReproduced: { name: 'TBR', automatic: true },
+        toBeSpecified: { name: 'TBS', automatic: true },
+        needsMoreInfo: { name: 'NMI', automatic: false },
+        toBeTested: { name: 'waiting for QA', automatic: false },
+        toBeMerged: { name: 'QA ✔️', automatic: false },
+        waitingAuthor: { name: 'waiting for author️', automatic: false },
+        fixed: { name: 'Fixed', automatic: true },
+        topwatchers: { name: 'Topwatchers', automatic: false },
+        rejected: { name: 'Rejected', automatic: false },
+        blocked: { name: 'Blocked', automatic: true}
       },
       milestones: [
         {

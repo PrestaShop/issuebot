@@ -51,7 +51,6 @@ module.exports = class IssueDataProvider {
     const allCards = await allCardsPromise;
 
     let currentCard;
-
     for (let index = 0; index < allCards.length; index += 1) {
       currentCard = allCards[index];
       const cardData = Utils.parseUrlForData(currentCard.content_url);
@@ -84,7 +83,6 @@ module.exports = class IssueDataProvider {
     // @todo: what about column "up next" ?
     const vars = [
       'notReadyColumnId',
-      'backlogColumnId',
       'toDoColumnId',
       'toBeSpecifiedColumnId',
       'inProgressColumnId',

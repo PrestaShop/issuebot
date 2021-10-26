@@ -25,7 +25,7 @@
 const Rule = require('./Rule.js');
 const Utils = require('../ruleFinder/Utils');
 
-module.exports = class D2 extends Rule {
+module.exports = class C3 extends Rule {
   /**
    * @param {Context} context
    *
@@ -33,36 +33,15 @@ module.exports = class D2 extends Rule {
    */
   async apply(context) {
     const {issue} = context.payload;
-    const issueId = parseInt(issue.number, 10);
+    const issueData = Utils.parseUrlForData(issue.url);
     const owner = context.payload.repository.owner.login;
     const repo = context.payload.repository.name;
 
-    const repositoryConfig = await this.getRepositoryConfigFromIssue(issue);
-    const projectConfig = await this.getProjectConfigFromIssue(issue);
-
-    if (Utils.issueHasLabel(issue, repositoryConfig.labels.fixed.name)) {
-      this.logger.info(`[Rule Applier] D2 - Remove label ${repositoryConfig.labels.fixed.name}`);
-      await this.githubApiClient.issues.removeLabel({
-        issue_number: issueId,
-        owner,
-        repo,
-        name: repositoryConfig.labels.fixed.name,
-      });
-    }
-
-    this.logger.info(`[Rule Applier] D2 - Add label ${repositoryConfig.labels.toBeSpecified.name}`);
-    await this.githubApiClient.issues.addLabels({
-      issue_number: issueId,
+    await this.githubApiClient.issues.update({
+      issue_number: issueData.number,
       owner,
       repo,
-      labels: {labels: [repositoryConfig.labels.toBeSpecified.name]},
+      state: 'closed'
     });
-
-    await this.moveCardTo(
-      issueId,
-      owner,
-      repo,
-      projectConfig.kanbanColumns.notReadyColumnId,
-    );
   }
 };

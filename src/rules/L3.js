@@ -25,7 +25,7 @@
 const Rule = require('./Rule.js')
 const Utils = require('../ruleFinder/Utils')
 
-module.exports = class L1 extends Rule {
+module.exports = class L3 extends Rule {
   /**
    * @param {Context} context
    *
@@ -40,15 +40,15 @@ module.exports = class L1 extends Rule {
     const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue)
 
     // Remove automatic labels
-    await this.removeIssueAutomaticLabels(referencedIssue, owner, repo, repositoryConfig.labels.inAnalysis)
+    await this.removeIssueAutomaticLabels(referencedIssue, owner, repo, repositoryConfig.labels.blocked)
 
-    // Add in analysis label
-    if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.inAnalysis.name)) {
+    // Add Blocked label
+    if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.blocked.name)) {
       await this.githubApiClient.issues.addLabels({
         issue_number: referencedIssueId,
         owner,
         repo,
-        labels: { labels: [repositoryConfig.labels.inAnalysis.name] }
+        labels: { labels: [repositoryConfig.labels.blocked.name] }
       })
     }
 

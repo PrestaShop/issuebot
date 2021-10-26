@@ -55,7 +55,7 @@ module.exports = class L2 extends Rule {
         // Remove automatic labels
         await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
 
-        // Move card in toBeTested column
+        // Move card in toBeMerged column
         await this.moveCardTo(
           referencedIssueData.number,
           referencedIssueData.owner,
