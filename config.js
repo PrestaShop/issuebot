@@ -48,19 +48,6 @@ const config = {
       ],
       projects: [
         {
-          name: 'PrestaShop 1.7.8.1',
-          kanbanColumns: {
-            notReadyColumnId: 15345351,
-            toDoColumnId: 15345339,
-            toBeSpecifiedColumnId: 15345356,
-            inProgressColumnId: 15345340,
-            toBeReviewedColumnId: 15345357,
-            toBeTestedColumnId: 15345369,
-            toBeMergedColumnId: 15345366,
-            doneColumnId: 15345341,
-          },
-        },
-        {
           name: 'PrestaShop 1.7.8.3',
           kanbanColumns: {
             notReadyColumnId: 16957476,
@@ -104,10 +91,6 @@ const config = {
         blocked: { name: 'Blocked', automatic: true}
       },
       milestones: [
-        {
-          name: '1.7.8.1',
-          project: 'PrestaShop 1.7.8.1',
-        },
         {
           name: '1.7.8.3',
           project: 'PrestaShop 1.7.8.3',
