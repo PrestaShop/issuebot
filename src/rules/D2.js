@@ -50,14 +50,6 @@ module.exports = class D2 extends Rule {
       });
     }
 
-    this.logger.info(`[Rule Applier] D2 - Add label ${repositoryConfig.labels.toBeSpecified.name}`);
-    await this.githubApiClient.issues.addLabels({
-      issue_number: issueId,
-      owner,
-      repo,
-      labels: {labels: [repositoryConfig.labels.toBeSpecified.name]},
-    });
-
     await this.moveCardTo(
       issueId,
       owner,
