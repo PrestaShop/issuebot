@@ -78,11 +78,11 @@ const Rules = {
    */
   D1: 'D1',
   /*
-   * Scenario: when issue is re-opened, move it in 'to be specified' column
+   * Scenario: when issue is re-opened, move it in 'not ready' column
    * GIVEN a closed Issue
    * WHEN it is re-opened
    * THEN Fixed label is removed
-   * AND issue is moved in to be specified column
+   * AND issue is moved in to 'not ready' column
    */
   D2: 'D2',
   /*
@@ -224,7 +224,7 @@ const Rules = {
   /*
    * Scenario: label/update Issue moved in “Not Ready” column
    * WHEN an Issue is moved into the column “Not Ready”
-   * Add the label “In Analysis” to the Issue
+   * Add the label “Needs Specs” to the Issue
    * AND remove assignee if there is one
    */
   L1: 'L1',
