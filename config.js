@@ -82,6 +82,7 @@ const config = {
         toBeReproduced: { name: 'TBR', automatic: true },
         toBeSpecified: { name: 'TBS', automatic: true },
         needsMoreInfo: { name: 'NMI', automatic: false },
+        needsSpecs: {name: 'Needs Specs', automatic: true },
         toBeTested: { name: 'waiting for QA', automatic: false },
         toBeMerged: { name: 'QA ✔️', automatic: false },
         waitingAuthor: { name: 'waiting for author️', automatic: false },
