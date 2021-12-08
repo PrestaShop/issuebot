@@ -79,8 +79,6 @@ const config = {
         ready: { name: 'Ready', automatic: true },
         inAnalysis: { name: 'In analysis', automatic: true },
         inProgress: { name: 'WIP', automatic: true },
-        toBeReproduced: { name: 'TBR', automatic: true },
-        toBeSpecified: { name: 'TBS', automatic: true },
         needsMoreInfo: { name: 'NMI', automatic: false },
         needsSpecs: {name: 'Needs Specs', automatic: true },
         toBeTested: { name: 'waiting for QA', automatic: false },
