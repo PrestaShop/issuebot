@@ -24,6 +24,8 @@
  */
 const Rule = require('./Rule.js');
 const Utils = require('../ruleFinder/Utils');
+const {getIssue} = require('../maxikanban/getIssue');
+const {changeColumn} = require('../maxikanban/changeColumn');
 
 module.exports = class H2 extends Rule {
   /**
@@ -59,6 +61,15 @@ module.exports = class H2 extends Rule {
           const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
 
           if (projectConfig.kanbanColumns.toDoColumnId === cardColumnId) {
+            const issueGraphqlData = await getIssue(this.githubApiClient, referencedIssueData.repo, referencedIssueData.owner, referencedIssueData.number);
+
+            await changeColumn(
+              this.githubApiClient,
+              issueGraphqlData,
+              projectConfig.maxiKanban.id,
+              projectConfig.maxiKanban.columns.inProgressColumnId,
+            );
+
             await this.moveCardTo(
               referencedIssueData.number,
               referencedIssueData.owner,

@@ -22,35 +22,10 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-const Rule = require('./Rule.js');
-const Utils = require('../ruleFinder/Utils');
-const {getIssue} = require('../maxikanban/getIssue');
-const {changeColumn} = require('../maxikanban/changeColumn');
 
-module.exports = class C2 extends Rule {
-  /**
-   * @param {Context} context
-   *
-   * @public
-   */
-  async apply(context) {
-    const {issue} = context.payload;
-    const projectConfig = await this.getProjectConfigFromIssue(issue);
-    const issueData = Utils.parseUrlForData(issue.url);
-    const issueGraphqlData = await getIssue(this.githubApiClient, issueData.repo, issueData.owner, issueData.number);
+module.exports.getProjectFieldDatas = (issue) => {
+  const projectCard = issue.repository.issue.projectNextItems.nodes[0];
+  const {projectField} = projectCard.fieldValues.nodes[1];
 
-    await changeColumn(
-      this.githubApiClient,
-      issueGraphqlData,
-      projectConfig.maxiKanban.id,
-      projectConfig.maxiKanban.columns.doneColumnId,
-    );
-
-    await this.moveCardTo(
-      issueData.number,
-      issueData.owner,
-      issueData.repo,
-      projectConfig.kanbanColumns.doneColumnId,
-    );
-  }
+  return projectField.name === 'Status' ? {itemId: projectCard.id, fieldId: projectField.id} : false;
 };
