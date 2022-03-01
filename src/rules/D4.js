@@ -24,8 +24,6 @@
  */
 const Rule = require('./Rule.js');
 const Utils = require('../ruleFinder/Utils');
-const {getIssue} = require('../maxikanban/getIssue');
-const {changeColumn} = require('../maxikanban/changeColumn');
 
 module.exports = class D4 extends Rule {
   /**
@@ -54,20 +52,13 @@ module.exports = class D4 extends Rule {
       // Move to TBS column if new label is not To-Do => If its To-Do, it will be automatically moved to TO-DO column
       if (newLabel !== repositoryConfig.labels.todo.name) {
         const projectConfig = await this.getProjectConfigFromIssue(issue);
-        const issueGraphqlData = await getIssue(this.githubApiClient, issueData.repo, issueData.owner, issueData.number);
-
-        await changeColumn(
-          this.githubApiClient,
-          issueGraphqlData,
-          projectConfig.maxiKanban.id,
-          projectConfig.maxiKanban.columns.toBeSpecifiedColumnId,
-        );
 
         await this.moveCardTo(
           issueData.number,
           issueData.owner,
           issueData.repo,
           projectConfig.kanbanColumns.toBeSpecifiedColumnId,
+          this.config.maxiKanban.columns.toBeSpecifiedColumnId,
         );
       }
     }

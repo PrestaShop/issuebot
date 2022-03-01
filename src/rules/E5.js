@@ -23,8 +23,6 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 const Rule = require('./Rule.js');
-const {getIssue} = require('../maxikanban/getIssue');
-const {changeColumn} = require('../maxikanban/changeColumn');
 
 module.exports = class E5 extends Rule {
   /**
@@ -54,20 +52,13 @@ module.exports = class E5 extends Rule {
 
         const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
         const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
-        const issueGraphqlData = await getIssue(this.githubApiClient, referencedIssueData.repo, referencedIssueData.owner, referencedIssueData.number);
-
-        await changeColumn(
-          this.githubApiClient,
-          issueGraphqlData,
-          projectConfig.maxiKanban.id,
-          projectConfig.maxiKanban.columns.doneColumnId,
-        );
 
         await this.moveCardTo(
           referencedIssueData.number,
           referencedIssueData.owner,
           referencedIssueData.repo,
           projectConfig.kanbanColumns.doneColumnId,
+          this.config.maxiKanban.columns.doneColumnId,
         );
 
         this.logger.info(`[Rule Applier] E5 - Add label ${repositoryConfig.labels.fixed.name}`);

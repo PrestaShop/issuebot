@@ -37,4 +37,4 @@ module.exports.createCard = async (githubClient, projectId, contentId) => {
   const datas = await githubClient.graphql(mutation(projectId, contentId));
 
   return datas;
-}
+};

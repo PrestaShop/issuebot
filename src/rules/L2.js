@@ -23,8 +23,6 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 const Rule = require('./Rule.js');
-const {getIssue} = require('../maxikanban/getIssue');
-const {changeColumn} = require('../maxikanban/changeColumn');
 
 module.exports = class L2 extends Rule {
   /**
@@ -57,21 +55,13 @@ module.exports = class L2 extends Rule {
         // Remove automatic labels
         await this.removeIssueAutomaticLabels(referencedIssue, owner, repo);
 
-        const issueGraphqlData = await getIssue(this.githubApiClient, referencedIssueData.repo, referencedIssueData.owner, referencedIssueData.number);
-
-        await changeColumn(
-          this.githubApiClient,
-          issueGraphqlData,
-          projectConfig.maxiKanban.id,
-          projectConfig.maxiKanban.columns.toBeMergedColumnId,
-        );
-
         // Move card in toBeMerged column
         await this.moveCardTo(
           referencedIssueData.number,
           referencedIssueData.owner,
           referencedIssueData.repo,
           projectConfig.kanbanColumns.toBeMergedColumnId,
+          this.config.maxiKanban.columns.toBeMergedColumnId,
         );
 
         // Remove the previous assignee

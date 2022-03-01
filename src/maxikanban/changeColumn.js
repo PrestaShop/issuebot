@@ -54,4 +54,4 @@ module.exports.changeColumn = async (githubClient, issue, projectId, value) => {
   const datas = await githubClient.graphql(mutation(projectId, itemId, fieldId, value));
 
   return datas;
-}
+};
