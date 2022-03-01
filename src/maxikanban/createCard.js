@@ -23,11 +23,18 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 
-// Used to get the `Status` field id (current column field inside Project Next API)
-module.exports.getProjectFieldDatas = (issue) => {
-  // All these values always exist because they are in a MaxiKanban
-  const projectCard = issue.repository.issue.projectNextItems.nodes[0];
-  const issueNode = projectCard.fieldValues.nodes.filter((node) => node.projectField.name === 'Status')[0];
+const mutation = (projectId, contentId) => `
+ mutation {
+   addProjectNextItem(input: {projectId: "${projectId}" contentId: "${contentId}"}) {
+     projectNextItem {
+       id
+     }
+   }
+ }
+`;
 
-  return issueNode?.projectField ? {itemId: projectCard.id, fieldId: issueNode.projectField.id} : false;
+module.exports.createCard = async (githubClient, projectId, contentId) => {
+  const datas = await githubClient.graphql(mutation(projectId, contentId));
+
+  return datas;
 };

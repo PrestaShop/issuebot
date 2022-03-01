@@ -22,12 +22,25 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
+const {getProjectFieldDatas} = require('./getProjectFieldDatas');
 
-// Used to get the `Status` field id (current column field inside Project Next API)
-module.exports.getProjectFieldDatas = (issue) => {
-  // All these values always exist because they are in a MaxiKanban
-  const projectCard = issue.repository.issue.projectNextItems.nodes[0];
-  const issueNode = projectCard.fieldValues.nodes.filter((node) => node.projectField.name === 'Status')[0];
+const mutation = (projectId, itemId) => `
+ mutation {
+    deleteProjectNextItem(
+      input: {
+        projectId: "${projectId}"
+        itemId: "${itemId}"
+      }
+    ) {
+      deletedItemId
+    }
+  }
+`;
 
-  return issueNode?.projectField ? {itemId: projectCard.id, fieldId: issueNode.projectField.id} : false;
+module.exports.deleteCard = async (githubClient, projectId, issue) => {
+  const fieldDatas = getProjectFieldDatas(issue);
+
+  const datas = await githubClient.graphql(mutation(projectId, fieldDatas.itemId));
+
+  return datas;
 };

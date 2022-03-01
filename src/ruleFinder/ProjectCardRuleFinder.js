@@ -24,8 +24,10 @@
  */
 const Rule = require('../rule');
 const Utils = require('./Utils');
+const {deleteCard} = require('../maxikanban/deleteCard');
 const {changeColumn} = require('../maxikanban/changeColumn');
 const {getIssue} = require('../maxikanban/getIssue');
+const {createCard} = require('../maxikanban/createCard');
 
 module.exports = class ProjectCardRuleFinder {
   /**
@@ -53,73 +55,126 @@ module.exports = class ProjectCardRuleFinder {
   async findRules(context) {
     const rules = [];
     const config = await this.configProvider.getProjectConfigFromProjectCard(this.config, context.payload.project_card);
-    console.log(context.payload);
+    const issueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card);
+    const issueOwner = context.payload.repository.owner.login;
+    const issueRepo = context.payload.repository.name;
+
+    // So we don't duplicate all these conditions
+    const mooveInSameColumn = async (cardColumnId) => {
+      const issueGraphqlData = await getIssue(context.github, issueRepo, issueOwner, issueId);
+
+      // Setup the GraphQL query to save some line of codes
+      const mimicColumnMove = async (maxiKanbanColumnId) => {
+        const datas = await changeColumn(
+          context.github,
+          issueGraphqlData,
+          this.config.maxiKanban.id,
+          maxiKanbanColumnId,
+        );
+
+        if (!datas) {
+          setTimeout(() => {
+            mooveInSameColumn(cardColumnId);
+          }, 3000);
+
+          return false;
+        }
+
+        return datas;
+      };
+
+      if (config.kanbanColumns.toDoColumnId === cardColumnId) {
+        return mimicColumnMove(this.config.maxiKanban.columns.toDoColumnId);
+      }
+
+      if (config.kanbanColumns.inProgressColumnId === cardColumnId) {
+        return mimicColumnMove(this.config.maxiKanban.columns.inProgressColumnId);
+      }
+
+      if (config.kanbanColumns.toBeReviewedColumnId === cardColumnId) {
+        return mimicColumnMove(this.config.maxiKanban.columns.toBeReviewedColumnId);
+      }
+
+      if (config.kanbanColumns.toBeMergedColumnId === cardColumnId) {
+        return mimicColumnMove(this.config.maxiKanban.columns.toBeMergedColumnId);
+      }
+
+      if (config.kanbanColumns.notReadyColumnId === cardColumnId) {
+        return mimicColumnMove(this.config.maxiKanban.columns.notReadyColumnId);
+      }
+
+      if (config.kanbanColumns.toBeSpecifiedColumnId === cardColumnId) {
+        return mimicColumnMove(this.config.maxiKanban.columns.toBeSpecifiedColumnId);
+      }
+
+      if (config.kanbanColumns.toBeTestedColumnId === cardColumnId) {
+        return mimicColumnMove(this.config.maxiKanban.columns.toBeTestedColumnId);
+      }
+
+      if (config.kanbanColumns.doneColumnId === cardColumnId) {
+        return mimicColumnMove(this.config.maxiKanban.columns.doneColumnId);
+      }
+
+      return false;
+    };
+
 
     if (Utils.contextHasAction(context, 'created')) {
+      const issueGraphqlData = await getIssue(context.github, issueRepo, issueOwner, issueId);
+      const cardColumnId = context.payload.project_card.column_id;
+
       if (config.kanbanColumns.toDoColumnId === context.payload.project_card.column_id) {
         rules.push(Rule.G2);
       }
       if (config.kanbanColumns.inProgressColumnId === context.payload.project_card.column_id) {
         rules.push(Rule.H1);
       }
+
+      await createCard(context.github, this.config.maxiKanban.id, issueGraphqlData.repository.issue.id);
+      await mooveInSameColumn(cardColumnId);
     }
 
     if (Utils.contextHasAction(context, 'moved')) {
       const cardColumnId = context.payload.project_card.column_id;
-      const issueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card);
-      const issueOwner = context.payload.repository.owner.login;
-      const issueRepo = context.payload.repository.name;
-      const issueGraphqlData = await getIssue(context.github, issueRepo, issueOwner, issueId);
-
-      // When you move a card from a Kanban, also move it inside the MaxiKanban
-      const mimicColumnMove = async (maxiKanbanColumnId) => {
-        await changeColumn(
-          context.github,
-          issueGraphqlData,
-          this.config.maxiKanban.id,
-          maxiKanbanColumnId,
-        );
-      };
 
       if (config.kanbanColumns.toDoColumnId === cardColumnId) {
         rules.push(Rule.G2);
-        mimicColumnMove(this.config.maxiKanban.columns.toDoColumnId);
       }
 
       if (config.kanbanColumns.inProgressColumnId === cardColumnId) {
         rules.push(Rule.H1);
-        mimicColumnMove(this.config.maxiKanban.columns.inProgressColumnId);
       }
 
       if (config.kanbanColumns.toBeReviewedColumnId === cardColumnId) {
         rules.push(Rule.H1);
-        mimicColumnMove(this.config.maxiKanban.columns.toBeReviewedColumnId);
       }
 
       if (config.kanbanColumns.toBeMergedColumnId === cardColumnId) {
         rules.push(Rule.H1);
-        mimicColumnMove(this.config.maxiKanban.columns.toBeMergedColumnId);
       }
 
       if (config.kanbanColumns.notReadyColumnId === cardColumnId) {
         rules.push(Rule.L1);
-        mimicColumnMove(this.config.maxiKanban.columns.notReadyColumnId);
       }
 
       if (config.kanbanColumns.toBeSpecifiedColumnId === cardColumnId) {
         rules.push(Rule.L3);
-        mimicColumnMove(this.config.maxiKanban.columns.toBeSpecifiedColumnId);
       }
 
       if (config.kanbanColumns.toBeTestedColumnId === cardColumnId) {
         rules.push(Rule.H1);
-        mimicColumnMove(this.config.maxiKanban.columns.toBeTestedColumnId);
       }
 
       if (config.kanbanColumns.doneColumnId === cardColumnId) {
         rules.push(Rule.K1);
-        mimicColumnMove(this.config.maxiKanban.columns.doneColumnId);
       }
+
+      await mooveInSameColumn(cardColumnId);
+    }
+
+    if (Utils.contextHasAction(context, 'deleted')) {
+      const issueGraphqlData = await getIssue(context.github, issueRepo, issueOwner, issueId);
+      await deleteCard(context.github, this.config.maxiKanban.id, issueGraphqlData);
     }
 
     this.logger.info(`Rules are : ${rules.join(', ')}`);

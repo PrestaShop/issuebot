@@ -49,9 +49,13 @@ const mutation = (projectId, itemId, fieldId, value) => `
 `;
 
 module.exports.changeColumn = async (githubClient, issue, projectId, value) => {
-  const {itemId, fieldId} = getProjectFieldDatas(issue);
+  const fieldDatas = getProjectFieldDatas(issue);
 
-  const datas = await githubClient.graphql(mutation(projectId, itemId, fieldId, value));
+  // In case the card doesn't have any column
+  if (!fieldDatas) return false;
+
+  // If it has a column, it can be moved because it's an update operation
+  const datas = await githubClient.graphql(mutation(projectId, fieldDatas.itemId, fieldDatas.fieldId, value));
 
   return datas;
 };
