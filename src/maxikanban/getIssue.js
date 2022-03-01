@@ -23,6 +23,7 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 
+// GraphQL Datas are different than the REST API, we need IDs from the GraphQL API
 const query = (repositoryName, owner, issueId) => `
   {
     repository(name: "${repositoryName}", owner: "${owner}") {

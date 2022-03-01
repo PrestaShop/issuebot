@@ -23,7 +23,9 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 
+// Used to get the `Status` field id (current column field inside Project Next API)
 module.exports.getProjectFieldDatas = (issue) => {
+  // All these values always exist because they are in a MaxiKanban
   const projectCard = issue.repository.issue.projectNextItems.nodes[0];
   const {projectField} = projectCard.fieldValues.nodes[1];
 
