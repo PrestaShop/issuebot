@@ -60,7 +60,6 @@ module.exports = class E4 extends Rule {
           referencedIssueData.owner,
           referencedIssueData.repo,
           projectConfig.kanbanColumns.toBeMergedColumnId,
-          this.config.maxiKanban.columns.toBeMergedColumnId,
         );
 
         // Remove automatic labels

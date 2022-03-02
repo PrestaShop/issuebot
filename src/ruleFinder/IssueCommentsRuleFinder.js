@@ -69,7 +69,7 @@ module.exports = class IssueCommentsRuleFinder {
       issueData.owner,
       issueData.repo,
       true,
-      repositoryConfig.excludedUsersFromTopwatchers,
+      repositoryConfig.excludedUsersFromTopwatchers
     );
     this.logger.info(commentAuthors);
     const numberOfCommentAuthors = parseInt(commentAuthors.count, 10);
@@ -79,9 +79,9 @@ module.exports = class IssueCommentsRuleFinder {
         issueData.owner,
         issueData.repo,
         true,
-        commentAuthors.authors.concat(repositoryConfig.excludedUsersFromTopwatchers),
+        commentAuthors.authors.concat(repositoryConfig.excludedUsersFromTopwatchers)
       ),
-      10,
+    10
     );
     this.logger.info(`${numberOfCommentAuthors} comments`);
     this.logger.info(`${numberOfPositiveReactions} positive reactions`);
