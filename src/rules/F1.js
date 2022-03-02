@@ -55,6 +55,7 @@ module.exports = class F1 extends Rule {
           referencedIssueData.owner,
           referencedIssueData.repo,
           projectConfig.kanbanColumns.inProgressColumnId,
+          this.config.maxiKanban.columns.inProgressColumnId,
         );
 
         if (Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.todo.name)) {

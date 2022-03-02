@@ -22,26 +22,25 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-const Rule = require('./Rule.js');
-const Utils = require('../ruleFinder/Utils');
+const {getProjectFieldDatas} = require('./getProjectFieldDatas');
 
-module.exports = class C1 extends Rule {
-  /**
-   * @param {Context} context
-   *
-   * @public
-   */
-  async apply(context) {
-    const {issue} = context.payload;
-    const projectConfig = await this.getProjectConfigFromIssue(issue);
-    const issueData = Utils.parseUrlForData(issue.url);
-
-    await this.moveCardTo(
-      issueData.number,
-      issueData.owner,
-      issueData.repo,
-      projectConfig.kanbanColumns.toDoColumnId,
-      this.config.maxiKanban.columns.toDoColumnId,
-    );
+const mutation = (projectId, itemId) => `
+ mutation {
+    deleteProjectNextItem(
+      input: {
+        projectId: "${projectId}"
+        itemId: "${itemId}"
+      }
+    ) {
+      deletedItemId
+    }
   }
+`;
+
+module.exports.deleteCard = async (githubClient, projectId, issue) => {
+  const fieldDatas = getProjectFieldDatas(issue);
+
+  const datas = await githubClient.graphql(mutation(projectId, fieldDatas.itemId));
+
+  return datas;
 };

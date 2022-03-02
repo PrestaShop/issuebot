@@ -55,6 +55,7 @@ module.exports = class D2 extends Rule {
       owner,
       repo,
       projectConfig.kanbanColumns.notReadyColumnId,
+      this.config.maxiKanban.columns.notReadyColumnId,
     );
   }
 };
