@@ -22,7 +22,7 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-const Utils = require('./ruleFinder/Utils');
+const Utils = require('./ruleFinder/Utils')
 
 module.exports = class ConfigProvider {
   /**
@@ -32,12 +32,12 @@ module.exports = class ConfigProvider {
    * @param {ProjectDataProvider} projectDataProvider
    * @param {Logger} logger
    */
-  constructor(config, githubApiClient, issueDataProvider, projectDataProvider, logger) {
-    this.config = config;
-    this.githubApiClient = githubApiClient;
-    this.issueDataProvider = issueDataProvider;
-    this.projectDataProvider = projectDataProvider;
-    this.logger = logger;
+  constructor (config, githubApiClient, issueDataProvider, projectDataProvider, logger) {
+    this.config = config
+    this.githubApiClient = githubApiClient
+    this.issueDataProvider = issueDataProvider
+    this.projectDataProvider = projectDataProvider
+    this.logger = logger
   }
 
   /**
@@ -47,11 +47,11 @@ module.exports = class ConfigProvider {
    * @param {Object} milestone
    * @returns {null|Object}
    */
-  getRepositoryConfigFromMilestone(config, milestone) {
+  getRepositoryConfigFromMilestone (config, milestone) {
     return this.getRepositoryConfigByName(
       config,
-      this.getProjectNameFromMilestone(config, milestone),
-    );
+      this.getProjectNameFromMilestone(config, milestone)
+    )
   }
 
   /**
@@ -88,23 +88,23 @@ module.exports = class ConfigProvider {
    *   >
    * }
    */
-  getProjectConfigFromMilestone(repositoryConfig, milestone) {
-    let projectName = null;
+  getProjectConfigFromMilestone (repositoryConfig, milestone) {
+    let projectName = null
     for (let index = 0; index < repositoryConfig.milestones.length; index += 1) {
       if (repositoryConfig.milestones[index].name === milestone) {
-        projectName = repositoryConfig.milestones[index].project;
+        projectName = repositoryConfig.milestones[index].project
       }
     }
 
     if (projectName) {
       for (let index = 0; index < repositoryConfig.projects.length; index += 1) {
         if (repositoryConfig.projects[index].name === projectName) {
-          return repositoryConfig.projects[index];
+          return repositoryConfig.projects[index]
         }
       }
     }
 
-    return null;
+    return null
   }
 
   /**
@@ -114,10 +114,10 @@ module.exports = class ConfigProvider {
    * @param {Object} issue
    * @returns {null|Object}
    */
-  getRepositoryConfigFromIssue(config, issue) {
-    const projectName = this.parseRepositoryUrlForName(issue.repository_url);
+  getRepositoryConfigFromIssue (config, issue) {
+    const projectName = this.parseRepositoryUrlForName(issue.repository_url)
 
-    return this.getRepositoryConfigByName(config, projectName);
+    return this.getRepositoryConfigByName(config, projectName)
   }
 
   /**
@@ -154,18 +154,18 @@ module.exports = class ConfigProvider {
    *   >
    * }
    */
-  async getProjectConfigFromIssue(config, issue) {
-    const issueData = Utils.parseUrlForData(issue.url);
+  async getProjectConfigFromIssue (config, issue) {
+    const issueData = Utils.parseUrlForData(issue.url)
     const cardInKanban = await this.issueDataProvider.getRelatedCardInKanban(
       issueData.number,
       issueData.owner,
-      issueData.repo,
-    );
+      issueData.repo
+    )
     if (cardInKanban !== null) {
-      return this.getProjectConfigFromProjectCard(config, cardInKanban);
+      return this.getProjectConfigFromProjectCard(config, cardInKanban)
     }
 
-    return null;
+    return null
   }
 
   /**
@@ -175,8 +175,8 @@ module.exports = class ConfigProvider {
    * @param {object} pullRequest
    * @returns {null|object}
    */
-  getRepositoryConfigFromPullRequest(config, pullRequest) {
-    return this.getRepositoryConfigByName(config, pullRequest.base.repo.name);
+  getRepositoryConfigFromPullRequest (config, pullRequest) {
+    return this.getRepositoryConfigByName(config, pullRequest.base.repo.name)
   }
 
   /**
@@ -186,14 +186,14 @@ module.exports = class ConfigProvider {
    * @param {string} projectName
    * @returns {null|object}
    */
-  getRepositoryConfigByName(config, projectName) {
+  getRepositoryConfigByName (config, projectName) {
     for (let index = 0; index < config.repositories.length; index += 1) {
       if (config.repositories[index].name === projectName) {
-        return config.repositories[index];
+        return config.repositories[index]
       }
     }
 
-    return null;
+    return null
   }
 
   /**
@@ -230,20 +230,20 @@ module.exports = class ConfigProvider {
    *
    * @public
    */
-  async getProjectConfigFromProjectCard(config, projectCard) {
+  async getProjectConfigFromProjectCard (config, projectCard) {
     const project = await this.projectDataProvider.getData(
-      this.projectDataProvider.parseUrlForId(projectCard.project_url),
-    );
+      this.projectDataProvider.parseUrlForId(projectCard.project_url)
+    )
 
-    const repositoryConfig = this.getRepositoryConfigByName(config, this.parseRepositoryUrlForName(project.owner_url));
+    const repositoryConfig = this.getRepositoryConfigByName(config, this.parseRepositoryUrlForName(project.owner_url))
 
     for (let index = 0; index < repositoryConfig.projects.length; index += 1) {
       if (repositoryConfig.projects[index].name === project.name) {
-        return repositoryConfig.projects[index];
+        return repositoryConfig.projects[index]
       }
     }
 
-    return null;
+    return null
   }
 
   /**
@@ -252,7 +252,7 @@ module.exports = class ConfigProvider {
    * @param {string} repositoryUrl
    * @returns {string}
    */
-  parseRepositoryUrlForName(repositoryUrl) {
-    return repositoryUrl.substr(repositoryUrl.lastIndexOf('/') + 1);
+  parseRepositoryUrlForName (repositoryUrl) {
+    return repositoryUrl.substr(repositoryUrl.lastIndexOf('/') + 1)
   }
-};
+}

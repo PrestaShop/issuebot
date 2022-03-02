@@ -22,8 +22,8 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-const Rule = require('./Rule.js');
-const Utils = require('../ruleFinder/Utils');
+const Rule = require('./Rule.js')
+const Utils = require('../ruleFinder/Utils')
 
 module.exports = class L1 extends Rule {
   /**
@@ -31,16 +31,16 @@ module.exports = class L1 extends Rule {
    *
    * @public
    */
-  async apply(context) {
-    const referencedIssueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card);
-    const owner = context.payload.repository.owner.login;
-    const repo = context.payload.repository.name;
+  async apply (context) {
+    const referencedIssueId = await this.projectCardDataProvider.getRelatedIssueId(context.payload.project_card)
+    const owner = context.payload.repository.owner.login
+    const repo = context.payload.repository.name
 
-    const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo);
-    const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
+    const referencedIssue = await this.issueDataProvider.getData(referencedIssueId, owner, repo)
+    const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue)
 
     // Remove automatic labels
-    await this.removeIssueAutomaticLabels(referencedIssue, owner, repo, repositoryConfig.labels.inAnalysis);
+    await this.removeIssueAutomaticLabels(referencedIssue, owner, repo, repositoryConfig.labels.inAnalysis)
 
     // Add 'need specs' label
     if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.needsSpecs.name)) {
@@ -48,8 +48,8 @@ module.exports = class L1 extends Rule {
         issue_number: referencedIssueId,
         owner,
         repo,
-        labels: {labels: [repositoryConfig.labels.needsSpecs.name]},
-      });
+        labels: { labels: [repositoryConfig.labels.needsSpecs.name] }
+      })
     }
 
     // Remove the issue assignee
@@ -57,7 +57,7 @@ module.exports = class L1 extends Rule {
       issue_number: referencedIssueId,
       owner,
       repo,
-      assignees: referencedIssue.user.login,
-    });
+      assignees: referencedIssue.user.login
+    })
   }
-};
+}
