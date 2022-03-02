@@ -58,7 +58,6 @@ module.exports = class E5 extends Rule {
           referencedIssueData.owner,
           referencedIssueData.repo,
           projectConfig.kanbanColumns.doneColumnId,
-          this.config.maxiKanban.columns.doneColumnId,
         );
 
         this.logger.info(`[Rule Applier] E5 - Add label ${repositoryConfig.labels.fixed.name}`);
