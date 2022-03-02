@@ -22,9 +22,6 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-const {getIssue} = require('../maxikanban/getIssue');
-const {changeColumn} = require('../maxikanban/changeColumn');
-
 module.exports = class Rule {
   /**
    * @param config
@@ -84,7 +81,7 @@ module.exports = class Rule {
     return false;
   }
 
-  async moveCardTo(issueId, issueOwner, issueRepo, columnId, maxiKanbanColumnId) {
+  async moveCardTo(issueId, issueOwner, issueRepo, columnId) {
     this.logger.info(`Moving issue #${issueId} card in Kanban`);
 
     const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId, issueOwner, issueRepo);
@@ -95,15 +92,6 @@ module.exports = class Rule {
       position: 'bottom',
       column_id: columnId,
     });
-
-    const issueGraphqlData = await getIssue(this.githubApiClient, issueRepo, issueOwner, issueId);
-
-    await changeColumn(
-      this.githubApiClient,
-      issueGraphqlData,
-      this.config.maxiKanban.id,
-      maxiKanbanColumnId,
-    );
   }
 
   async removeIssueAutomaticLabels(issue, owner, repo, newLabel = null) {

@@ -52,13 +52,11 @@ module.exports = class D4 extends Rule {
       // Move to TBS column if new label is not To-Do => If its To-Do, it will be automatically moved to TO-DO column
       if (newLabel !== repositoryConfig.labels.todo.name) {
         const projectConfig = await this.getProjectConfigFromIssue(issue);
-
         await this.moveCardTo(
           issueData.number,
           issueData.owner,
           issueData.repo,
           projectConfig.kanbanColumns.toBeSpecifiedColumnId,
-          this.config.maxiKanban.columns.toBeSpecifiedColumnId,
         );
       }
     }

@@ -38,15 +38,7 @@ module.exports = class RuleComputer {
    * @param {ConfigProvider} configProvider
    * @param {Logger} logger
    */
-  constructor(
-    config,
-    issueDataProvider,
-    issueCommentsDataProvider,
-    pullRequestDataProvider,
-    projectCardDataProvider,
-    configProvider,
-    logger,
-  ) {
+  constructor(config, issueDataProvider, issueCommentsDataProvider, pullRequestDataProvider, projectCardDataProvider, configProvider, logger) {
     this.config = config;
     this.logger = logger;
     this.issueDataProvider = issueDataProvider;
@@ -84,7 +76,6 @@ module.exports = class RuleComputer {
       this.config,
       this.configProvider,
       this.logger,
-      this.projectCardDataProvider,
     );
   }
 
