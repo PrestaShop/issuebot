@@ -25,6 +25,7 @@
 
 // Used to get the `Status` field id (current column field inside Project Next API)
 module.exports.getProjectFieldDatas = (issue) => {
+  console.log(issue, issue.data, issue.repository.issue.projectNextItems)
   // All these values always exist because they are in a MaxiKanban
   const projectCard = issue.repository.issue.projectNextItems.nodes[0];
   const issueNode = projectCard.fieldValues.nodes.filter((node) => node.projectField.name === 'Status')[0];
