@@ -248,6 +248,14 @@ const Rules = {
    * THEN add label "topwatchers" to the issue
    */
   M1: 'M1',
-};
+  /*
+   * Scenario: remove "waiting for author" label from issue
+   *
+   * When a comment is added to an issue
+   * AND the issue has the "waiting for author" label
+   * THEN remove label "waiting for author"
+   */
+  M2: 'M2'
+}
 
 module.exports = Rules;

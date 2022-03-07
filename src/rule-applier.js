@@ -48,6 +48,7 @@ const L1 = require('./rules/L1.js');
 const L2 = require('./rules/L2.js');
 const L3 = require('./rules/L3.js');
 const M1 = require('./rules/M1.js');
+const M2 = require('./rules/M2.js');
 const Rule = require('./rules/Rule.js');
 /* eslint-enable */
 
