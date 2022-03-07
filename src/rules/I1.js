@@ -71,7 +71,6 @@ module.exports = class I1 extends Rule {
                 referencedIssueData.owner,
                 referencedIssueData.repo,
                 projectConfig.kanbanColumns.toBeReviewedColumnId,
-                this.config.maxiKanban.columns.toBeReviewedColumnId,
               );
 
               // Remove automatic labels

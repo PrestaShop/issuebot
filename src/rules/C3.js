@@ -41,7 +41,7 @@ module.exports = class C3 extends Rule {
       issue_number: issueData.number,
       owner,
       repo,
-      state: 'closed',
+      state: 'closed'
     });
   }
 };

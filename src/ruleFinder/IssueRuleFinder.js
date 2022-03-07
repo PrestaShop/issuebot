@@ -97,6 +97,7 @@ module.exports = class IssueRuleFinder {
     }
 
     if (Utils.contextHasAction(context, 'reopened')) {
+
       rules.push(Rule.D2);
     }
 
