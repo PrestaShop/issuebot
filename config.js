@@ -74,6 +74,19 @@ const config = {
           },
         },
         {
+          name: 'PrestaShop 1.7.8.5',
+          kanbanColumns: {
+            notReadyColumnId: 17937708,
+            toDoColumnId: 17937711,
+            toBeSpecifiedColumnId: 17937712,
+            inProgressColumnId: 17937713,
+            toBeReviewedColumnId: 17937715,
+            toBeTestedColumnId: 17937717,
+            toBeMergedColumnId: 17993561,
+            doneColumnId: 17937724,
+          },
+        },
+        {
           name: 'PrestaShop 8.0.0',
           kanbanColumns: {
             notReadyColumnId: 10578078,
@@ -110,6 +123,10 @@ const config = {
         {
           name: '1.7.8.4',
           project: 'PrestaShop 1.7.8.4',
+        },
+        {
+          name: '1.7.8.5',
+          project: 'PrestaShop 1.7.8.5',
         },
         {
           name: '8.0.0',
