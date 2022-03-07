@@ -41,6 +41,7 @@ module.exports = class C2 extends Rule {
       issueData.owner,
       issueData.repo,
       projectConfig.kanbanColumns.doneColumnId,
+      this.config.maxiKanban.columns.doneColumnId,
     );
   }
 };
