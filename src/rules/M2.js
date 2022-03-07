@@ -35,15 +35,11 @@ module.exports = class M2 extends Rule {
     const repositoryConfig = this.getRepositoryConfigFromIssue(context.payload.issue)
     const issueData = Utils.parseUrlForData(context.payload.issue.url)
 
-    const referencedIssue = await this.issueDataProvider.getData(issueData.number, issueData.owner, issueData.repo)
-
-    if (Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.waitingAuthor.name)) {
-      await this.githubApiClient.issues.removeLabel({
-        issue_number: issueData.number,
-        owner: issueData.owner,
-        repo: issueData.repo,
-        name: repositoryConfig.labels.waitingAuthor.name
-      })
-    }
+    await this.githubApiClient.issues.removeLabel({
+      issue_number: issueData.number,
+      owner: issueData.owner,
+      repo: issueData.repo,
+      name: repositoryConfig.labels.waitingAuthor.name
+    })
   }
 }
