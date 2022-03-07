@@ -22,26 +22,37 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-const Rule = require('./Rule.js');
-const Utils = require('../ruleFinder/Utils');
 
-module.exports = class C1 extends Rule {
-  /**
-   * @param {Context} context
-   *
-   * @public
-   */
-  async apply(context) {
-    const {issue} = context.payload;
-    const projectConfig = await this.getProjectConfigFromIssue(issue);
-    const issueData = Utils.parseUrlForData(issue.url);
-
-    await this.moveCardTo(
-      issueData.number,
-      issueData.owner,
-      issueData.repo,
-      projectConfig.kanbanColumns.toDoColumnId,
-      this.config.maxiKanban.columns.toDoColumnId,
-    );
+// GraphQL Datas are different than the REST API, we need IDs from the GraphQL API
+const query = (repositoryName, owner, issueId) => `
+  {
+    repository(name: "${repositoryName}", owner: "${owner}") {
+      issue(number: ${issueId}) {
+        id
+        title
+        createdAt
+        projectNextItems(first: 100) {
+          nodes {
+            id
+            fieldValues(first: 100) {
+              nodes {
+                projectField {
+                  name
+                  id
+                  settings
+                }
+                value
+              }
+            }
+          }
+        }
+      }
+    }
   }
+`;
+
+module.exports.getIssue = async (githubClient, repositoryName, owner, issueId) => {
+  const datas = await githubClient.graphql(query(repositoryName, owner, issueId));
+
+  return datas;
 };

@@ -22,26 +22,40 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-const Rule = require('./Rule.js');
-const Utils = require('../ruleFinder/Utils');
 
-module.exports = class C1 extends Rule {
-  /**
-   * @param {Context} context
-   *
-   * @public
-   */
-  async apply(context) {
-    const {issue} = context.payload;
-    const projectConfig = await this.getProjectConfigFromIssue(issue);
-    const issueData = Utils.parseUrlForData(issue.url);
+const {getProjectFieldDatas} = require('./getProjectFieldDatas');
 
-    await this.moveCardTo(
-      issueData.number,
-      issueData.owner,
-      issueData.repo,
-      projectConfig.kanbanColumns.toDoColumnId,
-      this.config.maxiKanban.columns.toDoColumnId,
-    );
+const mutation = (projectId, itemId, fieldId, value) => `
+  mutation {
+    updateProjectNextItemField(
+      input: {
+        projectId: "${projectId}"
+        itemId: "${itemId}"
+        fieldId: "${fieldId}"
+        value: "${value}"
+      }
+    ) {
+      projectNextItem {
+        id
+        fieldValues(first: 10) {
+          nodes {
+            id
+            value
+          }
+        }
+      }
+    }
   }
+`;
+
+module.exports.changeColumn = async (githubClient, issue, projectId, value) => {
+  const fieldDatas = getProjectFieldDatas(issue);
+
+  // In case the card doesn't have any column
+  if (!fieldDatas) return false;
+
+  // If it has a column, it can be moved because it's an update operation
+  const datas = await githubClient.graphql(mutation(projectId, fieldDatas.itemId, fieldDatas.fieldId, value));
+
+  return datas;
 };
