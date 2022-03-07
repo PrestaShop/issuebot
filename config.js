@@ -70,8 +70,8 @@ const config = {
             toBeReviewedColumnId: 17400289,
             toBeTestedColumnId: 17400290,
             toBeMergedColumnId: 17483020,
-            doneColumnId: 17483022,
-          },
+            doneColumnId: 17483022
+          }
         },
         {
           name: 'PrestaShop 8.0.0',
@@ -88,19 +88,19 @@ const config = {
         },
       ],
       labels: {
-        todo: {name: 'To Do', automatic: true},
-        ready: {name: 'Ready', automatic: true},
-        inAnalysis: {name: 'In analysis', automatic: true},
-        inProgress: {name: 'WIP', automatic: true},
-        needsMoreInfo: {name: 'NMI', automatic: false},
-        needsSpecs: {name: 'Needs Specs', automatic: true},
-        toBeTested: {name: 'waiting for QA', automatic: false},
-        toBeMerged: {name: 'QA ✔️', automatic: false},
-        waitingAuthor: {name: 'waiting for author️', automatic: false},
-        fixed: {name: 'Fixed', automatic: true},
-        topwatchers: {name: 'Topwatchers', automatic: false},
-        rejected: {name: 'Rejected', automatic: false},
-        blocked: {name: 'Blocked', automatic: true},
+        todo: { name: 'To Do', automatic: true },
+        ready: { name: 'Ready', automatic: true },
+        inAnalysis: { name: 'In analysis', automatic: true },
+        inProgress: { name: 'WIP', automatic: true },
+        needsMoreInfo: { name: 'NMI', automatic: false },
+        needsSpecs: {name: 'Needs Specs', automatic: true },
+        toBeTested: { name: 'waiting for QA', automatic: false },
+        toBeMerged: { name: 'QA ✔️', automatic: false },
+        waitingAuthor: { name: 'waiting for author️', automatic: false },
+        fixed: { name: 'Fixed', automatic: true },
+        topwatchers: { name: 'Topwatchers', automatic: false },
+        rejected: { name: 'Rejected', automatic: false },
+        blocked: { name: 'Blocked', automatic: true}
       },
       milestones: [
         {
@@ -118,19 +118,6 @@ const config = {
       ],
     },
   ],
-  maxiKanban: {
-    id: 'PN_kwDOACr20M08Jw',
-    columns: {
-      notReadyColumnId: 'f75ad846',
-      toDoColumnId: '2f00dcef',
-      toBeSpecifiedColumnId: '85679661',
-      inProgressColumnId: '47fc9ee4',
-      toBeReviewedColumnId: '427af469',
-      toBeTestedColumnId: '31621680',
-      toBeMergedColumnId: '2cd7b745',
-      doneColumnId: '98236657',
-    },
-  },
 };
 
 module.exports = config;

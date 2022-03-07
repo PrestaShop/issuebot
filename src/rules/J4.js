@@ -64,7 +64,6 @@ module.exports = class J4 extends Rule {
               referencedIssueData.owner,
               referencedIssueData.repo,
               projectConfig.kanbanColumns.inProgressColumnId,
-              this.config.maxiKanban.columns.inProgressColumnId,
             );
 
             // Remove automatic labels
