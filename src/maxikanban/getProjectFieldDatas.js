@@ -22,26 +22,12 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-const Rule = require('./Rule.js');
-const Utils = require('../ruleFinder/Utils');
 
-module.exports = class C1 extends Rule {
-  /**
-   * @param {Context} context
-   *
-   * @public
-   */
-  async apply(context) {
-    const {issue} = context.payload;
-    const projectConfig = await this.getProjectConfigFromIssue(issue);
-    const issueData = Utils.parseUrlForData(issue.url);
+// Used to get the `Status` field id (current column field inside Project Next API)
+module.exports.getProjectFieldDatas = (issue) => {
+  // All these values always exist because they are in a MaxiKanban
+  const projectCard = issue.repository.issue.projectNextItems.nodes[0];
+  const issueNode = projectCard.fieldValues.nodes.filter((node) => node.projectField.name === 'Status')[0];
 
-    await this.moveCardTo(
-      issueData.number,
-      issueData.owner,
-      issueData.repo,
-      projectConfig.kanbanColumns.toDoColumnId,
-      this.config.maxiKanban.columns.toDoColumnId,
-    );
-  }
+  return issueNode?.projectField ? {itemId: projectCard.id, fieldId: issueNode.projectField.id} : false;
 };

@@ -59,12 +59,12 @@ module.exports = class IssueCommentsDataProvider {
     });
 
     if (excludeIssueOwner) {
-      excludedUsers.push(owner)
+      excludedUsers.push(owner);
     }
 
-    data.forEach(comment => {
+    data.forEach((comment) => {
       if (!excludedUsers.includes(comment.user.login)) {
-        commentAuthors.authors.push(comment.user.login)
+        commentAuthors.authors.push(comment.user.login);
         ++commentAuthors.count;
       }
     });
@@ -90,10 +90,10 @@ module.exports = class IssueCommentsDataProvider {
 
     let positiveReactionsCount = 0;
     if (excludeIssueOwner) {
-      excludedUsers.push(owner)
+      excludedUsers.push(owner);
     }
 
-    data.forEach(reaction => {
+    data.forEach((reaction) => {
       if (positiveReactions.includes(reaction.content) && !excludedUsers.includes(reaction.user.login)) {
         ++positiveReactionsCount;
       }

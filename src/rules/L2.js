@@ -61,6 +61,7 @@ module.exports = class L2 extends Rule {
           referencedIssueData.owner,
           referencedIssueData.repo,
           projectConfig.kanbanColumns.toBeMergedColumnId,
+          this.config.maxiKanban.columns.toBeMergedColumnId,
         );
 
         // Remove the previous assignee
