@@ -56,6 +56,7 @@ module.exports = class J1 extends Rule {
               referencedIssueData.owner,
               referencedIssueData.repo,
               projectConfig.kanbanColumns.toBeTestedColumnId,
+              this.config.maxiKanban.columns.toBeTestedColumnId,
             );
 
             const referencedIssue = await this.issueDataProvider.getData(
