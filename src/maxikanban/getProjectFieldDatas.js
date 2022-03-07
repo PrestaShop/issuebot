@@ -29,5 +29,5 @@ module.exports.getProjectFieldDatas = (issue) => {
   const projectCard = issue.repository.issue.projectNextItems.nodes[0];
   const issueNode = projectCard.fieldValues.nodes.filter((node) => node.projectField.name === 'Status')[0];
 
-  return issueNode?.projectField ? {itemId: projectCard.id, fieldId: issueNode.projectField.id} : false;
+  return issueNode && issueNode.projectField ? {itemId: projectCard.id, fieldId: issueNode.projectField.id} : false;
 };
