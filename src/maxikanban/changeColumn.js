@@ -23,7 +23,9 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 
+const {createCard} = require('../maxikanban/createCard');
 const {getProjectFieldDatas} = require('./getProjectFieldDatas');
+const config = require('../../config.js');
 
 const mutation = (projectId, itemId, fieldId, value) => `
   mutation {
@@ -52,7 +54,17 @@ module.exports.changeColumn = async (githubClient, issue, projectId, value) => {
   const fieldDatas = getProjectFieldDatas(issue);
 
   // In case the card doesn't have any column
-  if (!fieldDatas) return false;
+  if (!fieldDatas) {
+    await createCard(githubClient, config.maxiKanban.id, issue.repository.issue.id);
+
+    setTimeout(async () => {
+      const newFieldDatas = getProjectFieldDatas(issue);
+
+      await githubClient.graphql(mutation(projectId, newFieldDatas.itemId, newFieldDatas.fieldId, value));
+    }, 3000);
+
+    return false;
+  }
 
   // If it has a column, it can be moved because it's an update operation
   const datas = await githubClient.graphql(mutation(projectId, fieldDatas.itemId, fieldDatas.fieldId, value));
