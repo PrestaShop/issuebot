@@ -57,12 +57,6 @@ module.exports.changeColumn = async (githubClient, issue, projectId, value) => {
   if (!fieldDatas) {
     await createCard(githubClient, config.maxiKanban.id, issue.repository.issue.id);
 
-    setTimeout(async () => {
-      const newFieldDatas = getProjectFieldDatas(issue);
-
-      await githubClient.graphql(mutation(projectId, newFieldDatas.itemId, newFieldDatas.fieldId, value));
-    }, 3000);
-
     return false;
   }
 
