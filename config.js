@@ -109,7 +109,7 @@ const config = {
         needsSpecs: {name: 'Needs Specs', automatic: true},
         toBeTested: {name: 'waiting for QA', automatic: false},
         toBeMerged: {name: 'QA ✔️', automatic: false},
-        waitingAuthor: {name: 'waiting for author️', automatic: false},
+        waitingAuthor: {name: 'waiting for author', automatic: false},
         fixed: {name: 'Fixed', automatic: true},
         topwatchers: {name: 'Topwatchers', automatic: false},
         rejected: {name: 'Rejected', automatic: false},
