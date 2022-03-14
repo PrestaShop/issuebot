@@ -111,6 +111,7 @@ module.exports = class PullRequestRuleFinder {
           context.payload.repository.owner.login,
           context.payload.repository.name,
         );
+        console.log(nbApprovals, 'reviewcount')
         if (nbApprovals >= repositoryConfig.nbRequiredApprovals) {
           rules.push(Rule.E4);
         } else {
