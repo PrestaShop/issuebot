@@ -172,7 +172,7 @@ module.exports = class ProjectCardRuleFinder {
       await mooveInSameColumn(cardColumnId);
     }
 
-    if (Utils.contextHasAction(context, 'deleted')) {
+    if (Utils.contextHasAction(context, 'deleted') && config) {
       const issueGraphqlData = await getIssue(context.github, issueRepo, issueOwner, issueId);
       await deleteCard(context.github, this.config.maxiKanban.id, issueGraphqlData);
     }
