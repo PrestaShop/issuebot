@@ -184,12 +184,11 @@ module.exports = class PullRequestDataProvider {
       pull_number: pullRequestId,
       owner,
       repo,
+      per_page: 100,
     });
-    console.log(reviews);
 
     let nbApprovals = 0;
     reviews.data.forEach((review) => {
-      console.log(review);
       if (review.state === 'APPROVED') {
         nbApprovals += 1;
       }
