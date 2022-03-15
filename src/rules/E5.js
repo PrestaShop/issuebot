@@ -42,7 +42,7 @@ module.exports = class E5 extends Rule {
     );
 
     if (referencedIssuesData.length > 0) {
-      for (let index = 0; index < referencedIssuesData.length; index += 1) {
+      for (let index = 0; index <= referencedIssuesData.length; index += 1) {
         const referencedIssueData = referencedIssuesData[index];
         const referencedIssue = await this.issueDataProvider.getData(
           referencedIssueData.number,
@@ -52,14 +52,6 @@ module.exports = class E5 extends Rule {
 
         const repositoryConfig = this.getRepositoryConfigFromIssue(referencedIssue);
         const projectConfig = await this.getProjectConfigFromIssue(referencedIssue);
-
-        await this.moveCardTo(
-          referencedIssueData.number,
-          referencedIssueData.owner,
-          referencedIssueData.repo,
-          projectConfig.kanbanColumns.doneColumnId,
-          this.config.maxiKanban.columns.doneColumnId,
-        );
 
         this.logger.info(`[Rule Applier] E5 - Add label ${repositoryConfig.labels.fixed.name}`);
 
@@ -77,6 +69,16 @@ module.exports = class E5 extends Rule {
           repo: referencedIssueData.repo,
           assignees: referencedIssue.user.login,
         });
+
+        if (projectConfig) {
+          await this.moveCardTo(
+            referencedIssueData.number,
+            referencedIssueData.owner,
+            referencedIssueData.repo,
+            projectConfig ? projectConfig.kanbanColumns.doneColumnId : null,
+            this.config.maxiKanban.columns.doneColumnId,
+          );
+        }
       }
     }
   }
