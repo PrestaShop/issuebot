@@ -48,42 +48,16 @@ const config = {
       ],
       projects: [
         {
-          name: 'PrestaShop 1.7.8.3',
+          name: 'PrestaShop 1.7.8.6',
           kanbanColumns: {
-            notReadyColumnId: 16957476,
-            toDoColumnId: 16957492,
-            toBeSpecifiedColumnId: 16957498,
-            inProgressColumnId: 16957477,
-            toBeReviewedColumnId: 16957505,
-            toBeTestedColumnId: 16957511,
-            toBeMergedColumnId: 16957513,
-            doneColumnId: 16957478,
-          },
-        },
-        {
-          name: 'PrestaShop 1.7.8.4',
-          kanbanColumns: {
-            notReadyColumnId: 17400278,
-            toDoColumnId: 17400281,
-            toBeSpecifiedColumnId: 17540814,
-            inProgressColumnId: 17400284,
-            toBeReviewedColumnId: 17400289,
-            toBeTestedColumnId: 17400290,
-            toBeMergedColumnId: 17483020,
-            doneColumnId: 17483022,
-          },
-        },
-        {
-          name: 'PrestaShop 1.7.8.5',
-          kanbanColumns: {
-            notReadyColumnId: 17937708,
-            toDoColumnId: 17937711,
-            toBeSpecifiedColumnId: 17937712,
-            inProgressColumnId: 17937713,
-            toBeReviewedColumnId: 17937715,
-            toBeTestedColumnId: 17937717,
-            toBeMergedColumnId: 17993561,
-            doneColumnId: 17937724,
+            notReadyColumnId: 18311859,
+            toDoColumnId: 18311877,
+            toBeSpecifiedColumnId: 18311888,
+            inProgressColumnId: 18311860,
+            toBeReviewedColumnId: 18311894,
+            toBeTestedColumnId: 18311896,
+            toBeMergedColumnId: 18311898,
+            doneColumnId: 18311861,
           },
         },
         {
@@ -117,16 +91,8 @@ const config = {
       },
       milestones: [
         {
-          name: '1.7.8.3',
-          project: 'PrestaShop 1.7.8.3',
-        },
-        {
-          name: '1.7.8.4',
-          project: 'PrestaShop 1.7.8.4',
-        },
-        {
-          name: '1.7.8.5',
-          project: 'PrestaShop 1.7.8.5',
+          name: '1.7.8.6',
+          project: 'PrestaShop 1.7.8.6',
         },
         {
           name: '8.0.0',
