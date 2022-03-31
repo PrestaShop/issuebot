@@ -111,7 +111,7 @@ const config = {
         toBeMerged: {name: 'QA ✔️', automatic: false},
         waitingAuthor: {name: 'Waiting for author', automatic: false},
         fixed: {name: 'Fixed', automatic: true},
-        topwatchers: {name: 'Topwatchers', automatic: false},
+        topWatchers: {name: 'Topwatchers', automatic: false},
         rejected: {name: 'Rejected', automatic: false},
         blocked: {name: 'Blocked', automatic: true},
       },
