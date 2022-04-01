@@ -45,6 +45,8 @@ const config = {
         'sarahdib',
         'SD1982',
         'TristanLDD',
+        'marwachelly',
+        'AureRita',
       ],
       projects: [
         {
