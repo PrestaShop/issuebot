@@ -62,8 +62,11 @@ module.exports = class IssueCommentsDataProvider {
       excludedUsers.push(owner);
     }
 
+    let alreadyPushedAuthors = [];
+
     data.forEach((comment) => {
-      if (!excludedUsers.includes(comment.user.login)) {
+      if (!excludedUsers.includes(comment.user.login) && !alreadyPushedAuthors.includes(comment.user.login)) {
+        alreadyPushedAuthors.push(comment.user.login);
         commentAuthors.authors.push(comment.user.login);
         ++commentAuthors.count;
       }
@@ -93,9 +96,12 @@ module.exports = class IssueCommentsDataProvider {
       excludedUsers.push(owner);
     }
 
+    let alreadyPushedAuthors = [];
+
     data.forEach((reaction) => {
-      if (positiveReactions.includes(reaction.content) && !excludedUsers.includes(reaction.user.login)) {
+      if (positiveReactions.includes(reaction.content) && !excludedUsers.includes(reaction.user.login) && !alreadyPushedAuthors.includes(reaction.user.login)) {
         ++positiveReactionsCount;
+        alreadyPushedAuthors.push(reaction.user.login);
       }
     });
 
