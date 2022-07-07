@@ -91,8 +91,8 @@ const config = {
       },
       milestones: [
         {
-          name: '1.7.8.6',
-          project: 'PrestaShop 1.7.8.6',
+          name: '1.7.8.7',
+          project: 'PrestaShop 1.7.8.7',
         },
         {
           name: '8.0.0',
