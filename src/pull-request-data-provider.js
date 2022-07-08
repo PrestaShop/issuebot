@@ -70,7 +70,7 @@ module.exports = class PullRequestDataProvider {
    */
   async getReferencedIssues(pullRequestNumber, owner, repo) {
     const issues = [];
-    console.log(process.env.APP_ID, process.env.PRIVATE_KEY);
+    console.log('App id: ' + process.env.APP_ID);
     const auth = createAppAuth({
       id: process.env.APP_ID,
       privateKey: process.env.PRIVATE_KEY,
