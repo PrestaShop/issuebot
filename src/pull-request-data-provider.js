@@ -70,11 +70,10 @@ module.exports = class PullRequestDataProvider {
    */
   async getReferencedIssues(pullRequestNumber, owner, repo) {
     const issues = [];
-    console.log(process.env.APP_ID, process.env.PRIVATE_KEY_PATH);
-    const privateKey = fs.readFileSync(process.env.PRIVATE_KEY_PATH, 'utf8');
+    console.log(process.env.APP_ID, process.env.PRIVATE_KEY);
     const auth = createAppAuth({
       id: process.env.APP_ID,
-      privateKey,
+      privateKey: process.env.PRIVATE_KEY,
       installationId: process.env.INSTALLATION_ID,
     });
     const graphqlWithAuth = graphql.defaults({
