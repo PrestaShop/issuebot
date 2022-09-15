@@ -31,17 +31,15 @@ const query = (repositoryName, owner, issueId) => `
         id
         title
         createdAt
-        projectNextItems(first: 100) {
+        projectItems(first: 100) {
           nodes {
             id
-            fieldValues(first: 100) {
-              nodes {
-                projectField {
-                  name
+            project {
+              field(name: "Status") {
+                ... on ProjectV2SingleSelectField {
                   id
-                  settings
+                  name
                 }
-                value
               }
             }
           }
@@ -51,8 +49,33 @@ const query = (repositoryName, owner, issueId) => `
   }
 `;
 
+const queryByNodeId = (nodeId) => `
+  {
+    node(id: "${nodeId}") {
+      ... on Issue {
+        id
+        number
+        state
+        repository {
+          name
+          owner {
+            id
+            login
+          }
+        }
+      }
+    }
+  }
+`;
+
 module.exports.getIssue = async (githubClient, repositoryName, owner, issueId) => {
   const datas = await githubClient.graphql(query(repositoryName, owner, issueId));
+
+  return datas;
+};
+
+module.exports.getIssueByNodeId = async (githubClient, nodeId) => {
+  const datas = await githubClient.graphql(queryByNodeId(nodeId));
 
   return datas;
 };

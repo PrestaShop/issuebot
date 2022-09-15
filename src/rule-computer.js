@@ -85,6 +85,7 @@ module.exports = class RuleComputer {
       this.configProvider,
       this.logger,
       this.projectCardDataProvider,
+      this.issueDataProvider,
     );
   }
 
@@ -135,6 +136,11 @@ module.exports = class RuleComputer {
         this.logger.debug('[Rule Computer] Context type is Project Card');
 
         return this.projectCardRuleFinder.findRules(context);
+
+      case 'projects_v2_item':
+        this.logger.debug('[Rule Computer] Context type is Project v2 item');
+
+        return this.projectCardRuleFinder.findProjectv2Rules(context);
 
       case 'issue_comment':
         this.logger.info('[Rule Computer] Context type is issue comment');

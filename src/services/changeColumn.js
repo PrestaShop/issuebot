@@ -23,28 +23,24 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 
-const {createCard} = require('../maxikanban/createCard');
+const {createCard} = require('./createCard');
 const {getProjectFieldDatas} = require('./getProjectFieldDatas');
 const config = require('../../config.js');
 
 const mutation = (projectId, itemId, fieldId, value) => `
   mutation {
-    updateProjectNextItemField(
+    updateProjectV2ItemFieldValue(
       input: {
         projectId: "${projectId}"
         itemId: "${itemId}"
         fieldId: "${fieldId}"
-        value: "${value}"
+        value: {
+          singleSelectOptionId: "${value}"
+        }
       }
     ) {
-      projectNextItem {
+      projectV2Item {
         id
-        fieldValues(first: 10) {
-          nodes {
-            id
-            value
-          }
-        }
       }
     }
   }

@@ -105,6 +105,11 @@ module.exports = class IssueDataProvider {
             const cards = await this.githubApiClient.projects.listCards({
               column_id: projectConfig.kanbanColumns[value],
             });
+            cards.data = cards.data.map((card) => {
+              card.projectConfig = projectConfig;
+
+              return card;
+            });
             allCards.push(cards.data);
           }
         }));
