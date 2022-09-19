@@ -25,8 +25,8 @@
 
 const mutation = (projectId, contentId) => `
  mutation {
-   addProjectNextItem(input: {projectId: "${projectId}" contentId: "${contentId}"}) {
-     projectNextItem {
+   addProjectV2ItemById(input: {projectId: "${projectId}" contentId: "${contentId}"}) {
+     item {
        id
      }
    }

@@ -255,7 +255,7 @@ const Rules = {
    * AND the issue has the "waiting for author" label
    * THEN remove label "waiting for author"
    */
-  M2: 'M2'
-}
+  M2: 'M2',
+};
 
 module.exports = Rules;

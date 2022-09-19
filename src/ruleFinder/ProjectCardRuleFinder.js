@@ -24,10 +24,12 @@
  */
 const Rule = require('../rule');
 const Utils = require('./Utils');
-const {deleteCard} = require('../maxikanban/deleteCard');
-const {changeColumn} = require('../maxikanban/changeColumn');
-const {getIssue} = require('../maxikanban/getIssue');
-const {createCard} = require('../maxikanban/createCard');
+const {deleteCard} = require('../services/deleteCard');
+const {changeColumn} = require('../services/changeColumn');
+const {getIssue} = require('../services/getIssue');
+const {createCard} = require('../services/createCard');
+const {getStatus} = require('../services/getStatus');
+const {getIssueByNodeId} = require('../services/getIssue.js');
 
 module.exports = class ProjectCardRuleFinder {
   /**
@@ -36,11 +38,12 @@ module.exports = class ProjectCardRuleFinder {
      * @param {ProjectCardDataProvider} projectCardDataProvider
      * @param {Logger} logger
      */
-  constructor(config, configProvider, logger, projectCardDataProvider) {
+  constructor(config, configProvider, logger, projectCardDataProvider, issueDataProvider) {
     this.config = config;
     this.configProvider = configProvider;
     this.projectCardDataProvider = projectCardDataProvider;
     this.logger = logger;
+    this.issueDataProvider = issueDataProvider;
   }
 
   /**
@@ -180,5 +183,79 @@ module.exports = class ProjectCardRuleFinder {
     this.logger.info(`Rules are : ${rules.join(', ')}`);
 
     return rules;
+  }
+
+  /**
+     * Try to find whether webhook context matches an Project v2 Item rule requirements.
+     *
+     * @param {Context} context
+     *
+     * @returns {Promise<*>}
+     *
+     * @public
+     */
+  async findProjectv2Rules(context) {
+    const config = this.config.maxiKanban;
+    const {node: {fieldValueByName: {optionId: cardColumnId}}} = await getStatus(context.github, context.payload.projects_v2_item.node_id);
+
+    const mooveInSameColumn = async () => {
+      const {
+        node: {
+          number: issueId,
+          repository: {name: repo, owner: {login: owner}},
+        },
+      } = await getIssueByNodeId(context.github, context.payload.projects_v2_item.content_node_id);
+
+      const relatedCard = await this.issueDataProvider.getRelatedCardInKanban(issueId, owner, repo);
+
+      if (!relatedCard) return;
+
+      // Setup the GraphQL query to save some line of codes
+      const mimicColumnMove = async (kanbanColumnId) => {
+        await context.github.projects.moveCard({
+          card_id: relatedCard.id,
+          position: 'bottom',
+          column_id: kanbanColumnId,
+        });
+      };
+
+      if (config.columns.toDoColumnId === cardColumnId) {
+        mimicColumnMove(relatedCard.projectConfig.kanbanColumns.toDoColumnId);
+      }
+
+      if (config.columns.inProgressColumnId === cardColumnId) {
+        mimicColumnMove(relatedCard.projectConfig.kanbanColumns.inProgressColumnId);
+      }
+
+      if (config.columns.toBeReviewedColumnId === cardColumnId) {
+        mimicColumnMove(relatedCard.projectConfig.kanbanColumns.toBeReviewedColumnId);
+      }
+
+      if (config.columns.toBeMergedColumnId === cardColumnId) {
+        mimicColumnMove(relatedCard.projectConfig.kanbanColumns.toBeMergedColumnId);
+      }
+
+      if (config.columns.notReadyColumnId === cardColumnId) {
+        mimicColumnMove(relatedCard.projectConfig.kanbanColumns.notReadyColumnId);
+      }
+
+      if (config.columns.toBeSpecifiedColumnId === cardColumnId) {
+        mimicColumnMove(relatedCard.projectConfig.kanbanColumns.toBeSpecifiedColumnId);
+      }
+
+      if (config.columns.toBeTestedColumnId === cardColumnId) {
+        mimicColumnMove(relatedCard.projectConfig.kanbanColumns.toBeTestedColumnId);
+      }
+
+      if (config.columns.doneColumnId === cardColumnId) {
+        mimicColumnMove(relatedCard.projectConfig.kanbanColumns.doneColumnId);
+      }
+    };
+
+    if (Utils.contextHasAction(context, 'edited')) {
+      mooveInSameColumn();
+    }
+
+    return [];
   }
 };

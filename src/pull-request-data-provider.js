@@ -25,7 +25,6 @@
 const {graphql} = require('@octokit/graphql');
 const {createAppAuth} = require('@octokit/auth-app');
 const DomParser = require('dom-parser');
-const fs = require('fs');
 const Utils = require('./ruleFinder/Utils');
 
 module.exports = class PullRequestDataProvider {
@@ -70,10 +69,10 @@ module.exports = class PullRequestDataProvider {
    */
   async getReferencedIssues(pullRequestNumber, owner, repo) {
     const issues = [];
-    console.log('App id: ' + process.env.APP_ID);
+    console.log(`App id: ${process.env.APP_ID}`);
     const auth = createAppAuth({
       id: process.env.APP_ID,
-      privateKey: process.env.PRIVATE_KEY,
+      privateKey: process.env.PRIVATE_KEY.replace(/\\n/g, '\n'),
       installationId: process.env.INSTALLATION_ID,
     });
     const graphqlWithAuth = graphql.defaults({

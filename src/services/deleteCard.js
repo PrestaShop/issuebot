@@ -26,7 +26,7 @@ const {getProjectFieldDatas} = require('./getProjectFieldDatas');
 
 const mutation = (projectId, itemId) => `
  mutation {
-    deleteProjectNextItem(
+    deleteProjectV2Item(
       input: {
         projectId: "${projectId}"
         itemId: "${itemId}"

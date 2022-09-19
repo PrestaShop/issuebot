@@ -22,8 +22,8 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-const {getIssue} = require('../maxikanban/getIssue');
-const {changeColumn} = require('../maxikanban/changeColumn');
+const {getIssue} = require('../services/getIssue');
+const {changeColumn} = require('../services/changeColumn');
 
 module.exports = class Rule {
   /**
@@ -87,8 +87,7 @@ module.exports = class Rule {
   async moveCardTo(issueId, issueOwner, issueRepo, columnId, maxiKanbanColumnId) {
     this.logger.info(`Moving issue #${issueId} card in Kanban`);
 
-    const getRelatedCardPromise = this.issueDataProvider.getRelatedCardInKanban(issueId, issueOwner, issueRepo);
-    const relatedCard = await getRelatedCardPromise;
+    const relatedCard = await this.issueDataProvider.getRelatedCardInKanban(issueId, issueOwner, issueRepo);
 
     await this.githubApiClient.projects.moveCard({
       card_id: relatedCard.id,
