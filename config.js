@@ -48,7 +48,7 @@ const config = {
       ],
       projects: [
         {
-          name: 'PrestaShop 1.7.8.7',
+          name: 'PrestaShop 1.7.8.x',
           kanbanColumns: {
             notReadyColumnId: 18547630,
             toDoColumnId: 18547740,
@@ -71,6 +71,32 @@ const config = {
             toBeTestedColumnId: 10578100,
             toBeMergedColumnId: 10578102,
             doneColumnId: 10578112,
+          },
+        },
+        {
+          name: 'PrestaShop 8.0.x',
+          kanbanColumns: {
+            notReadyColumnId: 19152407,
+            toDoColumnId: 19152410,
+            toBeSpecifiedColumnId: 19152411,
+            inProgressColumnId: 19152408,
+            toBeReviewedColumnId: 19152419,
+            toBeTestedColumnId: 19152421,
+            toBeMergedColumnId: 19152420,
+            doneColumnId: 19152409,
+          },
+        },
+        {
+          name: 'PrestaShop 8.1.x',
+          kanbanColumns: {
+            notReadyColumnId: 19170724,
+            toDoColumnId: 19170727,
+            toBeSpecifiedColumnId: 19170728,
+            inProgressColumnId: 19170725,
+            toBeReviewedColumnId: 19170729,
+            toBeTestedColumnId: 19170734,
+            toBeMergedColumnId: 19170733,
+            doneColumnId: 19170726,
           },
         },
       ],
