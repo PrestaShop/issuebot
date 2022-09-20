@@ -30,6 +30,7 @@ const {getIssue} = require('../services/getIssue');
 const {createCard} = require('../services/createCard');
 const {getStatus} = require('../services/getStatus');
 const {getIssueByNodeId} = require('../services/getIssue.js');
+const {getProjectFieldDatas} = require('../services/getProjectFieldDatas');
 
 module.exports = class ProjectCardRuleFinder {
   /**
@@ -65,25 +66,30 @@ module.exports = class ProjectCardRuleFinder {
     // So we don't duplicate all these conditions
     const mooveInSameColumn = async (cardColumnId) => {
       const issueGraphqlData = await getIssue(context.github, issueRepo, issueOwner, issueId);
+      const fieldDatas = getProjectFieldDatas(issueGraphqlData);
 
       // Setup the GraphQL query to save some line of codes
       const mimicColumnMove = async (maxiKanbanColumnId) => {
-        const datas = await changeColumn(
-          context.github,
-          issueGraphqlData,
-          this.config.maxiKanban.id,
-          maxiKanbanColumnId,
-        );
+        if (fieldDatas.columnId !== this.config.maxiKanban.columns.sandboxColumnId || maxiKanbanColumnId === this.config.maxiKanban.columns.toBeTestedColumnId) {
+          const datas = await changeColumn(
+            context.github,
+            issueGraphqlData,
+            this.config.maxiKanban.id,
+            maxiKanbanColumnId,
+          );
 
-        if (!datas) {
-          setTimeout(() => {
-            mooveInSameColumn(cardColumnId);
-          }, 3000);
+          if (!datas) {
+            setTimeout(() => {
+              mooveInSameColumn(cardColumnId);
+            }, 3000);
 
-          return false;
+            return false;
+          }
+
+          return datas;
         }
 
-        return datas;
+        return false;
       };
 
       // If it has been created in the not ready column, add it to the sandbox column in the maxi kanban
