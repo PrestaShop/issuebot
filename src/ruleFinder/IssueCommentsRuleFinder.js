@@ -59,10 +59,10 @@ module.exports = class IssueCommentsRuleFinder {
     const repositoryConfig = this.configProvider.getRepositoryConfigFromIssue(this.config, issue);
 
     if (
-      Utils.issueHasLabel(issue, repositoryConfig.labels.waitingAuthor.name) &&
-      Utils.issueHasLabel(issue, repositoryConfig.labels.needsMoreInfo.name)
+      Utils.issueHasLabel(issue, repositoryConfig.labels.waitingAuthor.name)
+      && Utils.issueHasLabel(issue, repositoryConfig.labels.needsMoreInfo.name)
     ) {
-      rules.push(Rule.M2)
+      rules.push(Rule.M2);
     }
 
     // No need to go further if comments is lowest than threshold
