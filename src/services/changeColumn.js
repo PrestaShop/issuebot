@@ -56,8 +56,6 @@ module.exports.changeColumn = async (githubClient, issue, projectId, value) => {
     return false;
   }
 
-  console.log(fieldDatas, 'prout');
-
   // If it has a column, it can be moved because it's an update operation
   const datas = await githubClient.graphql(mutation(projectId, fieldDatas.itemId, fieldDatas.fieldId, value));
 
