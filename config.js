@@ -138,6 +138,7 @@ const config = {
       toBeTestedColumnId: '31621680',
       toBeMergedColumnId: '2cd7b745',
       doneColumnId: '98236657',
+      sandboxColumnId: 'c27d76fd',
     },
   },
 };

@@ -30,6 +30,7 @@ const {getIssue} = require('../services/getIssue');
 const {createCard} = require('../services/createCard');
 const {getStatus} = require('../services/getStatus');
 const {getIssueByNodeId} = require('../services/getIssue.js');
+const {getProjectFieldDatas} = require('../services/getProjectFieldDatas');
 
 module.exports = class ProjectCardRuleFinder {
   /**
@@ -65,26 +66,36 @@ module.exports = class ProjectCardRuleFinder {
     // So we don't duplicate all these conditions
     const mooveInSameColumn = async (cardColumnId) => {
       const issueGraphqlData = await getIssue(context.github, issueRepo, issueOwner, issueId);
+      const fieldDatas = getProjectFieldDatas(issueGraphqlData);
 
       // Setup the GraphQL query to save some line of codes
       const mimicColumnMove = async (maxiKanbanColumnId) => {
-        const datas = await changeColumn(
-          context.github,
-          issueGraphqlData,
-          this.config.maxiKanban.id,
-          maxiKanbanColumnId,
-        );
+        if (fieldDatas.columnId !== this.config.maxiKanban.columns.sandboxColumnId || maxiKanbanColumnId === this.config.maxiKanban.columns.toBeTestedColumnId) {
+          const datas = await changeColumn(
+            context.github,
+            issueGraphqlData,
+            this.config.maxiKanban.id,
+            maxiKanbanColumnId,
+          );
 
-        if (!datas) {
-          setTimeout(() => {
-            mooveInSameColumn(cardColumnId);
-          }, 3000);
+          if (!datas) {
+            setTimeout(() => {
+              mooveInSameColumn(cardColumnId);
+            }, 3000);
 
-          return false;
+            return false;
+          }
+
+          return datas;
         }
 
-        return datas;
+        return false;
       };
+
+      // If it has been created in the not ready column, add it to the sandbox column in the maxi kanban
+      if (!cardColumnId) {
+        return mimicColumnMove(this.config.maxiKanban.columns.sandboxColumnId);
+      }
 
       if (config.kanbanColumns.toDoColumnId === cardColumnId) {
         return mimicColumnMove(this.config.maxiKanban.columns.toDoColumnId);
@@ -134,7 +145,11 @@ module.exports = class ProjectCardRuleFinder {
       }
 
       await createCard(context.github, this.config.maxiKanban.id, issueGraphqlData.repository.issue.id);
-      await mooveInSameColumn(cardColumnId);
+      if (config.kanbanColumns.notReadyColumnId !== context.payload.project_card.column_id) {
+        await mooveInSameColumn(cardColumnId);
+      } else {
+        await mooveInSameColumn();
+      }
     }
 
     if (Utils.contextHasAction(context, 'moved')) {
@@ -172,7 +187,9 @@ module.exports = class ProjectCardRuleFinder {
         rules.push(Rule.K1);
       }
 
-      await mooveInSameColumn(cardColumnId);
+      if (config.kanbanColumns.notReadyColumnId !== cardColumnId) {
+        await mooveInSameColumn(cardColumnId);
+      }
     }
 
     if (Utils.contextHasAction(context, 'deleted') && config) {

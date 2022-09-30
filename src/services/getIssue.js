@@ -42,6 +42,13 @@ const query = (repositoryName, owner, issueId) => `
                 }
               }
             }
+            fieldValueByName(name: "Status") {
+              ... on ProjectV2ItemFieldSingleSelectValue {
+                id
+                name
+                optionId
+              }
+            }
           }
         }
       }

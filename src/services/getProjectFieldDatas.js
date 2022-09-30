@@ -30,5 +30,9 @@ module.exports.getProjectFieldDatas = (object) => {
 
   if (!projectCard || !projectCard.project) return false;
 
-  return {itemId: projectCard.id, fieldId: projectCard.project.field.id};
+  return {
+    itemId: projectCard.id,
+    fieldId: projectCard.project.field.id,
+    columnId: projectCard.fieldValueByName.optionId,
+  };
 };
