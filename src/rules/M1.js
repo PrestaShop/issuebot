@@ -36,7 +36,8 @@ module.exports = class M1 extends Rule {
     const issueData = Utils.parseUrlForData(context.payload.issue.url);
 
     const referencedIssue = await this.issueDataProvider.getData(issueData.number, issueData.owner, issueData.repo);
-    if (!Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.topWatchers.name)) {
+    if (referencedIssue.state !== 'closed'
+      && !Utils.issueHasLabel(referencedIssue, repositoryConfig.labels.topWatchers.name)) {
       await this.githubApiClient.issues.addLabels({
         issue_number: issueData.number,
         owner: issueData.owner,

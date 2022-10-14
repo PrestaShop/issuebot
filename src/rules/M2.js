@@ -22,8 +22,8 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-const Rule = require('./Rule.js')
-const Utils = require('../ruleFinder/Utils')
+const Rule = require('./Rule.js');
+const Utils = require('../ruleFinder/Utils');
 
 module.exports = class M2 extends Rule {
   /**
@@ -31,15 +31,15 @@ module.exports = class M2 extends Rule {
     *
     * @public
     */
-  async apply (context) {
-    const repositoryConfig = this.getRepositoryConfigFromIssue(context.payload.issue)
-    const issueData = Utils.parseUrlForData(context.payload.issue.url)
+  async apply(context) {
+    const repositoryConfig = this.getRepositoryConfigFromIssue(context.payload.issue);
+    const issueData = Utils.parseUrlForData(context.payload.issue.url);
 
     await this.githubApiClient.issues.removeLabel({
       issue_number: issueData.number,
       owner: issueData.owner,
       repo: issueData.repo,
-      name: repositoryConfig.labels.waitingAuthor.name
-    })
+      name: repositoryConfig.labels.waitingAuthor.name,
+    });
   }
-}
+};

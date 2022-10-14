@@ -213,7 +213,10 @@ module.exports = class ProjectCardRuleFinder {
      */
   async findProjectv2Rules(context) {
     const config = this.config.maxiKanban;
-    const {node: {fieldValueByName: {optionId: cardColumnId}}} = await getStatus(context.github, context.payload.projects_v2_item.node_id);
+    const {node: {fieldValueByName: {optionId: cardColumnId}}} = await getStatus(
+      context.github,
+      context.payload.projects_v2_item.node_id,
+    );
 
     const mooveInSameColumn = async () => {
       const {
