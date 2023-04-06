@@ -9,7 +9,7 @@ const myProbotApp = require('..');
 const TestUtils = require('./test-utils');
 
 const testUtils = new TestUtils();
-const config = require('./config');
+const { configTestRepository } = require('./config');
 
 describe('PrestaShop Kanban automation app test: move issues in Kanban from status', () => {
   let app;
@@ -20,7 +20,7 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
   });
 
   test('scenario C2: card already in done column', async () => {
-    const webhookPayload = testUtils.getDefaultPayloadMock('closed', 8, config.labels.fixed.name, config.milestones.next_patch_milestone);
+    const webhookPayload = testUtils.getDefaultIssuePayloadMock('closed', 8, configTestRepository.labels.fixed.name, configTestRepository.milestones.next_patch_milestone);
     const githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     // mock customization
@@ -44,7 +44,7 @@ describe('PrestaShop Kanban automation app test: move issues in Kanban from stat
   });
 
   test('scenario C2: not the kanban', async () => {
-    const webhookPayload = testUtils.getDefaultPayloadMock('closed', 20, config.labels.fixed.name, '1.7.6.4');
+    const webhookPayload = testUtils.getDefaultIssuePayloadMock('closed', 20, configTestRepository.labels.fixed.name, '1.7.6.4');
     const githubApiClientMock = testUtils.getDefaultGithubAPIClientMock();
 
     app.auth = () => Promise.resolve(githubApiClientMock);
