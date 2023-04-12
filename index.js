@@ -15,8 +15,8 @@ const RuleApplier = require('./src/rule-applier');
 let config = require('./config');
 
 if (process.env.NODE_ENV === 'test') {
-  // eslint-disable-next-line global-require
-  config = require('./tests/config');
+  // eslint-disable-next-line global-require, prefer-destructuring
+  config = require('./tests/config').config;
 }
 
 /**

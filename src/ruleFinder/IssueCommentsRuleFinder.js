@@ -37,12 +37,12 @@ module.exports = class IssueCommentsRuleFinder {
       return rules;
     }
 
-    const {issue} = context.payload;
+    const {issue, comment} = context.payload;
     const repositoryConfig = this.configProvider.getRepositoryConfigFromIssue(this.config, issue);
 
     if (
-      Utils.issueHasLabel(issue, repositoryConfig.labels.waitingAuthor.name)
-      && Utils.issueHasLabel(issue, repositoryConfig.labels.needsMoreInfo.name)
+      comment.user.id === issue.user.id
+      && Utils.issueHasLabel(issue, repositoryConfig.labels.waitingAuthor.name)
     ) {
       rules.push(Rule.M2);
     }

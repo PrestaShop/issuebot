@@ -1,0 +1,39 @@
+{
+  "action": "created",
+  "repository": {
+    "owner": {
+      "login": "toto"
+    }
+  },
+  "issue": {
+    "id": 12345,
+    "node_id": "abcd",
+    "number": "ISSUE_NUMBER",
+    "title": "An issue",
+    "repository_url": "https://api.github.com/prestashop/test-project-bot",
+    "url": "https://api.github.com/repos/prestashop/test-project-bot/issues/ISSUE_NUMBER",
+    "comments": 1,
+    "labels": [
+      {
+        "id": 789,
+        "node_id": "abcd",
+        "url": "https://github.com/prestashop/test-project-bot/labels/waiting-for-author",
+        "name": "ISSUE_LABEL",
+        "color": "eadd85",
+        "default": false
+      }
+    ],
+    "user": {
+      "id": "ISSUE_USER_ID",
+      "login": "toto"
+    }
+  },
+  "comment": {
+    "id": 234,
+    "body": "Comment",
+    "user": {
+      "id": "COMMENT_USER_ID",
+      "login":"toto"
+    }
+  }
+}

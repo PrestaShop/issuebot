@@ -4,7 +4,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-const config = require('./config');
 
 module.exports = class TestUtils {
   /**
@@ -13,44 +12,34 @@ module.exports = class TestUtils {
    * @param {string} label
    * @param {string} milestone
    */
-  getDefaultPayloadMock(action, issueNumber, label, milestone) {
-
-    let payload = require("./payload/issue/" + action);
+  getDefaultIssuePayloadMock(action, issueNumber, label, milestone) {
+    // We need a copy of this required payload (not the original one, because we mutate him in memory.)
+    let payload = JSON.parse(JSON.stringify(require("./payload/issue/" + action)));
 
     payload = replaceInObject(payload, 'ISSUE_NUMBER', issueNumber);
     payload = replaceInObject(payload, 'ISSUE_LABEL', label);
     payload = replaceInObject(payload, 'MILESTONE', milestone);
 
     return payload;
+  }
 
-    return {
-      action,
-      label: {
-        name: config.labels.toBeMerged.name,
-      },
-      repository: {
-        owner: {
-          login: 'toto'
-        }
-      },
-      issue: {
-        id: 12345,
-        node_id: 'abcd',
-        number: issueNumber,
-        title: 'An issue',
-        milestone: {title: config.milestones.next_patch_milestone},
-        labels: [
-          {
-            id: 789,
-            node_id: 'abcd',
-            url: 'https://github.com/prestashop/test-project-bot/labels/todo',
-            name: 'todo',
-            color: 'eadd85',
-            default: false,
-          }
-        ],
-      },
-    };
+  /**
+   * @param action
+   * @param issueNumber
+   * @param issueLabel
+   * @param issueUserId
+   * @param commentUserId
+   */
+  getDefaultCommentPayloadMock(action, issueNumber, issueLabel, issueUserId, commentUserId) {
+    // We need a copy of this required payload (not the original one, because we mutate him in memory.)
+    let payload = JSON.parse(JSON.stringify(require("./payload/comment/" + action)));
+
+    payload = replaceInObject(payload, 'ISSUE_NUMBER', issueNumber);
+    payload = replaceInObject(payload, 'ISSUE_LABEL', issueLabel);
+    payload = replaceInObject(payload, 'ISSUE_USER_ID', issueUserId);
+    payload = replaceInObject(payload, 'COMMENT_USER_ID', commentUserId);
+
+    return payload;
   }
 
   getDefaultGithubAPIClientMock() {

@@ -52,7 +52,10 @@ module.exports = class ProjectCardRuleFinder {
 
       // Setup the GraphQL query to save some line of codes
       const mimicColumnMove = async (maxiKanbanColumnId) => {
-        if (fieldDatas.columnId !== this.config.maxiKanban.columns.sandboxColumnId || maxiKanbanColumnId === this.config.maxiKanban.columns.toBeTestedColumnId) {
+        if (
+          fieldDatas.columnId !== this.config.maxiKanban.columns.sandboxColumnId
+          || maxiKanbanColumnId === this.config.maxiKanban.columns.toBeTestedColumnId
+        ) {
           const datas = await changeColumn(
             context.github,
             issueGraphqlData,
